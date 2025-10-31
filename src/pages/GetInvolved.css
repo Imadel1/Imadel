@@ -1,0 +1,55 @@
+/* GetInvolved.css */
+.get-involved {
+  font-family: "Poppins", sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  padding: 40px 20px;
+}
+
+.get-involved h1 {
+  text-align: center;
+  color: #007b5e;
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.job-list {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.job-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+}
+
+.job-card h3 {
+  color: #007b5e;
+  margin-bottom: 10px;
+}
+
+.job-card p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.job-card a {
+  color: #007b5e;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.job-card a:hover {
+  text-decoration: underline;
+}

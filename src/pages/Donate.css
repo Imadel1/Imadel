@@ -1,0 +1,167 @@
+.donate-page {
+    padding-top: 80px;
+    min-height: 100vh;
+    background: #FFFFFF;
+}
+
+.donate-hero {
+    background: #FF6B00;
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.donate-hero h1 {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.donate-hero p {
+    font-family: var(--font-sans);
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0.9;
+}
+
+.donate-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+}
+
+.donation-methods {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+}
+
+.bank-transfer h2 {
+    font-family: var(--font-display);
+    color: #FF6B00;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.bank-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.bank-info {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.bank-info h3 {
+    font-family: var(--font-display);
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.bank-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bank-info li {
+    display: flex;
+    margin-bottom: 1rem;
+    font-family: var(--font-sans);
+}
+
+.bank-info .label {
+    font-weight: 600;
+    width: 140px;
+    color: #666;
+}
+
+.bank-info .value {
+    color: #333;
+    font-weight: 500;
+}
+
+.donation-note {
+    background: #fff5eb;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.donation-note h3 {
+    font-family: var(--font-display);
+    color: #FF6B00;
+    margin-bottom: 1rem;
+}
+
+.donation-note p {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.donation-note a {
+    color: #FF6B00;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.donation-note a:hover {
+    text-decoration: underline;
+}
+
+.tax-info {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.tax-info h3 {
+    font-family: var(--font-display);
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.tax-info p {
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .donate-hero {
+        padding: 3rem 1.5rem;
+    }
+
+    .donate-hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .bank-details {
+        grid-template-columns: 1fr;
+    }
+
+    .donation-methods {
+        padding: 1.5rem;
+    }
+
+    .bank-info {
+        padding: 1.5rem;
+    }
+
+    .bank-info li {
+        flex-direction: column;
+    }
+
+    .bank-info .label {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+}

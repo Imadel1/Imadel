@@ -1,0 +1,220 @@
+/* src/index.css - IMaDEL Humanitarian Theme */
+
+/* Box sizing + sensible reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Core IMaDEL Color Palette */
+  --bg: #ffffff;
+  --panel: #f9fafc;
+  --text: #1b1b1b;
+  --muted: #5f6368;
+
+  /* Logo-based colors */
+  --primary: #0074cc;        /* IMaDEL blue (trust & calm) */
+  --primary-600: #005fa3;    /* darker blue for hover */
+  --accent: #ff8c00;         /* IMaDEL orange (energy & compassion) */
+  --success: #2e8b57;        /* IMaDEL green (growth & care) */
+  --danger: #e74c3c;         /* alert red */
+
+  /* Layout */
+  --max-width: 1100px;
+  --content-padding: 1.25rem;
+  --container-gap: 1rem;
+
+  /* Typography */
+  --font-sans: "Poppins", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --base-size: 16px;
+  --radius: 10px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
+
+  /* Motion */
+  --ease: cubic-bezier(.2,.9,.2,1);
+}
+
+/* Light, humanitarian tone */
+html {
+  font-size: var(--base-size);
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background-color: var(--bg);
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* General media */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h1 {
+  color: var(--success);
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 180ms var(--ease);
+}
+a:hover {
+  color: var(--primary-600);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--content-padding);
+}
+
+/* App layout */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* Header */
+.header {
+  background-color: #ffffff;
+  border-bottom: 2px solid #f3f4f6;
+  padding: 0.75rem 0;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header .bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Panels */
+.panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 0.9rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s var(--ease);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(255, 140, 0, 0.3);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.btn-ghost:hover {
+  background: rgba(0, 116, 204, 0.06);
+}
+
+/* Inputs */
+.input, textarea, .select {
+  width: 100%;
+  padding: .6rem .75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.input:focus,
+textarea:focus,
+.select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 116, 204, 0.15);
+  outline: none;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* Utilities */
+.center { display: flex; align-items: center; justify-content: center; }
+.mt-2 { margin-top: .5rem; }
+.mt-3 { margin-top: 1rem; }
+.mb-3 { margin-bottom: 1rem; }
+
+/* Small animation */
+.fade-in {
+  animation: fadeIn .3s ease both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Optimize font loading */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrFJA.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/spacegrotesk/v13/V8mQoQDjQSkFtoMM3T6r8E7mF71Q.woff2') format('woff2');
+}

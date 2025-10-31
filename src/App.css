@@ -1,0 +1,108 @@
+/* src/App.css - IMaDEL NGO Style */
+
+/* Root container */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: #ffffff;
+}
+
+/* Logo styling */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  transition: all 300ms ease;
+  will-change: filter, transform;
+  filter: drop-shadow(0 0 0.5em rgba(46, 139, 87, 0.2)); /* green glow */
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 1.5em rgba(255, 140, 0, 0.45)); /* orange highlight */
+}
+
+/* Optional logo spin animation */
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enable gentle rotation if motion preference allows */
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 18s linear;
+  }
+}
+
+/* Card section */
+.card {
+  padding: 2em;
+  background-color: #f9fafc;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 116, 204, 0.15); /* subtle blue glow */
+}
+
+/* Text for small info or link section */
+.read-the-docs {
+  color: #5f6368;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Link accents (IMaDEL color scheme) */
+a {
+  color: #0074cc;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #ff8c00;
+}
+
+/* Buttons if used within App */
+button {
+  background: #FF6B00;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  padding: 0.6em 1.2em;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(255, 140, 0, 0.25);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 116, 204, 0.25);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* Responsive adjustments */
+@media (max-width: 720px) {
+  #root {
+    padding: 1.5rem;
+  }
+  .logo {
+    height: 4.5em;
+  }
+  .card {
+    padding: 1.2em;
+  }
+}

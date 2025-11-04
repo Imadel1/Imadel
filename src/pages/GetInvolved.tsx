@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './GetInvolved.css';
 
 interface JobItem {
@@ -57,9 +58,9 @@ const GetInvolved: React.FC = () => {
             <div className="job-card" key={job.id}>
               <h3>{job.title}</h3>
               <p>{job.description}</p>
-              <a href={job.link} className="read-more">
+              <Link to={`/job/${job.id}`} className="read-more">
                 Read more →
-              </a>
+              </Link>
             </div>
           ))}
         </div>

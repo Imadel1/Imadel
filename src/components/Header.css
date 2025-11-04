@@ -7,12 +7,17 @@ header {
   right: 0;
   background: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  transition: all 0.3s ease-in-out;
+}
+
+.header-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 2rem;
-  z-index: 1000;
-  transition: all 0.3s ease-in-out;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Logo */
@@ -84,11 +89,13 @@ nav a::after {
   transition: width 0.3s ease;
 }
 
-nav a:hover {
+nav a:hover,
+nav a.active {
   color: #0074cc;
 }
 
-nav a:hover::after {
+nav a:hover::after,
+nav a.active::after {
   width: 100%;
 }
 
@@ -102,7 +109,7 @@ nav a:hover::after {
 }
 
 @media (max-width: 768px) {
-  header {
+  .header-container {
     padding: 0.75rem 1rem;
   }
 
@@ -165,13 +172,12 @@ nav a:hover::after {
 }
 
 /* Optional small scroll effect */
-header.scrolled {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+header.scrolled .header-container {
   padding: 0.6rem 2rem;
 }
 
 @media (max-width: 768px) {
-  header.scrolled {
+  header.scrolled .header-container {
     padding: 0.6rem 1rem;
   }
 }

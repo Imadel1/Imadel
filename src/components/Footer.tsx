@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaTwitter, FaTiktok } from "react-icons/fa";
+import { FaFacebookF, FaLinkedinIn, FaTiktok } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import "./Footer.css";
 import logo from "../assets/cropped-nouveau_logo.png";
 
@@ -41,9 +42,9 @@ const Footer: React.FC = () => {
         <div className="footer-section">
           <h4>Follow Us</h4>
           <div className="social-icons">
-            <a href="#" aria-label="Facebook"><FaFacebookF /></a>
-            <a href="#" aria-label="Instagram"><FaInstagram /></a>
-            <a href="#" aria-label="Twitter"><FaTwitter /></a>
+            <a href="https://www.facebook.com/ImadelML" aria-label="Facebook"><FaFacebookF /></a>
+            <a href="https://www.linkedin.com/company/ong-imadel/" aria-label="FaLinkedinIn">< FaLinkedinIn/></a>
+            <a href="https://x.com/ONGImadel" aria-label="Twitter"><FaXTwitter /></a>
             <a href="#" aria-label="TikTok"><FaTiktok /></a>
           </div>
         </div>

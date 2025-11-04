@@ -2,22 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>imadel</title>
+    <!-- Optimized font loading - only preload critical fonts -->
+    <link rel="preload" as="font" href="/fonts/Poppins-Regular.ttf" type="font/ttf" crossorigin>
+    <link rel="preload" as="font" href="/fonts/SpaceGrotesk-Bold.ttf" type="font/ttf" crossorigin>
+    <!-- Load fonts asynchronously -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <title>imadel</title>
-    <!-- Preload critical resources -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"></noscript>
-    <!-- Critical CSS inlined for above-the-fold content -->
-    <style>
-      body { margin: 0; font-family: 'Poppins', sans-serif; background: #ffffff; }
-      .hero { background: #FF6B00; color: white; text-align: center; padding: 4rem 2rem; }
-      .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; margin-bottom: 2rem; letter-spacing: -0.02em; }
-      .hero-domains { font-family: 'Poppins', sans-serif; font-size: 1.1rem; max-width: 900px; margin: 0 auto; line-height: 1.6; }
-    </style>
   </head>
   <body>
     <div id="root"></div>

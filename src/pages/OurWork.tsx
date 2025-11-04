@@ -1,132 +1,101 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './OurWork.css';
 import { Link } from "react-router-dom";
+import { projects } from '../data/projects';
 
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  link: string;
-}
+// Lazy loading hook for images
+const useLazyImage = (src: string) => {
+  const [loaded, setLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (inView) {
+      const img = new Image();
+      img.onload = () => setLoaded(true);
+      img.src = src;
+    }
+  }, [inView, src]);
+
+  return { imgRef, loaded, inView };
+};
+
+// Lazy image component
+const LazyImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
+  const { imgRef, loaded, inView } = useLazyImage(src);
+
+  return (
+    <img
+      ref={imgRef}
+      src={inView ? src : undefined}
+      alt={alt}
+      className={className}
+      style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
+    />
+  );
+};
 
 const OurWork: React.FC = () => {
-  const projects: Project[] = [
-    {
-      id: 1,
-      title: 'Hand in hand, for a better future!',
-      description:
-        '#IMADEL provided support on 24/09 to 125 households through food and nutritional assistance. This action, rendered by the S...',
-      link: '#',
-    },
-    {
-      id: 2,
-      title: 'Distribution of NFI kits to IDPs!',
-      description:
-        'IMADEL has provided support to 10 IDP households in Medina Coura (Mopti) through the distribution of essential kits for the elderly.',
-      link: '#',
-    },
-    {
-      id: 3,
-      title: 'Training to protect, raising awareness to act.',
-      description:
-        'As part of its fight against Gender-Based Violence (GBV), #IMADEL in partnership with #ActionAid trained a group of women who have been working on GBV prevention and advocacy...',
-      link: '#',
-    },
-    {
-      id: 4,
-      title: 'Support today, to rebuild tomorrow!',
-      description:
-        'IMADEL has provided support to 85 displaced households through the distribution of kits to the São Paulo S...',
-      link: '#',
-    },
-    {
-      id: 5,
-      title: 'Solidarity in action, to restore hope and dignity!',
-      description:
-        'As part of its humanitarian commitment, #IMADEL carried out humanitarian and cultural activities in the United States to restore hope and dignity.',
-      link: '#',
-    },
-    {
-      id: 6,
-      title: 'Awareness of #VBG',
-      description:
-        '#IMADEL conducted awareness sessions on Gender-Based Violence (GBV) and disaster-related shocks in the region.',
-      link: '#',
-    },
-    {
-      id: 7,
-      title: 'Assistance to IDPs',
-      description:
-        'IMADEL, in partnership with Action Aid International, has assisted 125 internally displaced households (750 beneficiaries) at the S... site.',
-      link: '#',
-    },
-    {
-      id: 8,
-      title: 'Local development',
-      description:
-        'Under the Top Up NGO project, #IMADEL with support from #ActionAid International Mali promotes sustainable local development and empowerment.',
-      link: '#',
-    },
-    {
-      id: 9,
-      title: 'Humanitarian assistance',
-      description:
-        'On June 16, 2025, #IMADEL, as a partner of #UNICEF, organized a humanitarian distribution activity in support of vulnerable families.',
-      link: '#',
-    },
-    {
-      id: 10,
-      title: 'Child protection',
-      description:
-        'Because every child matters — IMADEL works to ensure that each need receives a dignified and timely response in vulnerable communities.',
-      link: '#',
-    },
-    {
-      id: 11,
-      title: 'Cooking demonstration',
-      description:
-        'In Dimbal, Bankass circle, IMADEL and Plan International organized a nutritional cooking demonstration to promote healthy eating.',
-      link: '#',
-    },
-    {
-      id: 12,
-      title: 'Fight against malnutrition',
-      description:
-        '#IMADEL and partners are implementing actions and strategies to combat malnutrition and improve food security for families.',
-      link: '#',
-    },
-  ];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const totalPages = Math.ceil(projects.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProjects = projects.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="our-work-page">
-      {/* Hero Section */}
-      <section className="hero">
-        <h1>Our Work</h1>
-        <div className="hero-domains">
-          HUMANITARIAN AID – FOOD SECURITY – NUTRITION – EDUCATION – HEALTH – LOCAL DEVELOPMENT – CLIMATE CHANGE – GOVERNANCE
-        </div>
-      </section>
-
-      {/* Intro Section */}
-      <section className="intro">
-        <h2>Committed to improving livelihoods</h2>
-        <p>
-          Through partnerships and field-based initiatives, IMADEL is committed to improving livelihoods, promoting
-          resilience, and ensuring equitable access to basic services. Below are some of our recent actions and
-          humanitarian projects.
-        </p>
-      </section>
-
       {/* Projects Section */}
       <section className="projects">
         <div className="projects-grid">
-          {projects.map((project) => (
-            <div className="project-card" key={project.id}>
-              <h3>{project.title}</h3>
-              <p>{project.description}</p>
-              <Link to="#" className="read-more">READ MORE DETAILS</Link>
-            </div>
+          {currentProjects.map((project) => (
+            <Link to={`/project/${project.id}`} key={project.id} className="project-card-link">
+              <div className="project-card">
+                <LazyImage src={project.images[0]} alt={project.title} className="project-image" />
+                <h3>{project.title}</h3>
+                <p>{project.description.split('Read more')[0]}</p>
+                <span className="read-more">READ MORE DETAILS</span>
+              </div>
+            </Link>
           ))}
+        </div>
+        <div className="page-navigation">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={currentPage === page ? 'active' : ''}
+            >
+              {page}
+            </button>
+          ))}
+          {totalPages > 7 && <span>…</span>}
+          <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+            Next page
+          </button>
         </div>
       </section>
 

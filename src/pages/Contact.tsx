@@ -1,5 +1,6 @@
 import "./Contact.css";
-import { FaFacebookF, FaInstagram, FaTwitter, FaTiktok } from "react-icons/fa";
+import { FaFacebookF, FaLinkedinIn, FaTiktok } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 export default function Contact() {
   return (
@@ -46,9 +47,9 @@ export default function Contact() {
           <div className="social-media-section">
             <h3>Connect with us on our socials.</h3>
             <div className="social-icons">
-              <a href="#" aria-label="Facebook"><FaFacebookF /></a>
-              <a href="#" aria-label="Instagram"><FaInstagram /></a>
-              <a href="#" aria-label="Twitter"><FaTwitter /></a>
+              <a href="https://www.facebook.com/ImadelML" aria-label="Facebook"><FaFacebookF /></a>
+              <a href="https://www.linkedin.com/company/ong-imadel/" aria-label="FaLinkedinIn">< FaLinkedinIn/></a>
+              <a href="https://x.com/ONGImadel" aria-label="Twitter"><FaXTwitter /></a>
               <a href="#" aria-label="TikTok"><FaTiktok /></a>
             </div>
           </div>

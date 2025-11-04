@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import "./Header.css";
-import logo from "../assets/cropped-nouveau_logo.png";
+import logo from "../assets/cropped-nouveau_logo.webp";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -21,7 +21,7 @@ const Header = () => {
     <header className={`${scrolled ? "scrolled" : ""} ${isMenuOpen ? "menu-open" : ""}`}>
       <div className="header-container">
         <NavLink to="/" className="logo-container">
-          <img src={logo} alt="IMADEL Logo" />
+          <img src={logo} alt="IMADEL Logo" width="120" height="60" />
           <span className="logo-text">IMADEL</span>
         </NavLink>
 

@@ -13,7 +13,7 @@ export const projects: Project[] = [
     title: 'Hand in hand, for a better future!',
     description:
       'Hand in hand, for a better future! #IMADEL provided support on 24/09 to 125 households through food and nutritional assistance. This action, rendered by the S... Read more',
-    images: ['/src/assets/slide1.jpg.png', '/src/assets/slide2.jpg.png', '/src/assets/slide3.jpg.png'],
+    images: ['/src/assets/slide1.jpg.webp', '/src/assets/slide2.jpg.webp', '/src/assets/slide3.jpg.webp'],
   },
   {
     id: uuidv4(),

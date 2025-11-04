@@ -1,26 +1,13 @@
-# TODO List for Task: Remove Hero Sections and Rearrange Project Detail Page
+# Performance Optimization TODO
 
 ## Completed Tasks
-- [x] Analyze and plan the changes
-- [x] Create TODO.md with steps
-- [x] Rearrange ProjectDetail.tsx: Move description above images (already implemented)
-- [x] Implement lazy loading for images in ProjectDetail.tsx (show first 5, load rest on scroll) (already implemented)
+- [x] Analyze codebase for performance issues (LCP 5.52s, CLS 0.86, INP needs interaction)
+- [x] Add width and height attributes to all <img> tags to prevent CLS
+- [x] Preload critical images (logo, first carousel slide) in index.html
+- [x] Convert images to WebP format for better compression
+- [x] Ensure lazy loading for below-fold images (already in OurWork, ProjectDetail)
+- [x] Test performance after changes (server running, HTML includes preloads)
 
 ## Pending Tasks
-- [ ] Remove hero section from Home.tsx (About Section)
-- [ ] Remove hero section from OurWork.tsx (Intro Section)
-- [ ] Update ProjectDetail.css if needed for new layout
-- [ ] Test changes: Run dev server and verify functionality
-- [ ] Verify responsive design on mobile
-
-# Performance Optimization Tasks
-
-## Pending Performance Tasks
-- [x] Implement React.lazy for route-based code splitting in App.tsx
-- [x] Add lazy loading for all images using Intersection Observer (Home, OurWork, etc.)
-- [x] Remove unused CSS (hero styles not used in Home.tsx)
-- [x] Optimize font loading strategy (remove duplicate font loading)
-- [x] Remove unused dependencies (openai, uuid) from package.json
-- [x] Add React.memo and useMemo optimizations where beneficial
-- [ ] Optimize images (convert to webp, add sizes attributes)
-- [ ] Test performance improvements and bundle sizes
+- [ ] Optimize font loading if needed
+- [ ] Add interactions for INP measurement

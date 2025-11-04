@@ -19,6 +19,18 @@ const Home: React.FC = () => {
             sanitation, food security, education and maternal and child health training through large-scale actions
             for thousands of men, women and children across Mali.
           </p>
+
+          {/* Stats */}
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-number">15+</div>
+              <div className="stat-label">Years</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">50+</div>
+              <div className="stat-label">Projects Completed</div>
+            </div>
+          </div>
         </section>
 
         {/* Domains Section */}

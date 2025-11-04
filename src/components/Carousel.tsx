@@ -9,9 +9,9 @@ interface CarouselSlide {
 }
 
 // Import images properly for Vite
-import slide1 from '../assets/slide1.jpg.png';
-import slide2 from '../assets/slide2.jpg.png';
-import slide3 from '../assets/slide3.jpg.png';
+import slide1 from '../assets/slide1.jpg.webp';
+import slide2 from '../assets/slide2.jpg.webp';
+import slide3 from '../assets/slide3.jpg.webp';
 
 const carouselData: CarouselSlide[] = [
     {
@@ -98,7 +98,7 @@ const Carousel = () => {
                          className={`carousel-slide ${index === currentSlide ? 'active' : ''}`}
                          style={{ transform: `translateX(${100 * (index - currentSlide)}%)` }}
                          onClick={handleImageClick}>
-                        <img src={slide.image} alt={slide.title} />
+                        <img src={slide.image} alt={slide.title} width="800" height="400" />
                         <div className="carousel-content">
                             <h2>{slide.title}</h2>
                             <p>{slide.description}</p>

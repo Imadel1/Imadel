@@ -39,7 +39,7 @@ const useLazyImage = (src: string) => {
 };
 
 // Lazy image component
-const LazyImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
+const LazyImage: React.FC<{ src: string; alt: string; className?: string; width?: string; height?: string }> = ({ src, alt, className, width, height }) => {
   const { imgRef, loaded, inView } = useLazyImage(src);
 
   return (
@@ -48,6 +48,8 @@ const LazyImage: React.FC<{ src: string; alt: string; className?: string }> = ({
       src={inView ? src : undefined}
       alt={alt}
       className={className}
+      width={width}
+      height={height}
       style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
     />
   );
@@ -68,13 +70,22 @@ const OurWork: React.FC = () => {
 
   return (
     <div className="our-work-page">
+      {/* Intro Section */}
+      <section className="intro">
+        <h2>Our Projects</h2>
+        <p>
+          Discover the impactful projects that IMADEL has undertaken across Mali,
+          focusing on sustainable development, community empowerment, and humanitarian aid.
+        </p>
+      </section>
+
       {/* Projects Section */}
       <section className="projects">
         <div className="projects-grid">
           {currentProjects.map((project) => (
             <Link to={`/project/${project.id}`} key={project.id} className="project-card-link">
               <div className="project-card">
-                <LazyImage src={project.images[0]} alt={project.title} className="project-image" />
+                <LazyImage src={project.images[0]} alt={project.title} className="project-image" width="300" height="200" />
                 <h3>{project.title}</h3>
                 <p>{project.description.split('Read more')[0]}</p>
                 <span className="read-more">READ MORE DETAILS</span>

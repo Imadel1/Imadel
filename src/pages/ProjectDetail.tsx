@@ -76,7 +76,7 @@ const ProjectDetail: React.FC = () => {
           </div>
         </div>
         <div className="project-images">
-          <img src={project.images[currentImageIndex]} alt={project.title} className="project-detail-image" />
+          <img src={project.images[currentImageIndex]} alt={project.title} className="project-detail-image" width="600" height="400" />
           {project.images.length > 1 && (
             <div className="image-navigation">
               <button onClick={prevImage} className="image-nav-btn">‹</button>

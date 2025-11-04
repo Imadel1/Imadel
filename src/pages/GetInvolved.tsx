@@ -46,8 +46,8 @@ const GetInvolved: React.FC = () => {
       <section className="intro">
         <h1>Get Involved</h1>
         <p>
-          Explore opportunities to work with us or support ongoing community health and development projects. 
-          Join our team of passionate individuals making a difference across Ghana.
+          Explore opportunities to work with us or support ongoing community health and development projects.
+          Join our team of passionate individuals making a difference across Mali.
         </p>
       </section>
 
@@ -64,6 +64,15 @@ const GetInvolved: React.FC = () => {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Call To Action Section */}
+      <section className="cta">
+        <h2>Partner with Us</h2>
+        <p>Interested in partnering with IMADEL? We'd love to hear from you.</p>
+        <Link to="/contact" className="cta-button">
+          Contact Us for Partnerships
+        </Link>
       </section>
     </div>
   );

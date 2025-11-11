@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>imadel</title>
+    <!-- Optimized font loading - only preload critical fonts -->
+    <link rel="preload" as="font" href="/fonts/Poppins-Regular.ttf" type="font/ttf" crossorigin>
+    <link rel="preload" as="font" href="/fonts/SpaceGrotesk-Bold.ttf" type="font/ttf" crossorigin>
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="/src/assets/cropped-nouveau_logo.webp">
+    <link rel="preload" as="image" href="/src/assets/slide1.jpg.webp" fetchpriority="high">
+    <!-- Load fonts asynchronously -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"></noscript>
+    <!-- Inline critical CSS to prevent FOIT -->
+    <style>
+      /* Critical above-the-fold styles */
+      body { font-family: 'Poppins', sans-serif; margin: 0; }
+      .carousel { position: relative; width: 100%; height: 500px; overflow: hidden; }
+      .carousel-slide img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 2/1; }
+      .carousel-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem; background: rgba(255,255,255,0.95); text-align: center; min-height: 120px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

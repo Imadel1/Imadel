@@ -24,20 +24,8 @@ interface Objective {
 }
 
 // Constants
-const HERO_IMAGE = "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1600&auto=format&fit=crop";
+const HERO_IMAGE = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=1600&auto=format&fit=crop";
 const ABOUT_IMAGE = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop";
-
-const SERVICE_AREAS = [
-  "WASH",
-  "HEALTH",
-  "FOOD SECURITY",
-  "NUTRITION",
-  "EDUCATION",
-  "CONFLICT MANAGEMENT",
-  "GOVERNANCE",
-  "CLIMATE CHANGE",
-  "LOCAL DEVELOPMENT"
-];
 
 const AREAS_OF_INTERVENTION = [
   "Rural and urban hydraulics",
@@ -508,24 +496,17 @@ const Home: React.FC = () => {
           <div className="hero-content">
             <div className="hero-text">
               <h1 className="hero-title">
-                At the service of <span className="hero-highlight">local development</span>
+                Empowering Communities,<br />Building <span className="hero-highlight">Lasting Change</span>
               </h1>
-              <div className="service-areas" role="list" aria-label="Service areas">
-                {SERVICE_AREAS.map((area, index) => (
-                  <span key={index} role="listitem">{area}</span>
-                ))}
-              </div>
               <p className="hero-tagline">
-                IMADEL (Malian Initiative for Local Development Support) is a non-governmental organization (NGO). 
-                It contributes to the economic and social development of the world by promoting and supporting actions 
-                aimed at improving the living conditions of populations (rural, urban and other disadvantaged groups).
+                Transforming lives across Mali through sustainable development initiatives in health, education, water access, and community empowerment.
               </p>
               <div className="hero-actions">
-                <Link to="/getinvolved" className="btn-primary" aria-label="Get involved with IMADEL">
-                  Get Involved
+                <Link to="/getinvolved" className="btn-secondary" aria-label="Get involved with IMADEL">
+                  Become a Volunteer
                 </Link>
-                <Link to="/donate" className="btn-secondary" aria-label="Donate to IMADEL">
-                  Donate
+                <Link to="/donate" className="btn-primary" aria-label="Donate to IMADEL">
+                  Donate Now
                 </Link>
               </div>
             </div>

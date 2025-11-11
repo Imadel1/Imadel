@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaTint, FaHospital, FaBook, FaSeedling } from 'react-icons/fa';
 import './Donate.css';
 
 const Donate: React.FC = () => {

@@ -1,13 +1,24 @@
-# Performance Optimization TODO
-
-## Completed Tasks
-- [x] Analyze codebase for performance issues (LCP 5.52s, CLS 0.86, INP needs interaction)
-- [x] Add width and height attributes to all <img> tags to prevent CLS
-- [x] Preload critical images (logo, first carousel slide) in index.html
-- [x] Convert images to WebP format for better compression
-- [x] Ensure lazy loading for below-fold images (already in OurWork, ProjectDetail)
-- [x] Test performance after changes (server running, HTML includes preloads)
+# Admin Panel Enhancement TODO
 
 ## Pending Tasks
-- [ ] Optimize font loading if needed
-- [ ] Add interactions for INP measurement
+- [ ] Add edit functionality for projects (allow editing title, summary, content, country, published status)
+- [ ] Add image upload and management for projects (allow adding/removing images)
+- [ ] Add a new tab/section for Partners (similar to projects/jobs, with add/remove/edit)
+- [ ] Add a new tab/section for Newsletters (similar to projects/jobs, with add/remove/edit)
+- [ ] Make the admin panel layout more compact (adjust CSS for better space usage)
+- [ ] Ensure all sections list items by names with actions (add, edit, delete) for projects, jobs, offices, partners, newsletters
+
+## Completed Tasks
+- [x] Analyze current AdminPanel.tsx and AdminPanel.css
+- [x] Create comprehensive plan for enhancements
+- [x] Get user approval for the plan
+- [x] Add new types for Partner and Newsletter
+- [x] Add storage keys for partners and newsletters
+- [x] Add state management for partners and newsletters
+- [x] Add form states for partners and newsletters
+- [x] Add add/remove functions for partners and newsletters
+- [x] Update export/import to include partners and newsletters
+- [x] Add Partners and Newsletters tabs to navigation
+- [x] Add Partners and Newsletters sections to the UI
+- [x] Update Data tab to show partners and newsletters JSON
+- [x] Make CSS more compact (smaller padding, margins, font sizes, max-width container)

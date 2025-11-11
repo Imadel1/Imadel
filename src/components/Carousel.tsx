@@ -98,7 +98,15 @@ const Carousel = () => {
                          className={`carousel-slide ${index === currentSlide ? 'active' : ''}`}
                          style={{ transform: `translateX(${100 * (index - currentSlide)}%)` }}
                          onClick={handleImageClick}>
-                        <img src={slide.image} alt={slide.title} width="800" height="400" />
+                        <img
+                            src={slide.image}
+                            alt={slide.title}
+                            width="800"
+                            height="400"
+                            loading={index === 0 ? "eager" : "lazy"}
+                            decoding="async"
+                            fetchPriority={index === 0 ? "high" : "low"}
+                        />
                         <div className="carousel-content">
                             <h2>{slide.title}</h2>
                             <p>{slide.description}</p>

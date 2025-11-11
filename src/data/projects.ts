@@ -75,7 +75,7 @@ export const projects: Project[] = [
     id: uuidv4(),
     title: 'Child protection',
     description:
-      'Child protection 🌟 Because every child matters. And that each need deserves a dignified response. In a context marked by the... Read more',
+      'Child protection  Because every child matters. And that each need deserves a dignified response. In a context marked by the... Read more',
     images: ['/src/assets/slide1.jpg.png', '/src/assets/slide2.jpg.png', '/src/assets/slide3.jpg.png'],
   },
   {

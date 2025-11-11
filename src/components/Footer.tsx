@@ -7,45 +7,54 @@ import logo from "../assets/cropped-nouveau_logo.png";
 
 const Footer: React.FC = () => {
   return (
-    <footer>
+    <footer className="footer">
       <div className="footer-container">
-        {/* Logo and Brief */}
-        <div className="footer-section">
-          <img src={logo} alt="IMaDEL Logo" className="footer-logo" />
-          <p>
-            IMADEL is dedicated to empowering communities through health,
-            education, and sustainable development initiatives across Ghana.
+        {/* Logo and Description */}
+        <div className="footer-brand">
+          <img src={logo} alt="IMADEL Logo" className="footer-logo" />
+          <p className="footer-tagline">
+            Empowering communities through sustainable development
           </p>
         </div>
 
         {/* Quick Links */}
-        <div className="footer-section">
+        <div className="footer-section quick-links-section">
           <h4>Quick Links</h4>
-          <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/ourwork">Our Work</Link></li>
-            <li><Link to="/getinvolved">Get Involved</Link></li>
-            <li><Link to="/partners">Partners</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
-          </ul>
+          <nav className="footer-nav" role="navigation" aria-label="Footer navigation">
+            <Link to="/aboutus">About</Link>
+            <Link to="/ourwork">Projects</Link>
+            <Link to="/getinvolved">Job Offers</Link>
+            <Link to="/partners">Partners</Link>
+            <Link to="/contact">Contact</Link>
+          </nav>
         </div>
 
-        {/* Contact Info */}
+        {/* Contact */}
         <div className="footer-section">
           <h4>Contact</h4>
-          <p>Email: info@imadel.org</p>
-          <p>Phone: +243 81 455 1589</p>
-          <p>16-7e Rue Limete Résidentiel, Kinshasa, RDC</p>
+          <p className="footer-contact">
+            Bamako-Hamdallaye ACI 2000<br />
+            <a href="mailto:imadel@imadel.net">imadel@imadel.net</a><br />
+            <a href="tel:+22320799840">+223 20 79 98 40</a>
+          </p>
         </div>
 
-        {/* Social Media */}
+        {/* Social */}
         <div className="footer-section">
           <h4>Follow Us</h4>
           <div className="social-icons">
-            <a href="https://www.facebook.com/ImadelML" aria-label="Facebook"><FaFacebookF /></a>
-            <a href="https://www.linkedin.com/company/ong-imadel/" aria-label="FaLinkedinIn">< FaLinkedinIn/></a>
-            <a href="https://x.com/ONGImadel" aria-label="Twitter"><FaXTwitter /></a>
-            <a href="#" aria-label="TikTok"><FaTiktok /></a>
+            <a href="https://www.facebook.com/ImadelML" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+              <FaFacebookF />
+            </a>
+            <a href="https://www.linkedin.com/company/ong-imadel/" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+              <FaLinkedinIn />
+            </a>
+            <a href="https://x.com/ONGImadel" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
+              <FaXTwitter />
+            </a>
+            <a href="#" aria-label="TikTok">
+              <FaTiktok />
+            </a>
           </div>
         </div>
       </div>

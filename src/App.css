@@ -1,12 +1,20 @@
-/* src/App.css - IMaDEL NGO Style */
+/* src/App.css - IMADEL Consistent Colors */
 
 /* Root container */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  background-color: #ffffff;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background-color: var(--bg, #ffffff);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root::after {
+  content: none;
+  display: none;
 }
 
 /* Logo styling */
@@ -15,12 +23,12 @@
   padding: 1.5em;
   transition: all 300ms ease;
   will-change: filter, transform;
-  filter: drop-shadow(0 0 0.5em rgba(46, 139, 87, 0.2)); /* green glow */
+  filter: drop-shadow(0 0 0.5em rgba(255, 107, 0, 0.2)); /* IMADEL orange glow */
 }
 
 .logo:hover {
   transform: scale(1.05);
-  filter: drop-shadow(0 0 1.5em rgba(255, 140, 0, 0.45)); /* orange highlight */
+  filter: drop-shadow(0 0 1.5em rgba(255, 107, 0, 0.45)); /* IMADEL orange highlight */
 }
 
 /* Optional logo spin animation */
@@ -43,66 +51,102 @@
 /* Card section */
 .card {
   padding: 2em;
-  background-color: #f9fafc;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--panel, #f9fafc);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-sm, 0 2px 6px rgba(0, 0, 0, 0.04));
+  transition: var(--transition, all 0.3s ease);
+  border: 1px solid var(--border-light, #f0f0f0);
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(0, 116, 204, 0.15); /* subtle blue glow */
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.08));
+  border-color: var(--primary, #FF6B00);
 }
 
 /* Text for small info or link section */
 .read-the-docs {
-  color: #5f6368;
+  color: var(--text-muted, #9e9e9e);
   margin-top: 1rem;
   font-size: 0.9rem;
 }
 
-/* Link accents (IMaDEL color scheme) */
+/* Link accents (IMADEL color scheme) */
 a {
-  color: #0074cc;
+  color: var(--primary, #FF6B00);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #ff8c00;
+  color: var(--primary-dark, #e55a00);
+}
+
+a:focus {
+  outline: 2px solid var(--primary, #FF6B00);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Buttons if used within App */
 button {
-  background: #FF6B00;
-  color: #fff;
+  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  color: var(--text-on-primary, #ffffff);
   font-weight: 600;
   border: none;
-  padding: 0.6em 1.2em;
-  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full, 50px);
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(255, 140, 0, 0.25);
+  transition: var(--transition, all 0.3s ease);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  font-family: var(--font-sans, 'Poppins', sans-serif);
 }
 
 button:hover {
+  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 116, 204, 0.25);
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: translateY(0);
+}
+
+button:focus {
+  outline: 3px solid rgba(255, 107, 0, 0.3);
+  outline-offset: 2px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 720px) {
   #root {
-    padding: 1.5rem;
+    padding: 0;
   }
+  
   .logo {
     height: 4.5em;
   }
+  
   .card {
     padding: 1.2em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo,
+  .card,
+  button {
+    transition: none;
+  }
+  
+  .logo:hover,
+  button:hover {
+    transform: none;
+  }
+  
+  @keyframes logo-spin {
+    from, to {
+      transform: rotate(0deg);
+    }
   }
 }

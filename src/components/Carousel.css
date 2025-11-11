@@ -31,6 +31,7 @@
     object-position: center;
     display: block;
     max-height: 600px; /* Adjust this value based on your needs */
+    aspect-ratio: 2 / 1; /* 800:400 ratio */
 }
 
 .carousel-content {
@@ -39,9 +40,11 @@
     left: 0;
     right: 0;
     padding: 2rem;
-    background-color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     text-align: center;
     border-top: 2px solid #FF6B00;
+    min-height: 120px; /* Reserve space to prevent CLS */
 }
 
 .carousel-content h2 {

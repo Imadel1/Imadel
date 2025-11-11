@@ -2,7 +2,22 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #f9f9f9;
+  background-color: var(--bg, #ffffff);
+}
+
+.breadcrumb {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #616161);
+}
+
+.breadcrumb a {
+  color: var(--primary, #FF6B00);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
 }
 
 .job-detail-container {
@@ -12,45 +27,107 @@
 }
 
 .job-detail-content {
-  background: white;
+  background: var(--bg, #ffffff);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
+  position: relative;
+}
+
+.job-header {
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.job-meta {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center !important;
+  width: 100%;
+}
+
+.job-location,
+.job-type {
+  display: flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary, #616161);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.job-location svg,
+.job-type svg {
+  color: var(--primary, #FF6B00);
 }
 
 .back-button {
-  background: #FF6B00;
-  color: white;
+  background: var(--primary, #FF6B00);
+  color: white !important;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   cursor: pointer;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: var(--font-sans);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 100;
+}
+
+.back-button::before {
+  content: '←';
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .back-button:hover {
-  background: #e55a00;
+  background: var(--primary-dark, #e55a00);
+  transform: translateY(-2px);
+}
+
+.back-button:focus {
+  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline-offset: 2px;
 }
 
 .job-detail-content h1 {
-  color: #FF6B00;
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-  font-family: var(--font-display);
+  color: var(--primary, #FF6B00);
+  font-size: 2.2rem;
+  margin: 0 0 1.5rem 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
 }
 
 .job-detail-content h2 {
-  color: #333;
-  font-size: 1.5rem;
-  margin: 2rem 0 1rem 0;
-  font-family: var(--font-display);
+  color: var(--primary, #FF6B00);
+  font-size: 1.3rem;
+  margin: 1.5rem 0 1rem 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary, #FF6B00);
+  display: inline-block;
 }
 
 .job-detail-content p {
-  line-height: 1.6;
-  color: #666;
+  line-height: 1.8;
+  color: var(--text-secondary, #616161);
   margin-bottom: 1rem;
+  font-size: 1.05rem;
 }
 
 .job-detail-content ul {
@@ -59,23 +136,26 @@
 }
 
 .job-detail-content li {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
-  color: #555;
+  margin-bottom: 0.75rem;
+  line-height: 1.8;
+  color: var(--text-secondary, #616161);
 }
 
 .application-form {
-  background: white;
+  background: #fafafa;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
 }
 
 .application-form h2 {
-  color: #FF6B00;
-  font-size: 1.8rem;
+  color: var(--primary, #FF6B00);
+  font-size: 1.6rem;
   margin-bottom: 1.5rem;
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--primary, #FF6B00);
 }
 
 .form-group {
@@ -86,24 +166,34 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text, #1a1a2e);
+  font-size: 0.95rem;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-family: inherit;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  background: white;
+  color: var(--text, #1a1a2e);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #FF6B00;
-  box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+  border-color: var(--primary, #FF6B00);
+  box-shadow: 0 0 0 4px var(--primary-alpha, rgba(255, 107, 0, 0.1));
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted, #9e9e9e);
 }
 
 .form-group textarea {
@@ -115,24 +205,74 @@
   display: block;
   margin-top: 0.5rem;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary, #616161);
 }
 
 .submit-button {
-  background: #FF6B00;
+  background: var(--primary, #FF6B00);
   color: white;
   border: none;
   padding: 1rem 2rem;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   width: 100%;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.submit-button:hover {
-  background: #e55a00;
+.submit-button:hover:not(:disabled) {
+  background: var(--primary-dark, #e55a00);
+  transform: translateY(-2px);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:focus {
+  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline-offset: 2px;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  color: var(--error, #d32f2f);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.success-message {
+  background: rgba(46, 139, 87, 0.1);
+  color: var(--success, #2e8b57);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 3px solid var(--success, #2e8b57);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-button,
+  .submit-button,
+  .form-group input,
+  .form-group textarea {
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .back-button:hover,
+  .submit-button:hover {
+    transform: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -155,14 +295,173 @@
 @media (max-width: 767px) {
   .job-detail-page {
     padding: 1rem;
+    background-color: var(--bg, #ffffff);
   }
 
   .job-detail-content,
   .application-form {
-    padding: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 8px;
+  }
+
+  .job-detail-content {
+    border: 2px solid #e0e0e0;
+    background: white;
+  }
+
+  .application-form {
+    background: #fafafa;
+    border: 2px solid var(--primary, #FF6B00);
   }
 
   .job-detail-content h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    margin: 0 0 0.75rem 0;
+    margin-top: 0.5rem;
+  }
+
+  .job-meta {
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .job-location,
+  .job-type {
+    font-size: 0.9rem;
+  }
+
+  .job-detail-content h2 {
+    font-size: 1.2rem;
+    margin: 1.25rem 0 0.75rem 0;
+  }
+
+  .job-detail-content p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .application-form h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+  }
+
+  .submit-button {
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .back-button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0;
+    display: flex !important;
+    visibility: visible !important;
+  }
+
+  .job-detail-content {
+    padding: 1.25rem;
+    padding-top: 1.5rem;
+  }
+
+  .back-button {
+    margin-bottom: 1.25rem;
+  }
+
+  .job-header {
+    margin-top: 0.5rem;
+    z-index: 1;
+  }
+
+  .job-detail-container {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .job-detail-page {
+    padding: 0.75rem;
+  }
+
+  .job-detail-content,
+  .application-form {
+    padding: 1rem;
+  }
+
+  .back-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    margin-top: 0;
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 100;
+    position: relative;
+  }
+
+  .job-header {
+    margin-top: 0.75rem;
+  }
+
+  .job-detail-content {
+    padding: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  .job-detail-content h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+    margin-top: 0.5rem;
+  }
+
+  .job-meta {
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .job-location,
+  .job-type {
+    font-size: 0.85rem;
+  }
+
+  .job-detail-content h2 {
+    font-size: 1.1rem;
+  }
+
+  .job-detail-content p {
+    font-size: 0.9rem;
+  }
+
+  .application-form h2 {
+    font-size: 1.2rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+  }
+
+  .submit-button {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.9rem;
   }
 }

@@ -1,4 +1,4 @@
-/* src/index.css - IMaDEL Humanitarian Theme */
+/* src/index.css - IMADEL Unified Color System */
 
 /* Box sizing + sensible reset */
 *,
@@ -8,40 +8,76 @@
 }
 
 :root {
-  /* Core IMaDEL Color Palette */
+  /* IMADEL Brand Colors - Primary Palette */
+  --primary: #FF6B00;           /* IMADEL Orange - Primary brand color */
+  --primary-dark: #e55a00;      /* Darker orange for hover states */
+  --primary-darker: #cc4f00;    /* Even darker for active states */
+  --primary-light: #ff8c33;     /* Lighter orange for highlights */
+  --primary-lighter: #ffb366;   /* Very light orange for backgrounds */
+  --primary-alpha: rgba(255, 107, 0, 0.1);  /* Alpha for backgrounds */
+  --primary-alpha-2: rgba(255, 107, 0, 0.2); /* Alpha for borders */
+  --primary-alpha-3: rgba(255, 107, 0, 0.3); /* Alpha for shadows */
+
+  /* Neutral Colors */
   --bg: #ffffff;
+  --bg-alt: #f8f9fa;
+  --bg-dark: #1a1a2e;
+  --bg-darker: #16213e;
+  --bg-darkest: #0f3460;
   --panel: #f9fafc;
-  --text: #1b1b1b;
-  --muted: #5f6368;
-
-  /* Logo-based colors */
-  --primary: #0074cc;        /* IMaDEL blue (trust & calm) */
-  --primary-600: #005fa3;    /* darker blue for hover */
-  --accent: #ff8c00;         /* IMaDEL orange (energy & compassion) */
-  --success: #2e8b57;        /* IMaDEL green (growth & care) */
-  --danger: #e74c3c;         /* alert red */
-
+  --panel-hover: #f0f0f0;
+  
+  /* Text Colors */
+  --text: #1a1a2e;
+  --text-secondary: #616161;
+  --text-muted: #9e9e9e;
+  --text-light: #ffffff;
+  --text-on-primary: #ffffff;
+  
+  /* Border Colors */
+  --border: #e0e0e0;
+  --border-light: #f0f0f0;
+  --border-dark: #bdbdbd;
+  --border-primary: var(--primary);
+  
+  /* Status Colors */
+  --success: #2e8b57;
+  --success-light: #4caf50;
+  --warning: #ff9800;
+  --error: #d32f2f;
+  --error-light: #f44336;
+  --info: #2196f3;
+  --info-light: #64b5f6;
+  
+  /* Shadow Colors */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-primary: 0 4px 15px var(--primary-alpha-3);
+  --shadow-primary-hover: 0 8px 25px rgba(255, 107, 0, 0.4);
+  
   /* Layout */
-  --max-width: 1100px;
+  --max-width: 1200px;
   --content-padding: 1.25rem;
   --container-gap: 1rem;
-
+  
   /* Typography */
-  --font-sans: "Poppins", sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Poppins", "Poppins Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --font-display: "Space Grotesk", "Space Grotesk Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   --base-size: 16px;
   --radius: 10px;
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
-
+  --radius-sm: 8px;
+  --radius-lg: 12px;
+  --radius-full: 50px;
+  
   /* Motion */
-  --ease: cubic-bezier(.2,.9,.2,1);
+  --ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+  --transition: all 0.3s var(--ease);
 }
 
 /* Light, humanitarian tone */
 html {
   font-size: var(--base-size);
-  height: 100%;
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
@@ -50,17 +86,29 @@ html {
 
 body {
   margin: 0;
-  min-height: 100%;
+  padding: 0;
   background-color: var(--bg);
   line-height: 1.6;
   -webkit-tap-highlight-color: transparent;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
-/* General media */
+body::after {
+  content: none;
+  display: none;
+}
+
+/* General media - prevent layout shifts */
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;
   height: auto;
+}
+
+/* Prevent cumulative layout shift for images */
+img {
+  content-visibility: auto;
 }
 
 /* Headings */
@@ -69,20 +117,29 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text);
   font-weight: 600;
   line-height: 1.3;
+  font-family: var(--font-display);
 }
 
 h1 {
-  color: var(--success);
+  color: var(--text);
   letter-spacing: -0.02em;
 }
 
+/* Links */
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: color 180ms var(--ease);
+  transition: var(--transition);
 }
+
 a:hover {
-  color: var(--primary-600);
+  color: var(--primary-dark);
+}
+
+a:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Container */
@@ -103,14 +160,15 @@ a:hover {
 
 /* Header */
 .header {
-  background-color: #ffffff;
-  border-bottom: 2px solid #f3f4f6;
+  background-color: var(--bg);
+  border-bottom: 2px solid var(--border-light);
   padding: 0.75rem 0;
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 10;
 }
+
 .header .bar {
   display: flex;
   align-items: center;
@@ -126,55 +184,109 @@ a:hover {
   box-shadow: var(--shadow-sm);
 }
 
-/* Buttons */
+/* Buttons - Unified Style */
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: .5rem;
-  padding: .5rem 0.9rem;
-  border-radius: 999px;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
   border: none;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.2s var(--ease);
+  font-size: 1rem;
+  transition: var(--transition);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  text-align: center;
+  justify-content: center;
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 6px 16px rgba(255, 140, 0, 0.25);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-primary);
 }
+
 .btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(255, 140, 0, 0.3);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-darker) 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-hover);
+  color: var(--text-on-primary);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:focus {
+  outline: 3px solid var(--primary-alpha-2);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-secondary:hover {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border-color: var(--primary);
+}
+
+.btn-secondary:focus {
+  outline: 3px solid var(--primary-alpha-2);
+  outline-offset: 2px;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: var(--text-on-primary);
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--primary);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
 }
+
 .btn-ghost:hover {
-  background: rgba(0, 116, 204, 0.06);
+  background: var(--primary-alpha);
+  border-color: var(--primary);
 }
 
 /* Inputs */
 .input, textarea, .select {
   width: 100%;
-  padding: .6rem .75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--bg);
   color: var(--text);
   font: inherit;
-  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  font-family: var(--font-sans);
+  transition: var(--transition);
 }
+
 .input:focus,
 textarea:focus,
 .select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(0, 116, 204, 0.15);
   outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-alpha);
+}
+
+.input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
 }
 
 /* Footer */
@@ -182,66 +294,117 @@ textarea:focus,
   text-align: center;
   padding: 1rem 0;
   font-size: 0.9rem;
-  color: var(--muted);
-  border-top: 1px solid #e5e7eb;
-  background: #fff;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
 }
 
 /* Utilities */
-.center { display: flex; align-items: center; justify-content: center; }
-.mt-2 { margin-top: .5rem; }
+.center { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 1rem; }
 .mb-3 { margin-bottom: 1rem; }
 
 /* Small animation */
 .fade-in {
-  animation: fadeIn .3s ease both;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  animation: fadeIn 0.3s ease both;
 }
 
-/* Google Fonts */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(4px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Fallback fonts with size adjustments */
+@font-face {
+  font-family: 'Poppins Fallback';
+  src: local('Arial');
+  size-adjust: 107%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial');
+  size-adjust: 110%;
+  ascent-override: 92%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+}
+
+/* Google Fonts - with optional display for critical text */
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 400;
-  font-display: swap;
+  font-display: optional;
   src: url(https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrFJA.ttf) format('truetype');
 }
+
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 500;
-  font-display: swap;
+  font-display: optional;
   src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9V1s.ttf) format('truetype');
 }
+
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 600;
-  font-display: swap;
+  font-display: optional;
   src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6V1s.ttf) format('truetype');
 }
+
 @font-face {
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url(https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLCz7V1s.ttf) format('truetype');
 }
+
 @font-face {
   font-family: 'Space Grotesk';
   font-style: normal;
   font-weight: 500;
-  font-display: swap;
+  font-display: optional;
   src: url(https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7aUUsj.ttf) format('truetype');
 }
+
 @font-face {
   font-family: 'Space Grotesk';
   font-style: normal;
   font-weight: 700;
-  font-display: swap;
+  font-display: optional;
   src: url(https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf) format('truetype');
 }

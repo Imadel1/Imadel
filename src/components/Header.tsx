@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Header.css";
-import logo from "../assets/cropped-nouveau_logo.webp";
+import logo from "../assets/cropped-nouveau_logo.png";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -19,26 +19,24 @@ const Header = () => {
 
   return (
     <header className={`${scrolled ? "scrolled" : ""} ${isMenuOpen ? "menu-open" : ""}`}>
-      <div className="header-container">
-        <NavLink to="/" className="logo-container">
-          <img src={logo} alt="IMADEL Logo" width="120" height="60" />
-          <span className="logo-text">IMADEL</span>
-        </NavLink>
+      <div className="logo-container">
+        <img src={logo} alt="IMADEL Logo" width="55" height="55" />
+        <span className="logo-text">IMADEL</span>
+      </div>
 
-        <nav className={isMenuOpen ? "active" : ""}>
-          <NavLink to="/" onClick={() => setIsMenuOpen(false)}>Home</NavLink>
-          <NavLink to="/aboutus" onClick={() => setIsMenuOpen(false)}>About Us</NavLink>
-          <NavLink to="/ourwork" onClick={() => setIsMenuOpen(false)}>Our Work</NavLink>
-          <NavLink to="/getinvolved" onClick={() => setIsMenuOpen(false)}>Get Involved</NavLink>
-          <NavLink to="/partners" onClick={() => setIsMenuOpen(false)}>Partners</NavLink>
-          <NavLink to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</NavLink>
-        </nav>
+      <nav className={isMenuOpen ? "active" : ""}>
+        <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
+        <Link to="/aboutus" onClick={() => setIsMenuOpen(false)}>About Us</Link>
+        <Link to="/ourwork" onClick={() => setIsMenuOpen(false)}>Our Work</Link>
+        <Link to="/getinvolved" onClick={() => setIsMenuOpen(false)}>Get Involved</Link>
+        <Link to="/partners" onClick={() => setIsMenuOpen(false)}>Partners</Link>
+        <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+      </nav>
 
-        <div className="header-right">
-          <NavLink to="/donate" className="donate-button">Donate</NavLink>
-          <div className="menu-toggle" onClick={toggleMenu}>
-            {isMenuOpen ? "✕" : "☰"}
-          </div>
+      <div className="header-right">
+        <Link to="/donate" className="donate-button">Donate</Link>
+        <div className="menu-toggle" onClick={toggleMenu}>
+          {isMenuOpen ? "✕" : "☰"}
         </div>
       </div>
     </header>

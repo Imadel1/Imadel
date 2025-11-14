@@ -4,7 +4,7 @@ This document provides guidance for backend developers on integrating this front
 
 ## Current Architecture
 
-### Frontend Stack
+### Frontend Stack#
 - **Framework**: React 18 with TypeScript
 - **Routing**: React Router v6
 - **Styling**: CSS Modules with CSS Variables

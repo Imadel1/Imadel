@@ -32,5 +32,6 @@ dist-ssr
 .next
 out
 
-# API temp repo (remove after integration)
+# API temp repos (remove after integration)
 temp-imadel-api
+temp-api-repo/

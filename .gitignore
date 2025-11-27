@@ -32,6 +32,10 @@ dist-ssr
 .next
 out
 
+# Local helper docs (kept in repo now, ignore future changes)
+BACKEND_INTEGRATION.md
+UNNECESSARY_FILES_REPORT.md
+
 # API temp repos (remove after integration)
 temp-imadel-api
 temp-api-repo/

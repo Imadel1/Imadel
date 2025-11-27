@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './AreasOfIntervention.css';
+import { projectsApi } from '../services/api';
 
 interface Project {
   id: string;
@@ -41,18 +42,42 @@ export default function AreasOfIntervention() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
 
-  // TODO: Replace with API call - GET /api/projects?published=true
+  // Load projects from API
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('imadel_admin_projects');
-      if (raw) {
-        const allProjects = JSON.parse(raw) as Project[];
-        const publishedProjects = allProjects.filter(p => p.published);
-        setProjects(publishedProjects);
+    const loadProjects = async () => {
+      try {
+        const response = await projectsApi.getAll({ published: true });
+
+        const rawProjects =
+          (response as any).projects ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(rawProjects)) {
+          const publishedProjects = rawProjects.map((p: any) => ({
+            id: p._id || p.id,
+            title: p.title,
+            summary: p.description || '',
+            content: p.fullDescription || '',
+            country: p.location || '',
+            published: p.published,
+            images: p.images && p.images.length > 0 
+              ? p.images.map((img: any) => img.url || img)
+              : [],
+            // Note: Backend may need to be updated to support areasOfIntervention field
+            areasOfIntervention: p.areasOfIntervention || p.category ? [p.category] : []
+          })) as Project[];
+          
+          setProjects(publishedProjects);
+        }
+      } catch (error) {
+        console.error('Error loading projects from API:', error);
+        // Do not fall back to localStorage – show only live backend data
+        setProjects([]);
       }
-    } catch (error) {
-      console.error('Error loading projects:', error);
-    }
+    };
+
+    loadProjects();
   }, []);
 
   const getProjectsByArea = (area: string) => {

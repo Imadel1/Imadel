@@ -2,6 +2,7 @@ import React, { useState, useEffect, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaBriefcase } from 'react-icons/fa';
 import './JobDetail.css';
+import { jobsApi } from '../services/api';
 
 interface JobItem {
   id: string;
@@ -53,147 +54,38 @@ const JobDetail: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Default fallback jobs if no admin data
-  const defaultJobs: JobItem[] = [
-    {
-      id: '1',
-      title: 'Environmental Safeguard Specialist',
-      description: 'IMADEL is recruiting an Environmental Safeguard Specialist for the project "Implementation of Community Mobilization Activities, Prevention."',
-      fullDescription: 'IMADEL is seeking a qualified Environmental Safeguard Specialist to support our environmental protection initiatives. This role involves implementing environmental safeguards, conducting assessments, and ensuring compliance with environmental standards in community development projects.',
-      requirements: [
-        'Bachelor\'s degree in Environmental Science, Environmental Engineering, or related field',
-        'Minimum 3 years of experience in environmental safeguards',
-        'Knowledge of environmental impact assessment processes',
-        'Strong analytical and reporting skills',
-        'Fluency in French and English'
-      ],
-      responsibilities: [
-        'Conduct environmental impact assessments',
-        'Develop and implement environmental management plans',
-        'Monitor environmental compliance',
-        'Prepare environmental safeguard reports',
-        'Coordinate with project teams and stakeholders'
-      ],
-      location: 'Bamako, Mali',
-      type: 'Full-time'
-    },
-    {
-      id: '2',
-      title: 'Coordinator – Protection of Refugees Project',
-      description: 'Notice of recruitment of a Coordinator for the implementation of activities under the project "Sectoral Measures for the Protection of Refugees."',
-      fullDescription: 'We are looking for an experienced Coordinator to lead the implementation of refugee protection activities. This position will oversee project coordination, stakeholder engagement, and ensure effective delivery of protection services to refugee communities.',
-      requirements: [
-        'Master\'s degree in International Relations, Humanitarian Affairs, or related field',
-        'Minimum 5 years of experience in refugee protection or humanitarian work',
-        'Experience in project coordination and management',
-        'Knowledge of refugee protection frameworks',
-        'Strong communication and interpersonal skills'
-      ],
-      responsibilities: [
-        'Coordinate project activities and implementation',
-        'Manage stakeholder relationships and partnerships',
-        'Oversee project budget and resource allocation',
-        'Monitor project progress and impact',
-        'Prepare progress reports and documentation'
-      ],
-      location: 'Bamako, Mali',
-      type: 'Full-time'
-    },
-    {
-      id: '3',
-      title: 'Coordinator – Social Cohesion Project',
-      description: 'Recruitment of a Coordinator for the project "Implementation of Community Mobilization, Social Cohesion and Achievement Activities."',
-      fullDescription: 'IMADEL seeks a dedicated Coordinator to lead social cohesion initiatives aimed at strengthening community bonds and promoting inclusive development. This role focuses on community mobilization and fostering social harmony.',
-      requirements: [
-        'Bachelor\'s degree in Social Sciences, Community Development, or related field',
-        'Minimum 4 years of experience in community development',
-        'Experience in social cohesion and conflict resolution',
-        'Strong facilitation and training skills',
-        'Knowledge of local cultural contexts'
-      ],
-      responsibilities: [
-        'Coordinate community mobilization activities',
-        'Facilitate social cohesion workshops and training',
-        'Develop community engagement strategies',
-        'Monitor social impact and cohesion indicators',
-        'Collaborate with local authorities and organizations'
-      ],
-      location: 'Various locations, Mali',
-      type: 'Full-time'
-    },
-    {
-      id: '4',
-      title: 'Health Supervisor',
-      description: 'Terms of Reference (ToR) for the recruitment of a Health Supervisor for upcoming community health initiatives.',
-      fullDescription: 'We are recruiting a Health Supervisor to oversee community health programs and ensure the effective delivery of health services. This position will focus on health promotion, disease prevention, and community health education.',
-      requirements: [
-        'Bachelor\'s degree in Public Health, Nursing, or Medicine',
-        'Minimum 3 years of experience in community health',
-        'Knowledge of health promotion and disease prevention',
-        'Experience in health program supervision',
-        'Strong community engagement skills'
-      ],
-      responsibilities: [
-        'Supervise community health program implementation',
-        'Conduct health education and awareness campaigns',
-        'Monitor health indicators and program outcomes',
-        'Coordinate with health facilities and providers',
-        'Prepare health program reports and documentation'
-      ],
-      location: 'Bamako, Mali',
-      type: 'Full-time'
-    }
-  ];
-
-  // Load jobs from admin panel
+  // Load job from backend API
   useEffect(() => {
-    const loadJob = () => {
+    if (!id) return;
+
+    const loadJob = async () => {
       try {
-        const stored = localStorage.getItem('imadel_admin_jobs');
-        let foundJob: JobItem | undefined;
-        
-        if (stored) {
-          const adminJobs = JSON.parse(stored);
-          foundJob = adminJobs.find((j: any) => j.id === id && j.published);
-          
-          if (foundJob) {
-            setJob({
-              id: foundJob.id,
-              title: foundJob.title,
-              description: foundJob.description,
-              fullDescription: foundJob.description,
-              location: foundJob.location,
-              applyUrl: foundJob.applyUrl,
-              type: 'Full-time'
-            });
-            return;
-          }
-        }
-        
-        // Fall back to default jobs if not found in admin
-        const defaultJob = defaultJobs.find(j => j.id === id);
-        if (defaultJob) {
-          setJob(defaultJob);
+        const response = await jobsApi.getById(id);
+
+        // Expecting backend shape: { success, job }
+        const jobData = (response as any).job || (response as any).data;
+
+        if (response.success && jobData) {
+          setJob({
+            id: jobData._id || jobData.id,
+            title: jobData.title,
+            description: jobData.description || '',
+            fullDescription: jobData.fullDescription || jobData.description || '',
+            location: jobData.location || '',
+            type: jobData.type || jobData.employmentType || '',
+            applyUrl: jobData.applyUrl || '',
+            published: jobData.published,
+          });
+        } else {
+          setJob(null);
         }
       } catch (error) {
-        console.error('Error loading job:', error);
-        // Fall back to default jobs on error
-        const defaultJob = defaultJobs.find(j => j.id === id);
-        if (defaultJob) {
-          setJob(defaultJob);
-        }
+        console.error('Error loading job from API:', error);
+        setJob(null);
       }
     };
 
     loadJob();
-
-    // Listen for updates from admin panel
-    const handleUpdate = () => loadJob();
-    window.addEventListener('imadel:jobs:updated', handleUpdate);
-
-    return () => {
-      window.removeEventListener('imadel:jobs:updated', handleUpdate);
-    };
   }, [id]);
 
   if (!job) {

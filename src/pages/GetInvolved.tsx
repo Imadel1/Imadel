@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './GetInvolved.css';
+import { jobsApi } from '../services/api';
 
 interface JobItem {
   id: string;
@@ -52,33 +53,34 @@ const DEFAULT_JOBS: JobItem[] = [
 const GetInvolved: React.FC = () => {
   const [jobs, setJobs] = useState<JobItem[]>(DEFAULT_JOBS);
 
-  // Load jobs from admin panel
+  // Load jobs from API
   useEffect(() => {
-    const loadJobs = () => {
+    const loadJobs = async () => {
       try {
-        const stored = localStorage.getItem('imadel_admin_jobs');
-        if (stored) {
-          const adminJobs = JSON.parse(stored);
-          // Filter only published jobs
-          const publishedJobs = adminJobs
+        const response = await jobsApi.getAll();
+        
+        if (response.success && response.jobs) {
+          // Filter only published jobs and map format
+          const publishedJobs = response.jobs
             .filter((j: any) => j.published)
             .map((j: any) => ({
-              id: j.id,
+              id: j._id || j.id,
               title: j.title,
               description: j.description || '',
-              location: j.location,
-              applyUrl: j.applyUrl,
-              link: `/job/${j.id}`,
+              location: j.location || '',
+              applyUrl: j.applyUrl || '',
+              link: `/job/${j._id || j.id}`,
               category: j.location || 'General'
             }));
           
-          // Use admin jobs if available, otherwise use defaults
           if (publishedJobs.length > 0) {
             setJobs(publishedJobs);
           }
         }
       } catch (error) {
-        console.error('Error loading jobs:', error);
+        console.error('Error loading jobs from API:', error);
+        // Do not fall back to localStorage – show only live backend data
+        setJobs([]);
       }
     };
 

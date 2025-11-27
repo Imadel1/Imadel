@@ -2,26 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
 import logo from '../assets/cropped-nouveau_logo.png';
+import { authApi } from '../services/api';
 
 /**
- * BACKEND INTEGRATION NOTES:
+ * BACKEND INTEGRATION: Now uses API for authentication
  * 
- * SECURITY WARNING: This login system is for DEVELOPMENT ONLY!
+ * API Endpoint: POST /api/auth/login
+ * - Requires: email, password
+ * - Returns: { success, token, admin }
  * 
- * Current Hardcoded Credentials (REMOVE IN PRODUCTION):
- * - Username: admin
- * - Password: admin123
- * - 2FA Code: Randomly generated 6-digit code (stored in sessionStorage)
+ * Token is automatically stored and included in subsequent requests.
  * 
- * TODO for Production:
- * 1. Replace with real authentication API (POST /api/auth/login)
- * 2. Implement server-side 2FA (TOTP/email/SMS)
- * 3. Use JWT tokens stored in httpOnly cookies (NOT localStorage)
- * 4. Add password reset functionality
- * 5. Implement rate limiting and account lockout
- * 6. Add CAPTCHA for brute force protection
- * 
- * See BACKEND_INTEGRATION.md for detailed authentication flow.
+ * Note: 2FA is currently client-side simulated. If backend implements
+ * 2FA endpoints, update this component accordingly.
  */
 
 // Lightweight client-side 2FA simulation. Replace with a server-side flow for
@@ -70,30 +63,37 @@ export default function AdminLogin() {
     if (p && p.attemptsLeft != null) setAttemptsLeft(p.attemptsLeft);
   }, []);
 
-  const requestVerification = (e?: React.FormEvent) => {
+  const requestVerification = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setStatus(null);
-    // Basic local check -- in production this should be handled server-side.
-    if (email.trim() !== ADMIN_EMAIL || password !== ADMIN_PW) {
-      setStatus('Invalid email or password');
+
+    if (!email.trim() || !password) {
+      setStatus('Please enter both email and password');
       return;
     }
 
-    const newCode = genCode();
-    save2fa(newCode, 300); // 5 minutes
-    setPhase('verify');
-    setCooldown(60); // 60s resend cooldown
-    setAttemptsLeft(5);
-    setStatus('A verification code was sent to the admin email.');
+    try {
+      setStatus('Logging in...');
+      const response = await authApi.login(email.trim(), password);
 
-    // For development convenience we optionally display the code in the UI or log it.
-    if (DEV_SHOW) {
-      console.info('[DEV] Admin verification code:', newCode);
-      setStatus(s => (s ? s + ' (dev mode: code logged to console)' : null));
+      if (response.success && response.token) {
+        // Login successful - token is automatically stored by authApi.login()
+        // Store authentication flag for compatibility
+        try { localStorage.setItem('imadel_admin_authenticated', '1'); } catch {}
+        setPhase('done');
+        setStatus('Login successful! Redirecting...');
+        
+        // Redirect to admin panel
+        setTimeout(() => {
+          navigate('/admin/panel');
+        }, 500);
+      } else {
+        setStatus('Login failed. Please check your credentials.');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setStatus(error.message || 'Login failed. Please try again.');
     }
-
-    // focus code input on next render
-    setTimeout(()=> codeInputRef.current?.focus(), 50);
   };
 
   const resendCode = () => {
@@ -155,7 +155,6 @@ export default function AdminLogin() {
               <button type="submit" className="login-btn">Request code</button>
             </div>
             <div aria-live="polite" style={{marginTop:8,color:'#555'}}>{status}</div>
-            <div className="note">This demo uses a client-side simulated 2FA; replace with a server-side email sender for production.</div>
           </form>
         )}
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-import { projects as defaultProjects } from '../data/projects';
 import './ProjectDetail.css';
 
 interface ContentItem {
@@ -59,15 +58,10 @@ const ProjectDetail: React.FC = () => {
             }
           }
         } else {
-          // For projects, combine admin projects with default projects from data file
-          let allProjects: ContentItem[] = [...defaultProjects.map(p => ({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            images: p.images
-          }))];
-          
+          // For projects, only use dynamic/admin projects (no hardcoded defaults)
           const stored = localStorage.getItem(storageKey);
+          let allProjects: ContentItem[] = [];
+
           if (stored) {
             const adminProjects = JSON.parse(stored);
             const publishedProjects = adminProjects
@@ -80,13 +74,12 @@ const ProjectDetail: React.FC = () => {
                 images: p.images || ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
                 country: p.country
               }));
-            
-            // Add admin projects at the beginning
-            allProjects = [...publishedProjects, ...allProjects];
+
+            allProjects = publishedProjects;
           }
-          
+
           setAllContent(allProjects);
-          
+
           // Find the specific project
           const foundProject = allProjects.find((p: any) => p.id === id);
           if (foundProject) {

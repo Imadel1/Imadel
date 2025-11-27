@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import "./Header.css";
 import logo from "../assets/cropped-nouveau_logo.png";
 
@@ -25,12 +25,49 @@ const Header = () => {
       </div>
 
       <nav className={isMenuOpen ? "active" : ""}>
-        <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
-        <Link to="/aboutus" onClick={() => setIsMenuOpen(false)}>About Us</Link>
-        <Link to="/ourwork" onClick={() => setIsMenuOpen(false)}>Our Work</Link>
-        <Link to="/getinvolved" onClick={() => setIsMenuOpen(false)}>Get Involved</Link>
-        <Link to="/partners" onClick={() => setIsMenuOpen(false)}>Partners</Link>
-        <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/aboutus"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          About Us
+        </NavLink>
+        <NavLink
+          to="/ourwork"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Our Work
+        </NavLink>
+        <NavLink
+          to="/getinvolved"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Get Involved
+        </NavLink>
+        <NavLink
+          to="/partners"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Partners
+        </NavLink>
+        <NavLink
+          to="/contact"
+          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Contact
+        </NavLink>
       </nav>
 
       <div className="header-right">

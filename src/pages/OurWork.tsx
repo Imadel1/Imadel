@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './OurWork.css';
 import { Link } from "react-router-dom";
-import { projects as defaultProjects } from '../data/projects';
+import { projectsApi } from '../services/api';
 
 // Lazy Image Component with Intersection Observer
 interface LazyImageProps {
@@ -61,34 +61,38 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className, width = 300,
 
 const OurWork: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [projects, setProjects] = useState(defaultProjects);
+  const [projects, setProjects] = useState<any[]>([]);
   const itemsPerPage = 9;
 
-  // Load projects from admin panel
+  // Load projects from API
   useEffect(() => {
-    const loadProjects = () => {
+    const loadProjects = async () => {
       try {
-        const stored = localStorage.getItem('imadel_admin_projects');
-        if (stored) {
-          const adminProjects = JSON.parse(stored);
-          // Filter only published projects
-          const publishedProjects = adminProjects
-            .filter((p: any) => p.published)
-            .map((p: any) => ({
-              id: p.id,
-              title: p.title,
-              description: p.summary || p.content || '',
-              images: p.images || ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
-              country: p.country || 'Mali'
-            }));
-          
-          // Use admin projects if available, otherwise use defaults
-          if (publishedProjects.length > 0) {
-            setProjects(publishedProjects);
-          }
+        const response = await projectsApi.getAll({ published: true });
+
+        // Support multiple possible response shapes: { projects }, { data: [...] }, or direct array
+        const rawProjects =
+          (response as any).projects ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(rawProjects)) {
+          const mappedProjects = rawProjects.map((p: any) => ({
+            id: p._id || p.id,
+            title: p.title,
+            description: p.description || p.fullDescription || '',
+            images: p.images && p.images.length > 0 
+              ? p.images.map((img: any) => img.url || img)
+              : ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
+            country: p.location || 'Mali'
+          }));
+
+          setProjects(mappedProjects);
         }
       } catch (error) {
-        console.error('Error loading projects:', error);
+        console.error('Error loading projects from API:', error);
+        // Do not fall back to localStorage – show only live backend data
+        setProjects([]);
       }
     };
 

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { FaBullseye, FaGlobeAmericas, FaDumbbell, FaHandshake, FaLandmark, FaSeedling } from "react-icons/fa";
 import "./Home.css";
+import { projectsApi } from "../services/api";
 
 // Types
 interface NewsItem {
@@ -99,113 +100,7 @@ const getObjectiveIcon = (iconName: string) => {
   }
 };
 
-//Default fallback news items if admin hasn't added any
-const DEFAULT_NEWS_ITEMS: NewsItem[] = [
-  {
-    id: "1",
-    title: "Together, let's make a difference!",
-    description: "Every day, IMADEL acts on the ground to help the most vulnerable populations.",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "2",
-    title: "Hand in hand, for a better future!",
-    description: "#IMADEL provided support on 24/09 to 125 households through food assistance...",
-    image: "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "3",
-    title: "Distribution of NFI kits to IDPs!",
-    description: "IMADEL has provided support to 10 IDP households in Medina Coura (Mopti) through the development of the S...",
-    image: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "4",
-    title: "Training to protect, raising awareness to act.",
-    description: "As part of its fight against Gender-Based Violence (GBV), #IMADEL...",
-    image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "5",
-    title: "Support today, to rebuild tomorrow!",
-    description: "Support today, to rebuild tomorrow! IMADEL has provided support to 85 displaced households in the United States.",
-    image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "6",
-    title: "Solidarity in action, to restore hope and dignity!",
-    description: "\"Solidarity in action, to restore hope and dignity!\" As part of its...",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "7",
-    title: "Awareness of #VBG",
-    description: "#IMADEL conducted awareness sessions on #VBG and ticks related to the and ticks.",
-    image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "8",
-    title: "Assistance to IDPs",
-    description: "IMADEL, in partnership with Action Aid International, has assisted 125 internally displaced households, i.e. 750 internally displaced households.",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  },
-  {
-    id: "9",
-    title: "Clean Water Initiative Launch",
-    description: "IMADEL launches new clean water project reaching 5,000 beneficiaries in rural communities.",
-    image: "https://images.unsplash.com/photo-1541675154750-0444c7d51e8e?q=80&w=800&auto=format&fit=crop",
-    badge: "PROJECT",
-    link: "#"
-  },
-  {
-    id: "10",
-    title: "Education for All Campaign",
-    description: "Supporting 2,000 children with school supplies and educational materials in underserved areas.",
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop",
-    badge: "PROJECT",
-    link: "#"
-  },
-  {
-    id: "11",
-    title: "Healthcare Access Program",
-    description: "Mobile health clinics bringing essential medical services to remote villages across Mali.",
-    image: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=800&auto=format&fit=crop",
-    badge: "NEWS",
-    link: "#"
-  },
-  {
-    id: "12",
-    title: "Women's Empowerment Workshop",
-    description: "Training 300 women in entrepreneurship and leadership skills for economic independence.",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop",
-    badge: "PROJECT",
-    link: "#"
-  },
-  {
-    id: "13",
-    title: "Local development",
-    description: "As part of the implementation of the Top Up NGO project #IMADEL with...",
-    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=800&auto=format&fit=crop",
-    badge: "TOPICALITY",
-    link: "#"
-  }
-];
+// Note: News items are sourced from admin-managed newsletters only (no hardcoded news)
 
 // Lazy Image Component with Intersection Observer
 interface LazyImageProps {
@@ -399,10 +294,10 @@ const AnimatedCounter: React.FC<CounterProps> = ({ end, suffix = '', duration = 
 
 // Main Home Component
 const Home: React.FC = () => {
-  const [newsItems, setNewsItems] = useState<NewsItem[]>(DEFAULT_NEWS_ITEMS);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [projects, setProjects] = useState<NewsItem[]>([]);
 
-  // Load newsletters from admin panel
+  // Load newsletters from admin panel (keeping localStorage for now until backend adds newsletter content endpoints)
   useEffect(() => {
     const loadNewsletters = () => {
       try {
@@ -443,31 +338,37 @@ const Home: React.FC = () => {
     };
   }, []);
 
-  // Load projects from admin panel
+  // Load projects from API
   useEffect(() => {
-    const loadProjects = () => {
+    const loadProjects = async () => {
       try {
-        const stored = localStorage.getItem('imadel_admin_projects');
-        if (stored) {
-          const adminProjects = JSON.parse(stored);
-          // Filter only published projects and map to news format
-          const publishedProjects = adminProjects
-            .filter((p: any) => p.published)
+        const response = await projectsApi.getAll({ published: true });
+
+        const rawProjects =
+          (response as any).projects ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(rawProjects)) {
+          const mappedProjects = rawProjects
+            .slice(0, 6)
             .map((p: any) => ({
-              id: p.id,
+              id: p._id || p.id,
               title: p.title,
-              description: p.summary || (p.content ? p.content.substring(0, 150) + '...' : ''),
-              image: p.images && p.images[0] ? p.images[0] : 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
-              badge: p.country || 'PROJECT',
-              link: `/project/${p.id}`,
+              description: p.description || (p.fullDescription ? p.fullDescription.substring(0, 150) + '...' : ''),
+              image: p.images && p.images.length > 0 && p.images[0].url 
+                ? p.images[0].url 
+                : 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+              badge: p.location || 'PROJECT',
+              link: `/project/${p._id || p.id}`,
             }));
           
-          if (publishedProjects.length > 0) {
-            setProjects(publishedProjects);
-          }
+          setProjects(mappedProjects);
         }
       } catch (error) {
-        console.error('Error loading projects:', error);
+        console.error('Error loading projects from API:', error);
+        // Do not fall back to localStorage – show only live backend data
+        setProjects([]);
       }
     };
 
@@ -556,16 +457,29 @@ const Home: React.FC = () => {
         <section className="latest-updates-section" aria-labelledby="updates-heading">
           <div className="container">
             <h2 id="updates-heading">Latest News & Projects</h2>
-            <div className="updates-grid" role="list" aria-label="Latest news and projects">
-              {/* Show 2 news items */}
-              {newsItems.slice(0, 2).map((news) => (
-                <NewsCard key={news.id} news={news} />
-              ))}
-              {/* Show 4 projects (total 6 items) */}
-              {projects.slice(0, 4).map((project) => (
-                <NewsCard key={project.id} news={project} />
-              ))}
-            </div>
+
+            {newsItems.length === 0 && projects.length === 0 ? (
+              <p
+                style={{
+                  marginTop: '1.5rem',
+                  textAlign: 'center',
+                  color: 'var(--text-secondary, #616161)',
+                }}
+              >
+                No recent news or projects are available at the moment. Please check back soon.
+              </p>
+            ) : (
+              <div className="updates-grid" role="list" aria-label="Latest news and projects">
+                {/* Show up to 2 news items */}
+                {newsItems.slice(0, 2).map((news) => (
+                  <NewsCard key={news.id} news={news} />
+                ))}
+                {/* Show up to 4 projects (total 6 items) */}
+                {projects.slice(0, 4).map((project) => (
+                  <NewsCard key={project.id} news={project} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

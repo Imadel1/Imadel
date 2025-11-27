@@ -79,6 +79,7 @@ nav {
   outline-offset: 2px;
 }
 
+.nav-link,
 nav a {
   text-decoration: none;
   color: var(--text-secondary, #616161);
@@ -89,6 +90,7 @@ nav a {
   font-family: var(--font-sans, 'Poppins', sans-serif);
 }
 
+.nav-link::after,
 nav a::after {
   content: "";
   position: absolute;
@@ -100,18 +102,33 @@ nav a::after {
   transition: width 0.3s ease;
 }
 
+.nav-link:hover,
 nav a:hover {
   color: var(--primary, #FF6B00);
 }
 
+.nav-link:hover::after,
 nav a:hover::after {
   width: 100%;
 }
 
+.nav-link:focus,
 nav a:focus {
   outline: 2px solid var(--primary, #FF6B00);
   outline-offset: 4px;
   border-radius: 2px;
+}
+
+/* Active link state (desktop) */
+nav a.active,
+.nav-link.active {
+  color: var(--primary, #FF6B00);
+  font-weight: 600;
+}
+
+nav a.active::after,
+.nav-link.active::after {
+  width: 100%;
 }
 
 /* Responsive Menu (Mobile) */
@@ -185,7 +202,8 @@ nav a:focus {
     }
   }
 
-  nav a {
+  nav a,
+  .nav-link {
     font-size: 0.9rem;
     text-align: left;
     padding: 0.6rem 0.75rem;
@@ -195,17 +213,20 @@ nav a:focus {
     font-weight: 600;
   }
 
-  nav a:hover {
+  nav a:hover,
+  .nav-link:hover {
     background-color: rgba(255, 107, 0, 0.12);
     color: var(--primary, #FF6B00);
     transform: translateX(2px);
   }
 
-  nav a::after {
+  nav a::after,
+  .nav-link::after {
     display: none;
   }
 
-  nav a:active {
+  nav a:active,
+  .nav-link:active {
     background-color: rgba(255, 107, 0, 0.25);
   }
 

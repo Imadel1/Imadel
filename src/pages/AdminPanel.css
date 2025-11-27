@@ -120,6 +120,7 @@
   transition: all 0.3s ease;
   color: #616161;
   position: relative;
+  box-shadow: none !important;
 }
 
 .admin-tabs button.active {
@@ -392,6 +393,19 @@
 .entity-actions a:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+}
+
+/* Simple loading / error text for admin entities */
+.entity-loading {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  color: #616161;
+}
+
+.entity-error {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  color: #d32f2f;
 }
 
 .data-columns {

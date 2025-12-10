@@ -1,4 +1,5 @@
-import { useState, FormEvent, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { donationsApi } from '../services/api';
 import './DonationForm.css';
 
@@ -17,6 +18,8 @@ interface DonationFormData {
 interface DonationFormProps {
   defaultPaymentMethod?: 'card' | 'momo' | 'bank';
 }
+
+// Remove the DonationResponse interface - let TypeScript infer the API return type
 
 const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'card' }) => {
   const [formData, setFormData] = useState<DonationFormData>({
@@ -78,7 +81,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
           ? `${formData.message} | Méthode: ${methodLabel}`
           : `Méthode de paiement choisie: ${methodLabel}`;
 
-      // Initialize donation
+      // Initialize donation - let TypeScript infer the response type
       const response = await donationsApi.initialize({
         donorName: formData.donorName,
         donorEmail: formData.donorEmail,
@@ -90,9 +93,15 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
         purpose: formData.purpose as any,
       });
 
-      if (response.success && response.data?.authorizationUrl) {
-        // Redirect to payment page
-        window.location.href = response.data.authorizationUrl;
+      // Check response and redirect
+      if (response.success && response.data) {
+        // Type assertion to access authorization_url
+        const data = response.data as any;
+        if (data.authorization_url) {
+          window.location.href = data.authorization_url;
+        } else {
+          setError(response.message || 'Erreur lors de l\'initialisation du paiement');
+        }
       } else {
         setError(response.message || 'Erreur lors de l\'initialisation du paiement');
       }
@@ -316,4 +325,3 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
 };
 
 export default DonationForm;
-

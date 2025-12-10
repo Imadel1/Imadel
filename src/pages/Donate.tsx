@@ -1,4 +1,8 @@
-import React, { useState, FormEvent, useEffect } from 'react';
+// Fix for Donate.tsx - Line 72 Type Error
+// Replace the DonationResponse interface and update the handleMobileMoneySubmit function
+
+import React, { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTint, FaHospital, FaBook, FaSeedling, FaCreditCard, FaMobileAlt, FaUniversity } from 'react-icons/fa';
 import { donationsApi } from '../services/api';
@@ -16,6 +20,8 @@ interface MobileMoneyFormData {
   donorName: string;
   donorEmail: string;
 }
+
+// Remove the DonationResponse interface - we'll use the API's return type directly
 
 const Donate: React.FC = () => {
   const { t } = useTranslation();
@@ -55,7 +61,7 @@ const Donate: React.FC = () => {
         return;
       }
 
-      // Initialize donation with mobile money
+      // Initialize donation with mobile money - don't specify type, let TypeScript infer
       const response = await donationsApi.initialize({
         donorName: mobileMoneyForm.donorName,
         donorEmail: mobileMoneyForm.donorEmail,
@@ -67,9 +73,15 @@ const Donate: React.FC = () => {
         purpose: mobileMoneyForm.purpose as any,
       });
 
-      if (response.success && response.data?.authorizationUrl) {
-        // Redirect to payment page
-        window.location.href = response.data.authorizationUrl;
+      // Check if response is successful and has authorization_url
+      if (response.success && response.data) {
+        // Type assertion to access authorization_url
+        const data = response.data as any;
+        if (data.authorization_url) {
+          window.location.href = data.authorization_url;
+        } else {
+          setMobileError(response.message || 'Erreur lors de l\'initialisation du paiement');
+        }
       } else {
         setMobileError(response.message || 'Erreur lors de l\'initialisation du paiement');
       }
@@ -100,6 +112,7 @@ const Donate: React.FC = () => {
 
   return (
     <div className="donate-page">
+      {/* Rest of the component remains the same */}
       <div className="donate-hero" aria-labelledby="donate-hero-heading">
         <div className="container">
           <h1 id="donate-hero-heading">{t('supportOurMission')}</h1>

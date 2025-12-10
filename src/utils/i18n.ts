@@ -146,7 +146,6 @@ export const translations = {
     withSubject: 'avec l\'objet',
     provider: 'Opérateur',
     phoneNumberLabel: 'Numéro de téléphone',
-    fullName: 'Nom complet',
     purposeOfDonation: 'Objectif du don',
     processPayment: 'Traiter le Paiement',
     generalDonation: 'Don général',
@@ -155,12 +154,23 @@ export const translations = {
     water: 'Eau potable',
     emergency: 'Urgence',
     other: 'Autre',
+    
+    // Donate Page - NEW KEYS ADDED
+    waysToDonate: 'Moyens de donner',
+    paymentMethods: 'Méthodes de paiement',
+    mobileMoney: 'Mobile Money',
+    bankTransfer: 'Virement bancaire',
+    cardPayment: 'Paiement par carte',
+    
+    // Project Listing
     showingProjects: 'Affichage de',
     ofProjects: 'sur',
-    projects: 'projets',
     readMore: 'LIRE PLUS',
     previousPage: 'Précédent',
     nextPage: 'Suivant',
+    projectsCompleted: 'Projets Réalisés',
+    
+    // Get Involved
     getInvolvedInMission: 'Impliquez-vous dans notre mission',
     joinUsToMakeDifference: 'Rejoignez-nous pour faire la différence dans les communautés à travers le Mali',
     servingLocalDevelopment: 'Au service du développement local',
@@ -173,7 +183,6 @@ export const translations = {
     joinUsInMission: 'Rejoignez-nous dans notre mission',
     participateInJourney: 'Participez à notre voyage pour créer un développement durable, équitable et participatif à travers le Mali.',
     years: 'Années',
-    projectsCompleted: 'Projets Réalisés',
     jobOffersAndRecruitment: 'Offres d\'Emploi & Avis de Recrutement',
     alwaysLookingForProfessionals: 'Nous sommes toujours à la recherche de professionnels dévoués pour rejoindre notre équipe. Consultez nos offres actuelles ci-dessous.',
     noJobsAvailable: 'Aucune offre d\'emploi disponible pour le moment. Veuillez vérifier plus tard.',
@@ -233,12 +242,10 @@ export const translations = {
     heroTagline: 'Nous sommes prêts à fournir un meilleur service pour rendre le monde heureux',
     becomeVolunteer: 'Devenir Bénévole',
     donateNow: 'Faire un Don Maintenant',
-    readMore: 'LIRE PLUS',
     news: 'ACTUALITÉ',
     ourImpact: 'Notre Impact au Fil des Ans',
     yearsOfService: 'Années de Service',
     livesTouched: 'Vies Touchées',
-    projectsCompleted: 'Projets Réalisés',
     communitiesServed: 'Communautés Servies',
     partnersCount: 'Partenaires',
     latestNews: 'Dernières Actualités et Projets',
@@ -366,7 +373,6 @@ export const translations = {
     withSubject: 'with subject',
     provider: 'Provider',
     phoneNumberLabel: 'Phone Number',
-    fullName: 'Full Name',
     purposeOfDonation: 'Purpose of Donation',
     processPayment: 'Process Payment',
     generalDonation: 'General Donation',
@@ -375,12 +381,23 @@ export const translations = {
     water: 'Drinking Water',
     emergency: 'Emergency',
     other: 'Other',
+    
+    // Donate Page - NEW KEYS ADDED
+    waysToDonate: 'Ways to Donate',
+    paymentMethods: 'Payment Methods',
+    mobileMoney: 'Mobile Money',
+    bankTransfer: 'Bank Transfer',
+    cardPayment: 'Card Payment',
+    
+    // Project Listing
     showingProjects: 'Showing',
     ofProjects: 'of',
-    projects: 'projects',
     readMore: 'READ MORE',
     previousPage: 'Previous',
     nextPage: 'Next',
+    projectsCompleted: 'Projects Completed',
+    
+    // Get Involved
     getInvolvedInMission: 'Get Involved in Our Mission',
     joinUsToMakeDifference: 'Join us to make a difference in communities across Mali',
     servingLocalDevelopment: 'Serving Local Development',
@@ -393,7 +410,6 @@ export const translations = {
     joinUsInMission: 'Join Us in Our Mission',
     participateInJourney: 'Participate in our journey to create sustainable, equitable and participatory development across Mali.',
     years: 'Years',
-    projectsCompleted: 'Projects Completed',
     jobOffersAndRecruitment: 'Job Offers & Recruitment Notices',
     alwaysLookingForProfessionals: 'We are always looking for dedicated professionals to join our team. Check out our current openings below.',
     noJobsAvailable: 'No job openings available at the moment. Please check back later.',
@@ -453,12 +469,10 @@ export const translations = {
     heroTagline: 'We are ready to provide better service to make the world happy',
     becomeVolunteer: 'Become a Volunteer',
     donateNow: 'Donate Now',
-    readMore: 'READ MORE',
     news: 'NEWS',
     ourImpact: 'Our Impact Over the Years',
     yearsOfService: 'Years of Service',
     livesTouched: 'Lives Touched',
-    projectsCompleted: 'Projects Completed',
     communitiesServed: 'Communities Served',
     partnersCount: 'Partners',
     latestNews: 'Latest News & Projects',
@@ -517,5 +531,3 @@ export const useTranslation = () => {
     },
   };
 };
-
-

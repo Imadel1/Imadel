@@ -46,8 +46,8 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const codeInputRef = useRef<HTMLInputElement | null>(null);
 
-  const ADMIN_EMAIL = (import.meta.env && (import.meta.env as any).VITE_ADMIN_EMAIL) || 'admin@imadel.org';
-  const ADMIN_PW = (import.meta.env && (import.meta.env as any).VITE_ADMIN_PASSWORD) || 'admin';
+  // REMOVED: Unused ADMIN_EMAIL and ADMIN_PW variables
+  // Now using API authentication instead
   const DEV_SHOW = true; // Always show code in development
 
   useEffect(()=>{

@@ -78,12 +78,11 @@
 .job-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  border-color: var(--primary, #FF6B00);
+  border-color: transparent;
 }
 
 .job-card:focus-within {
-  outline: 3px solid var(--primary, #FF6B00);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .job-category {
@@ -127,9 +126,7 @@
 }
 
 .read-more:focus {
-  outline: 2px solid var(--primary, #FF6B00);
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline: none;
 }
 
 .volunteer-section,
@@ -176,7 +173,7 @@
 .btn-secondary {
   background: transparent;
   color: var(--primary, #FF6B00);
-  border: 2px solid var(--primary, #FF6B00);
+  border: 2px solid transparent;
 }
 
 .btn-secondary:hover {
@@ -187,7 +184,7 @@
 .btn-outline {
   background: transparent;
   color: var(--primary, #FF6B00);
-  border: 2px solid var(--primary, #FF6B00);
+  border: 2px solid transparent;
 }
 
 .btn-outline:hover {

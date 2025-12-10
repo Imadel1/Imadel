@@ -23,12 +23,12 @@
   padding: 1.5em;
   transition: all 300ms ease;
   will-change: filter, transform;
-  filter: drop-shadow(0 0 0.5em rgba(255, 107, 0, 0.2)); /* IMADEL orange glow */
+  filter: drop-shadow(0 0 0.5em var(--primary-alpha-2, rgba(255, 107, 0, 0.2)));
 }
 
 .logo:hover {
   transform: scale(1.05);
-  filter: drop-shadow(0 0 1.5em rgba(255, 107, 0, 0.45)); /* IMADEL orange highlight */
+  filter: drop-shadow(0 0 1.5em var(--primary-alpha-3, rgba(255, 107, 0, 0.45)));
 }
 
 /* Optional logo spin animation */
@@ -98,14 +98,14 @@ button {
   border-radius: var(--radius-full, 50px);
   cursor: pointer;
   transition: var(--transition, all 0.3s ease);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: none;
   font-family: var(--font-sans, 'Poppins', sans-serif);
 }
 
 button:hover {
   background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: none;
 }
 
 button:active {

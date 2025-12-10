@@ -174,13 +174,13 @@ const OurWork: React.FC = () => {
       {/* Intro Section */}
       <section className="intro" aria-labelledby="intro-heading">
         <div className="container">
-          <h1 id="intro-heading">Our Projects</h1>
+          <h1 id="intro-heading">Nos Projets</h1>
           <p>
-            Discover the impactful projects that IMADEL has undertaken across Mali,
-            focusing on sustainable development, community empowerment, and humanitarian aid.
+            Découvrez les projets impactants qu'IMADEL a entrepris à travers le Mali,
+            se concentrant sur le développement durable, l'autonomisation des communautés et l'aide humanitaire.
           </p>
           <p className="project-count">
-            Showing {currentProjects.length} of {projects.length} projects
+            Affichage de {currentProjects.length} sur {projects.length} projets
           </p>
         </div>
       </section>
@@ -188,14 +188,14 @@ const OurWork: React.FC = () => {
       {/* Projects Section */}
       <section className="projects" aria-labelledby="projects-heading">
         <div className="container">
-          <h2 id="projects-heading" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', borderWidth: 0 }}>Project List</h2>
-          <div className="projects-grid" role="list" aria-label="List of projects">
+          <h2 id="projects-heading" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', borderWidth: 0 }}>Liste des Projets</h2>
+          <div className="projects-grid" role="list" aria-label="Liste des projets">
             {currentProjects.map((project) => (
               <article key={project.id} className="project-card-wrapper" role="listitem">
                 <Link 
                   to={`/project/${project.id}`} 
                   className="project-card-link"
-                  aria-label={`View details for ${project.title}`}
+                  aria-label={`Voir les détails pour ${project.title}`}
                 >
                   <div className="project-card">
                     <div className="project-image-container">
@@ -211,7 +211,7 @@ const OurWork: React.FC = () => {
                       <h3>{project.title}</h3>
                       <p>{project.description.split('Read more')[0].trim()}</p>
                       <span className="read-more" aria-hidden="true">
-                        READ MORE DETAILS →
+                        LIRE PLUS →
                       </span>
                     </div>
                   </div>
@@ -222,17 +222,17 @@ const OurWork: React.FC = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <nav className="page-navigation" aria-label="Project pagination">
+            <nav className="page-navigation" aria-label="Pagination des projets">
               <button
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
                 className="pagination-button"
-                aria-label="Previous page"
+                aria-label="Page précédente"
               >
-                Previous
+                Précédent
               </button>
 
-              <div className="page-numbers" role="list" aria-label="Page numbers">
+              <div className="page-numbers" role="list" aria-label="Numéros de page">
                 {getPageNumbers().map((page, index) => (
                   page === '...' ? (
                     <span key={`ellipsis-${index}`} className="page-ellipsis" aria-hidden="true">
@@ -243,7 +243,7 @@ const OurWork: React.FC = () => {
                       key={page}
                       onClick={() => handlePageChange(page as number)}
                       className={`page-number ${currentPage === page ? 'active' : ''}`}
-                      aria-label={`Go to page ${page}`}
+                      aria-label={`Aller à la page ${page}`}
                       aria-current={currentPage === page ? 'page' : undefined}
                       role="listitem"
                     >
@@ -257,9 +257,9 @@ const OurWork: React.FC = () => {
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
                 className="pagination-button"
-                aria-label="Next page"
+                aria-label="Page suivante"
               >
-                Next
+                Suivant
               </button>
             </nav>
           )}
@@ -269,10 +269,10 @@ const OurWork: React.FC = () => {
       {/* Call To Action Section */}
       <section className="cta" aria-labelledby="cta-heading">
         <div className="container">
-          <h2 id="cta-heading">Get involved in our mission</h2>
-          <p>Join us in making a difference across communities in Mali</p>
+          <h2 id="cta-heading">Impliquez-vous dans notre mission</h2>
+          <p>Rejoignez-nous pour faire la différence dans les communautés à travers le Mali</p>
           <Link to="/getinvolved" className="cta-button">
-            Get Involved
+            S'impliquer
           </Link>
         </div>
       </section>

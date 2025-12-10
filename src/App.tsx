@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { useEffect } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { getSettings, applyTheme } from "./utils/settings";
 
 // Import your page components
 import Home from "./pages/Home";
@@ -11,6 +12,7 @@ import GetInvolved from "./pages/GetInvolved";
 import Partners from "./pages/Partners";
 import Contact from "./pages/Contact";
 import Donate from "./pages/Donate";
+import DonationCallback from "./pages/DonationCallback";
 import ProjectDetail from "./pages/ProjectDetail";
 import JobDetail from "./pages/JobDetail";
 import AreasOfIntervention from "./pages/AreasOfIntervention";
@@ -34,6 +36,31 @@ function ScrollToTop() {
 function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isHomePage = location.pathname === '/';
+
+  // Initialize theme on app load and listen for changes
+  useEffect(() => {
+    const settings = getSettings();
+    applyTheme(settings.theme || 'orange');
+    
+    // Listen for theme changes from admin panel
+    const handleThemeChange = (event: CustomEvent) => {
+      applyTheme(event.detail.theme || 'orange');
+    };
+    
+    const handleSettingsUpdate = () => {
+      const updatedSettings = getSettings();
+      applyTheme(updatedSettings.theme || 'orange');
+    };
+    
+    window.addEventListener('imadel:theme:changed', handleThemeChange as EventListener);
+    window.addEventListener('imadel:settings:updated', handleSettingsUpdate);
+    
+    return () => {
+      window.removeEventListener('imadel:theme:changed', handleThemeChange as EventListener);
+      window.removeEventListener('imadel:settings:updated', handleSettingsUpdate);
+    };
+  }, []);
 
   return (
     <>
@@ -42,7 +69,7 @@ function AppContent() {
       {!isAdminRoute && <Header />}
 
       {/* Page Content */}
-      <div style={{ marginTop: isAdminRoute ? "0" : "100px", flex: "1 0 auto" }}>
+      <div style={{ marginTop: isAdminRoute || isHomePage ? "0" : "100px", flex: "1 0 auto" }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/aboutus" element={<AboutUs />} />
@@ -55,6 +82,7 @@ function AppContent() {
           <Route path="/partners" element={<Partners />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/donate" element={<Donate />} />
+          <Route path="/donation/callback" element={<DonationCallback />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/panel" element={<AdminPanel />} />
         </Routes>

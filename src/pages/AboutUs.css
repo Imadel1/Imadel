@@ -228,13 +228,13 @@
 .btn-primary {
   background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
   color: var(--text-on-primary, #ffffff);
-  box-shadow: var(--shadow-primary, 0 4px 15px rgba(255, 107, 0, 0.3));
+  box-shadow: none;
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-primary-hover, 0 8px 25px rgba(255, 107, 0, 0.4));
+  box-shadow: none;
 }
 
 .btn-primary:focus {
@@ -245,12 +245,13 @@
 .btn-secondary {
   background: transparent;
   color: var(--primary, #FF6B00);
-  border: 2px solid var(--primary, #FF6B00);
+  border: 2px solid transparent;
 }
 
 .btn-secondary:hover {
   background: var(--primary, #FF6B00);
   color: var(--text-on-primary, #ffffff);
+  border-color: transparent;
 }
 
 /* Objectives Section */

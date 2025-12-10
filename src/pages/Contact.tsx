@@ -1,4 +1,5 @@
-import React, { useState, type FormEvent } from 'react';
+import React, { useState, useEffect, type FormEvent } from 'react';
+import { getSettings, subscribeToSettings } from '../utils/settings';
 import './Contact.css';
 
 interface FormData {
@@ -20,9 +21,19 @@ const Contact: React.FC = () => {
     message: ''
   });
 
+  const [settings, setSettings] = useState(getSettings());
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  // Load settings and subscribe to updates
+  useEffect(() => {
+    setSettings(getSettings());
+    const unsubscribe = subscribeToSettings((newSettings) => {
+      setSettings(newSettings);
+    });
+    return unsubscribe;
+  }, []);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,21 +44,21 @@ const Contact: React.FC = () => {
     const newErrors: FormErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'Le nom est requis';
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = 'Le nom doit contenir au moins 2 caractères';
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'L\'email est requis';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'Veuillez entrer une adresse email valide';
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
+      newErrors.message = 'Le message est requis';
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = 'Message must be at least 10 characters';
+      newErrors.message = 'Le message doit contenir au moins 10 caractères';
     }
 
     setErrors(newErrors);
@@ -103,25 +114,25 @@ const Contact: React.FC = () => {
     <div className="contact-page">
       <div className="contact-content">
         <div className="contact-info">
-          <h1>Contact Us</h1>
+          <h1>Contactez-nous</h1>
           <p className="contact-intro">
-            Get in touch with IMADEL. We'd love to hear from you and answer any questions you may have.
+            Entrez en contact avec IMADEL. Nous serions ravis de vous entendre et de répondre à toutes vos questions.
           </p>
 
           <div className="contact-details">
-            <h2>Mali Headquarters</h2>
+            <h2>Siège au Mali</h2>
             <address>
               <p>
-                <strong>Address:</strong><br />
+                <strong>Adresse:</strong><br />
                 Bamako-Hamdallaye ACI 2000<br />
                 Côté ouest cimetière de Lafiabougou<br />
                 Bamako, Mali
               </p>
               <p>
-                <strong>Phone:</strong><br />
-                <a href="tel:+22320799840">+223 20 79 98 40</a><br />
-                <a href="tel:+22371718585">+223 71 71 85 85</a><br />
-                <a href="tel:+22366787385">+223 66 78 73 85</a>
+                <strong>Téléphone:</strong><br />
+                <a href={`tel:${settings.phoneNumber.replace(/\s/g, '')}`}>{settings.phoneNumber}</a><br />
+                <a href={`tel:${settings.orangeMoney.replace(/\s/g, '')}`}>{settings.orangeMoney}</a><br />
+                <a href={`tel:${settings.malitel.replace(/\s/g, '')}`}>{settings.malitel}</a>
               </p>
               <p>
                 <strong>Email:</strong><br />
@@ -132,19 +143,19 @@ const Contact: React.FC = () => {
           </div>
 
           <div className="country-offices">
-            <h2>Regional Offices</h2>
+            <h2>Bureaux Régionaux</h2>
             <ul>
               <li>
-                <strong>Mauritania:</strong>{' '}
-                <span className="country-placeholder">Address coming soon</span>
+                <strong>Mauritanie:</strong>{' '}
+                <span className="country-placeholder">Adresse à venir</span>
               </li>
               <li>
-                <strong>Senegal:</strong>{' '}
-                <span className="country-placeholder">Address coming soon</span>
+                <strong>Sénégal:</strong>{' '}
+                <span className="country-placeholder">Adresse à venir</span>
               </li>
               <li>
-                <strong>Cameroon:</strong>{' '}
-                <span className="country-placeholder">Address coming soon</span>
+                <strong>Cameroun:</strong>{' '}
+                <span className="country-placeholder">Adresse à venir</span>
               </li>
             </ul>
             {/* TODO: Fetch and render country data dynamically from backend (Firestore or API) */}
@@ -152,11 +163,11 @@ const Contact: React.FC = () => {
         </div>
 
         <div className="contact-form-container">
-          <h2>Send us a Message</h2>
+          <h2>Envoyez-nous un Message</h2>
           <form className="contact-form" onSubmit={handleSubmit} noValidate>
             <div className="form-group">
               <label htmlFor="name">
-                Name & Surname <span className="required" aria-label="required">*</span>
+                Nom & Prénom <span className="required" aria-label="requis">*</span>
               </label>
               <input
                 type="text"
@@ -164,7 +175,7 @@ const Contact: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                placeholder="Your name and surname"
+                placeholder="Votre nom et prénom"
                 required
                 aria-invalid={errors.name ? 'true' : 'false'}
                 aria-describedby={errors.name ? 'name-error' : undefined}
@@ -178,7 +189,7 @@ const Contact: React.FC = () => {
 
             <div className="form-group">
               <label htmlFor="email">
-                Email <span className="required" aria-label="required">*</span>
+                Email <span className="required" aria-label="requis">*</span>
               </label>
               <input
                 type="email"
@@ -186,7 +197,7 @@ const Contact: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="your.email@example.com"
+                placeholder="votre.email@exemple.com"
                 required
                 aria-invalid={errors.email ? 'true' : 'false'}
                 aria-describedby={errors.email ? 'email-error' : undefined}
@@ -200,14 +211,14 @@ const Contact: React.FC = () => {
 
             <div className="form-group">
               <label htmlFor="message">
-                Message <span className="required" aria-label="required">*</span>
+                Message <span className="required" aria-label="requis">*</span>
               </label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleInputChange}
-                placeholder="Your message..."
+                placeholder="Votre message..."
                 rows={6}
                 required
                 aria-invalid={errors.message ? 'true' : 'false'}
@@ -222,13 +233,13 @@ const Contact: React.FC = () => {
 
             {submitStatus === 'success' && (
               <div className="success-message" role="alert">
-                Thank you for your message! We'll get back to you soon.
+                Merci pour votre message ! Nous vous répondrons bientôt.
               </div>
             )}
 
             {submitStatus === 'error' && (
               <div className="error-message" role="alert">
-                There was an error sending your message. Please try again or contact us directly.
+                Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer ou nous contacter directement.
               </div>
             )}
 
@@ -236,16 +247,16 @@ const Contact: React.FC = () => {
               type="submit" 
               className="submit-button"
               disabled={isSubmitting}
-              aria-label={isSubmitting ? 'Submitting form' : 'Submit contact form'}
+              aria-label={isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
             >
-              {isSubmitting ? 'Sending...' : 'Send Message'}
+              {isSubmitting ? 'Envoi...' : 'Envoyer le Message'}
             </button>
           </form>
         </div>
       </div>
 
       <div className="map-container">
-        <h2>Find Us</h2>
+        <h2>Nous Trouver</h2>
         {/* TODO: Replace static map with data from backend (lat/long + project info) */}
         <iframe
           title="IMADEL Office Location in Bamako, Mali"

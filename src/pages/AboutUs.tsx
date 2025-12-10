@@ -1,18 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './AboutUs.css';
+import aboutHeroImage from '../assets/imadel-5.jpg';
+import missionImage from '../assets/imadel-7.jpg';
+import activitiesImage from '../assets/p2imadel 3.jpg';
 
-// Dummy images
-const ABOUT_HERO_IMAGE = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1600&auto=format&fit=crop";
-const MISSION_IMAGE = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop";
-const ACTIVITIES_IMAGE = "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=800&auto=format&fit=crop";
+// Images from assets
+const ABOUT_HERO_IMAGE = aboutHeroImage;
+const MISSION_IMAGE = missionImage;
+const ACTIVITIES_IMAGE = activitiesImage;
 
 const OBJECTIVES = [
-  "Contribute to the capacity building of development actors with a view to accelerating the ownership and ownership of local development",
-  "Promote the strengthening of a civil society participating in the formulation and implementation of development policies",
-  "Promote democracy, good governance and support the implementation of the decentralization policy in the country",
-  "Strengthen the partnership by boosting the efforts of the State and partner NGOs and associations in support of communities",
-  "Work for sustainable, equitable and participatory development"
+  "Contribuer au renforcement des capacités des acteurs de développement en vue d'accélérer la prise en main et l'appropriation du développement local",
+  "Favoriser le renforcement d'une société civile participant à la formulation et à la mise en œuvre des politiques de développement",
+  "Promouvoir la démocratie, la bonne gouvernance et accompagner la mise en œuvre de la politique de décentralisation dans le pays",
+  "Renforcer le partenariat en dynamisant les efforts de l'État et des ONG et associations partenaires en appui aux communautés",
+  "Œuvrer pour un développement durable, équitable et participatif"
 ];
 
 const AboutUs: React.FC = () => {
@@ -27,11 +30,11 @@ const AboutUs: React.FC = () => {
         />
         <div className="hero-overlay" aria-hidden="true" />
         <div className="hero-content">
-          <h1 id="about-hero-heading">At the service of local development</h1>
+          <h1 id="about-hero-heading">Au service du développement local</h1>
           <p>
-            IMADEL (Malian Initiative for Local Development Support) is a non-governmental organization (NGO).
-            It contributes to the economic and social development of the world by promoting and supporting actions
-            aimed at improving the living conditions of populations (rural, urban and other disadvantaged groups).
+            IMADEL (Initiative Malienne d'Appui au Développement Local) est une organisation non gouvernementale (ONG).
+            Elle contribue au développement économique et social du monde en favorisant et en soutenant des actions
+            visant à améliorer les conditions de vie des populations (rurales, urbaines et autres groupes défavorisés).
           </p>
         </div>
       </section>
@@ -44,35 +47,35 @@ const AboutUs: React.FC = () => {
               <div className="mission-image">
                 <img 
                   src={MISSION_IMAGE} 
-                  alt="IMADEL team working on community development projects"
+                  alt="Équipe IMADEL travaillant sur des projets de développement communautaire"
                   loading="lazy"
                   width={600}
                   height={400}
                 />
               </div>
               <div className="mission-content">
-                <h2 id="mission-vision-heading">Our Mission</h2>
+                <h2 id="mission-vision-heading">Notre Mission</h2>
                 <p>
-                  IMADEL is the result of the desire of its members to contribute to the economic and social development
-                  of the population. The members of IMADEL are all actors who have acquired and developed skills in the
-                  field of local development. These experiences focus on priority sectors such as hydraulics, agriculture,
-                  livestock, decentralization, capacity building, migration, environment/sanitation, health, education, etc.
-                  These experiences have been widely shared with vulnerable groups.
+                  IMADEL est le fruit de la volonté de ses membres de contribuer au développement économique et social
+                  de la population. Les membres d'IMADEL sont tous des acteurs ayant acquis et développé des compétences dans le
+                  domaine du développement local. Ces expériences portent sur des secteurs prioritaires tels que l'hydraulique, l'agriculture,
+                  l'élevage, la décentralisation, le renforcement des capacités, la migration, l'environnement/assainissement, la santé, l'éducation, etc.
+                  Ces expériences ont été largement partagées avec les groupes vulnérables.
                 </p>
               </div>
             </div>
             <div className="vision">
-              <h2>Our Vision</h2>
+              <h2>Notre Vision</h2>
               <p>
-                To provide technical, material and financial support to associations or human groups for the improvement
-                of their living conditions and their self-promotion; To contribute effectively to the economic, social and
-                cultural development of the Malian population, according to the reference frameworks adopted by the Governments.
+                Apporter un appui technique, matériel et financier aux associations ou groupements humains pour l'amélioration
+                de leurs conditions de vie et leur auto-promotion ; Contribuer efficacement au développement économique, social et
+                culturel de la population malienne, selon les cadres de référence adoptés par les Gouvernements.
               </p>
               <p>
-                For fifteen years, IMADEL has undertaken actions to accelerate the achievement of the Millennium Development
-                Goals. These actions have significantly contributed to access to safe drinking water, hygiene and sanitation,
-                food security, education and training in maternal and child health through large-scale actions for thousands
-                of men, women and children across Mali.
+                Depuis quinze ans, IMADEL a entrepris des actions pour accélérer l'atteinte des Objectifs du Millénaire pour le Développement.
+                Ces actions ont contribué de manière significative à l'accès à l'eau potable, à l'hygiène et à l'assainissement,
+                à la sécurité alimentaire, à l'éducation et à la formation en santé maternelle et infantile par des actions de grande envergure pour des milliers
+                d'hommes, de femmes et d'enfants à travers le Mali.
               </p>
             </div>
           </div>
@@ -80,16 +83,16 @@ const AboutUs: React.FC = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="stats-section" aria-label="Organization statistics">
+      <section className="stats-section" aria-label="Statistiques de l'organisation">
         <div className="container">
           <div className="stats-grid">
-            <div className="stat-item" role="region" aria-label="15 plus years of experience">
+            <div className="stat-item" role="region" aria-label="Plus de 15 ans d'expérience">
               <div className="stat-number" aria-label="15 plus">15+</div>
-              <div className="stat-label">Years</div>
+              <div className="stat-label">Années</div>
             </div>
-            <div className="stat-item" role="region" aria-label="50 plus projects completed">
+            <div className="stat-item" role="region" aria-label="Plus de 50 projets réalisés">
               <div className="stat-number" aria-label="50 plus">50+</div>
-              <div className="stat-label">Projects Completed</div>
+              <div className="stat-label">Projets Réalisés</div>
             </div>
           </div>
         </div>
@@ -100,25 +103,25 @@ const AboutUs: React.FC = () => {
         <div className="container">
           <div className="activities-content">
             <div className="activities-text">
-              <h2 id="activities-heading">Our Activities</h2>
+              <h2 id="activities-heading">Nos Activités</h2>
               <p>
-                15 years at the service of development. For fifteen years, IMADEL has undertaken actions to accelerate
-                the achievement of the Millennium Development Goals. These actions have significantly contributed to
-                access to safe drinking water, hygiene and sanitation, food security, education and training in maternal
-                and child health through large-scale actions for thousands of men, women and children across Mali.
+                15 ans au service du développement. Depuis quinze ans, IMADEL a entrepris des actions pour accélérer
+                l'atteinte des Objectifs du Millénaire pour le Développement. Ces actions ont contribué de manière significative à
+                l'accès à l'eau potable, à l'hygiène et à l'assainissement, à la sécurité alimentaire, à l'éducation et à la formation en santé maternelle
+                et infantile par des actions de grande envergure pour des milliers d'hommes, de femmes et d'enfants à travers le Mali.
               </p>
               <p>
-                Our activities span across multiple sectors including rural and urban hydraulics, decentralization,
-                hygiene and sanitation, education, formation, advocacy and lobbying, environment, health, and local development.
+                Nos activités couvrent de nombreux secteurs, notamment l'hydraulique rurale et urbaine, la décentralisation,
+                l'hygiène et l'assainissement, l'éducation, la formation, le plaidoyer et le lobbying, l'environnement, la santé et le développement local.
               </p>
               <Link to="/ourwork" className="btn-primary">
-                View Our Projects
+                Voir Nos Projets
               </Link>
             </div>
             <div className="activities-image">
               <img 
                 src={ACTIVITIES_IMAGE} 
-                alt="IMADEL activities and projects in communities across Mali"
+                alt="Activités et projets IMADEL dans les communautés à travers le Mali"
                 loading="lazy"
                 width={600}
                 height={400}
@@ -131,7 +134,7 @@ const AboutUs: React.FC = () => {
       {/* Objectives Section */}
       <section className="objectives" aria-labelledby="objectives-heading">
         <div className="container">
-          <h2 id="objectives-heading">Our Objectives</h2>
+          <h2 id="objectives-heading">Nos Objectifs</h2>
           <div className="objectives-list" role="list">
             {OBJECTIVES.map((objective, index) => (
               <div key={index} className="objective-item" role="listitem">
@@ -146,14 +149,14 @@ const AboutUs: React.FC = () => {
       {/* Call to Action Section */}
       <section className="cta-section" aria-labelledby="cta-heading">
         <div className="container">
-          <h2 id="cta-heading">Join Us in Our Mission</h2>
-          <p>Be part of our journey to create sustainable, equitable and participatory development across Mali.</p>
+          <h2 id="cta-heading">Rejoignez-nous dans notre mission</h2>
+          <p>Participez à notre voyage pour créer un développement durable, équitable et participatif à travers le Mali.</p>
           <div className="cta-buttons">
             <Link to="/getinvolved" className="btn-primary">
-              Get Involved
+              S'impliquer
             </Link>
             <Link to="/donate" className="btn-secondary">
-              Donate
+              Faire un Don
             </Link>
           </div>
         </div>

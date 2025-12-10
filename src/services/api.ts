@@ -301,9 +301,115 @@ export const partnersApi = {
   },
 };
 
+// ==================== DONATIONS ====================
+
+export const donationsApi = {
+  /**
+   * Initialize a donation (returns authorization URL for Paystack)
+   * POST /api/donations/initialize
+   */
+  initialize: async (donationData: {
+    donorName: string;
+    donorEmail: string;
+    donorPhone?: string;
+    amount: number;
+    currency: string;
+    message?: string;
+    isAnonymous?: boolean;
+    purpose?: string;
+  }) => {
+    return apiRequest('/donations/initialize', {
+      method: 'POST',
+      body: JSON.stringify(donationData),
+    });
+  },
+
+  /**
+   * Verify a donation by Paystack reference
+   * GET /api/donations/verify/:reference
+   */
+  verify: async (reference: string) => {
+    return apiRequest(`/donations/verify/${reference}`);
+  },
+
+  /**
+   * Get all donations (admin)
+   * GET /api/donations
+   */
+  getAll: async () => {
+    return apiRequest('/donations');
+  },
+
+  /**
+   * Get donation by id (admin)
+   * GET /api/donations/:id
+   */
+  getById: async (id: string) => {
+    return apiRequest(`/donations/${id}`);
+  },
+};
+
+// ==================== APPLICATIONS ====================
+
+export const applicationsApi = {
+  /**
+   * Get all applications (with optional filters)
+   * GET /api/applications?status=&jobId=
+   */
+  getAll: async (params?: { status?: string; jobId?: string }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.jobId) queryParams.append('jobId', params.jobId);
+    const query = queryParams.toString();
+    return apiRequest(`/applications${query ? `?${query}` : ''}`);
+  },
+
+  /**
+   * Get single application
+   * GET /api/applications/:id
+   */
+  getById: async (id: string) => {
+    return apiRequest(`/applications/${id}`);
+  },
+
+  /**
+   * Update application status / notes
+   * PUT /api/applications/:id
+   */
+  updateStatus: async (id: string, status: string, adminNotes?: string) => {
+    return apiRequest(`/applications/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status, adminNotes }),
+    });
+  },
+
+  /**
+   * Delete application
+   * DELETE /api/applications/:id
+   */
+  delete: async (id: string) => {
+    return apiRequest(`/applications/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 // ==================== NEWSLETTERS ====================
 
 export const newslettersApi = {
+  /**
+   * Get all newsletter content items
+   * GET /api/newsletters/content or GET /api/newsletters (if backend supports content)
+   */
+  getAll: async (params?: { published?: boolean }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.published !== undefined) {
+      queryParams.append('published', params.published.toString());
+    }
+    const query = queryParams.toString();
+    return apiRequest(`/newsletters/content${query ? `?${query}` : ''}`);
+  },
+
   /**
    * Get all subscribers (admin only)
    * GET /api/newsletters
@@ -493,6 +599,8 @@ export default {
   projects: projectsApi,
   jobs: jobsApi,
   partners: partnersApi,
+  donations: donationsApi,
+  applications: applicationsApi,
   newsletters: newslettersApi,
   offices: officesApi,
   uploads: uploadsApi,

@@ -132,7 +132,7 @@
   transition: all 0.3s ease;
   flex: 1;
   min-width: 140px;
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: none;
   position: relative;
   overflow: hidden;
 }
@@ -154,7 +154,7 @@
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: none;
   background: linear-gradient(135deg, #e55a00 0%, #cc4f00 100%);
 }
 

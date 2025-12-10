@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "../utils/i18n";
+import LanguageSwitcher from "./LanguageSwitcher";
 import "./Header.css";
 import logo from "../assets/cropped-nouveau_logo.png";
 
 const Header = () => {
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -17,12 +22,15 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // On non-home pages, always show the solid (scrolled) style
+  const headerClass = !isHome || scrolled ? "scrolled" : "";
+
   return (
-    <header className={`${scrolled ? "scrolled" : ""} ${isMenuOpen ? "menu-open" : ""}`}>
-      <div className="logo-container">
+    <header className={`${headerClass} ${isMenuOpen ? "menu-open" : ""}`}>
+      <Link to="/" className="logo-container" onClick={() => setIsMenuOpen(false)}>
         <img src={logo} alt="IMADEL Logo" width="55" height="55" />
         <span className="logo-text">IMADEL</span>
-      </div>
+      </Link>
 
       <nav className={isMenuOpen ? "active" : ""}>
         <NavLink
@@ -31,47 +39,48 @@ const Header = () => {
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
-          Home
+          {t('home')}
         </NavLink>
         <NavLink
           to="/aboutus"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
-          About Us
+          {t('about')}
         </NavLink>
         <NavLink
           to="/ourwork"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
-          Our Work
+          {t('work')}
         </NavLink>
         <NavLink
           to="/getinvolved"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
-          Get Involved
+          {t('getInvolved')}
         </NavLink>
         <NavLink
           to="/partners"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
-          Partners
+          {t('partners')}
         </NavLink>
         <NavLink
           to="/contact"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
-          Contact
+          {t('contact')}
         </NavLink>
       </nav>
 
       <div className="header-right">
-        <Link to="/donate" className="donate-button">Donate</Link>
+        <LanguageSwitcher />
+        <Link to="/donate" className="donate-button">{t('donate')}</Link>
         <div className="menu-toggle" onClick={toggleMenu}>
           {isMenuOpen ? "✕" : "☰"}
         </div>

@@ -95,9 +95,7 @@
 }
 
 .footer-nav a:focus {
-    outline: 2px solid var(--primary, #FF6B00);
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: none;
 }
 
 .footer-contact {
@@ -119,9 +117,7 @@
 }
 
 .footer-contact a:focus {
-    outline: 2px solid var(--primary, #FF6B00);
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: none;
 }
 
 .social-icons {
@@ -150,8 +146,7 @@
 }
 
 .social-icons a:focus {
-    outline: 2px solid var(--primary, #FF6B00);
-    outline-offset: 2px;
+    outline: none;
 }
 
 .footer-bottom {

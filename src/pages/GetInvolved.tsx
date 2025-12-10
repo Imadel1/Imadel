@@ -18,35 +18,35 @@ interface JobItem {
 const DEFAULT_JOBS: JobItem[] = [
   {
     id: '1',
-    title: 'Environmental Safeguard Specialist',
+    title: 'Spécialiste en Sauvegarde Environnementale',
     description:
-      'IMADEL is recruiting an Environmental Safeguard Specialist for the project "Implementation of Community Mobilization Activities, Prevention."',
+      'IMADEL recrute un Spécialiste en Sauvegarde Environnementale pour le projet "Mise en œuvre des Activités de Mobilisation Communautaire, Prévention."',
     link: '/job/1',
-    category: 'Environment'
+    category: 'Environnement'
   },
   {
     id: '2',
-    title: 'Coordinator – Protection of Refugees Project',
+    title: 'Coordinateur – Projet Protection des Réfugiés',
     description:
-      'Notice of recruitment of a Coordinator for the implementation of activities under the project "Sectoral Measures for the Protection of Refugees."',
+      'Avis de recrutement d\'un Coordinateur pour la mise en œuvre des activités dans le cadre du projet "Mesures Sectorielles pour la Protection des Réfugiés."',
     link: '/job/2',
     category: 'Protection'
   },
   {
     id: '3',
-    title: 'Coordinator – Social Cohesion Project',
+    title: 'Coordinateur – Projet Cohésion Sociale',
     description:
-      'Recruitment of a Coordinator for the project "Implementation of Community Mobilization, Social Cohesion and Achievement Activities."',
+      'Recrutement d\'un Coordinateur pour le projet "Mise en œuvre des Activités de Mobilisation Communautaire, Cohésion Sociale et Réalisation."',
     link: '/job/3',
-    category: 'Social Development'
+    category: 'Développement Social'
   },
   {
     id: '4',
-    title: 'Health Supervisor',
+    title: 'Superviseur Santé',
     description:
-      'Terms of Reference (ToR) for the recruitment of a Health Supervisor for upcoming community health initiatives.',
+      'Termes de Référence (TDR) pour le recrutement d\'un Superviseur Santé pour les initiatives de santé communautaire à venir.',
     link: '/job/4',
-    category: 'Health'
+    category: 'Santé'
   },
 ];
 
@@ -60,9 +60,20 @@ const GetInvolved: React.FC = () => {
         const response = await jobsApi.getAll();
         
         if (response.success && response.jobs) {
-          // Filter only published jobs and map format
+          // Filter only published jobs that haven't passed their deadline
+          const now = new Date();
           const publishedJobs = response.jobs
-            .filter((j: any) => j.published)
+            .filter((j: any) => {
+              // Must be published
+              if (!j.published) return false;
+              // Must have a deadline that hasn't passed
+              if (j.deadline) {
+                const deadline = new Date(j.deadline);
+                return deadline > now;
+              }
+              // If no deadline, include it (for backward compatibility)
+              return true;
+            })
             .map((j: any) => ({
               id: j._id || j.id,
               title: j.title,
@@ -70,7 +81,8 @@ const GetInvolved: React.FC = () => {
               location: j.location || '',
               applyUrl: j.applyUrl || '',
               link: `/job/${j._id || j.id}`,
-              category: j.location || 'General'
+              category: j.location || 'General',
+              deadline: j.deadline
             }));
           
           if (publishedJobs.length > 0) {
@@ -99,26 +111,26 @@ const GetInvolved: React.FC = () => {
     <div className="get-involved-page">
       <section className="intro" aria-labelledby="intro-heading">
         <div className="container">
-          <h1 id="intro-heading">Get Involved</h1>
+          <h1 id="intro-heading">S'impliquer</h1>
           <p>
-            Explore opportunities to work with us or support ongoing community health and development projects.
-            Join our team of passionate individuals making a difference across Mali.
+            Découvrez les opportunités de travailler avec nous ou de soutenir les projets de santé et de développement communautaire en cours.
+            Rejoignez notre équipe de personnes passionnées qui font la différence à travers le Mali.
           </p>
         </div>
       </section>
 
       <section className="job-offers" aria-labelledby="job-offers-heading">
         <div className="container">
-          <h2 id="job-offers-heading">Job Offers & Recruitment Notices</h2>
+          <h2 id="job-offers-heading">Offres d'Emploi & Avis de Recrutement</h2>
           <p className="section-description">
-            We are always looking for dedicated professionals to join our team. Browse our current openings below.
+            Nous sommes toujours à la recherche de professionnels dévoués pour rejoindre notre équipe. Consultez nos offres actuelles ci-dessous.
           </p>
-          <div className="job-list" role="list" aria-label="Job openings">
+          <div className="job-list" role="list" aria-label="Offres d'emploi">
             {jobs.length > 0 ? (
               jobs.map((job) => (
                 <article key={job.id} className="job-card" role="listitem">
                   {(job.category || job.location) && (
-                    <span className="job-category" aria-label={`Category: ${job.category || job.location}`}>
+                    <span className="job-category" aria-label={`Catégorie: ${job.category || job.location}`}>
                       {job.category || job.location}
                     </span>
                   )}
@@ -127,15 +139,15 @@ const GetInvolved: React.FC = () => {
                   <Link 
                     to={job.link || `/job/${job.id}`} 
                     className="read-more"
-                    aria-label={`Read more about ${job.title} position`}
+                    aria-label={`En savoir plus sur le poste ${job.title}`}
                   >
-                    Read more →
+                    Lire plus →
                   </Link>
                 </article>
               ))
             ) : (
               <p className="no-jobs-message" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary, #616161)' }}>
-                No job openings available at the moment. Please check back later.
+                Aucune offre d'emploi disponible pour le moment. Veuillez vérifier plus tard.
               </p>
             )}
           </div>
@@ -144,27 +156,27 @@ const GetInvolved: React.FC = () => {
 
       <section className="volunteer-section" aria-labelledby="volunteer-heading">
         <div className="container">
-          <h2 id="volunteer-heading">Volunteer Opportunities</h2>
+          <h2 id="volunteer-heading">Opportunités de Bénévolat</h2>
           <p>
-            Not looking for a full-time position? We also welcome volunteers who want to contribute their time and skills 
-            to our mission. Whether you're interested in field work, administrative support, or specialized expertise, 
-            we have opportunities for you.
+            Vous ne cherchez pas un poste à temps plein ? Nous accueillons également des bénévoles qui souhaitent consacrer leur temps et leurs compétences
+            à notre mission. Que vous soyez intéressé par le travail de terrain, le soutien administratif ou une expertise spécialisée,
+            nous avons des opportunités pour vous.
           </p>
           <Link to="/contact" className="btn-secondary">
-            Contact Us About Volunteering
+            Contactez-nous pour le Bénévolat
           </Link>
         </div>
       </section>
 
       <section className="partnership-section" aria-labelledby="partnership-heading">
         <div className="container">
-          <h2 id="partnership-heading">Partnership Opportunities</h2>
+          <h2 id="partnership-heading">Opportunités de Partenariat</h2>
           <p>
-            Are you an organization looking to collaborate? IMADEL values partnerships with NGOs, government agencies, 
-            and private sector organizations that share our commitment to local development.
+            Vous êtes une organisation cherchant à collaborer ? IMADEL valorise les partenariats avec les ONG, les agences gouvernementales
+            et les organisations du secteur privé qui partagent notre engagement envers le développement local.
           </p>
           <Link to="/partners" className="btn-outline">
-            View Our Partners
+            Voir Nos Partenaires
           </Link>
         </div>
       </section>
@@ -172,10 +184,10 @@ const GetInvolved: React.FC = () => {
       {/* Call To Action Section */}
       <section className="cta" aria-labelledby="cta-heading">
         <div className="container">
-          <h2 id="cta-heading">Partner with Us</h2>
-          <p>Interested in partnering with IMADEL? We'd love to hear from you.</p>
+          <h2 id="cta-heading">Devenez Partenaire</h2>
+          <p>Intéressé par un partenariat avec IMADEL ? Nous aimerions avoir de vos nouvelles.</p>
           <Link to="/contact" className="cta-button">
-            Contact Us for Partnerships
+            Contactez-nous pour les Partenariats
           </Link>
         </div>
       </section>

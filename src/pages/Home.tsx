@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { FaBullseye, FaGlobeAmericas, FaDumbbell, FaHandshake, FaLandmark, FaSeedling } from "react-icons/fa";
+import { useTranslation } from "../utils/i18n";
 import "./Home.css";
-import { projectsApi } from "../services/api";
+import { projectsApi, newslettersApi } from "../services/api";
 
 // Types
 interface NewsItem {
@@ -25,63 +26,67 @@ interface Objective {
 }
 
 // Constants
-const HERO_IMAGE = "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=1600&auto=format&fit=crop";
-const ABOUT_IMAGE = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1200&auto=format&fit=crop";
+import heroImage from '../assets/imadel 1.jpg';
+import aboutImage from '../assets/imadel-2.jpg';
 
-const AREAS_OF_INTERVENTION = [
-  "Rural and urban hydraulics",
-  "Decentralization",
-  "Hygiene/sanitation",
-  "Education",
-  "Formation",
-  "Advocacy/lobbying",
-  "Environment",
-  "Health",
-  "Local development"
+const HERO_IMAGE = heroImage;
+const ABOUT_IMAGE = aboutImage;
+
+// These will be generated dynamically based on language
+const getAreasOfIntervention = (language: string) => [
+  language === 'fr' ? "Hydraulique rurale et urbaine" : "Rural and urban hydraulics",
+  language === 'fr' ? "Décentralisation" : "Decentralization",
+  language === 'fr' ? "Hygiène/Assainissement" : "Hygiene/Sanitation",
+  language === 'fr' ? "Éducation" : "Education",
+  language === 'fr' ? "Formation" : "Training",
+  language === 'fr' ? "Plaidoyer/Lobbying" : "Advocacy/Lobbying",
+  language === 'fr' ? "Environnement" : "Environment",
+  language === 'fr' ? "Santé" : "Health",
+  language === 'fr' ? "Développement local" : "Local development"
 ];
 
-const OBJECTIVES: Objective[] = [
+const getObjectives = (t: any): Objective[] => [
   {
     id: "1",
     icon: "target",
-    title: "Support Communities",
-    description: "To provide technical, material and financial support to associations or human groups for the improvement of their living conditions and their self-promotion"
+    title: t('objective1Title'),
+    description: t('objective1Desc')
   },
   {
     id: "2",
     icon: "globe",
-    title: "Economic & Social Development",
-    description: "To contribute effectively to the economic, social and cultural development of the Malian population, according to the reference frameworks adopted by the Governments"
+    title: t('objective2Title'),
+    description: t('objective2Desc')
   },
   {
     id: "3",
     icon: "dumbbell",
-    title: "Capacity Building",
-    description: "Contribute to the capacity building of development actors with a view to accelerating the ownership and ownership of local development"
+    title: t('objective3Title'),
+    description: t('objective3Desc')
   },
   {
     id: "4",
     icon: "handshake",
-    title: "Civil Society",
-    description: "Promote the strengthening of a civil society participating in the formulation and implementation of development policies"
+    title: t('objective4Title'),
+    description: t('objective4Desc')
   },
   {
     id: "5",
     icon: "landmark",
-    title: "Governance",
-    description: "Promote democracy, good governance and support the implementation of the decentralization policy in the country"
+    title: t('objective5Title'),
+    description: t('objective5Desc')
   },
   {
     id: "6",
     icon: "partnership",
-    title: "Partnership",
-    description: "Strengthen the partnership by boosting the efforts of the State and partner NGOs and associations in support of communities"
+    title: t('objective6Title'),
+    description: t('objective6Desc')
   },
   {
     id: "7",
     icon: "seedling",
-    title: "Sustainable Development",
-    description: "Work for sustainable, equitable and participatory development"
+    title: t('objective7Title'),
+    description: t('objective7Desc')
   }
 ];
 
@@ -178,11 +183,12 @@ interface NewsCardProps {
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
+  const { t, language } = useTranslation();
   return (
     <article className="news-card">
       <div className="news-image">
         <LazyImage
-          src={news.image || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop"}
+          src={news.image || aboutImage}
           alt={news.title}
           width={350}
           height={200}
@@ -191,8 +197,8 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
       </div>
       <div className="news-content">
         <h3>{news.title}</h3>
-        <Link to={`/news/${news.id}`} className="read-more" aria-label={`Read more about ${news.title}`}>
-          READ MORE
+        <Link to={`/news/${news.id}`} className="read-more" aria-label={language === 'fr' ? `En savoir plus sur ${news.title}` : `Read more about ${news.title}`}>
+          {t('readMore')}
         </Link>
       </div>
     </article>
@@ -294,36 +300,46 @@ const AnimatedCounter: React.FC<CounterProps> = ({ end, suffix = '', duration = 
 
 // Main Home Component
 const Home: React.FC = () => {
+  const { t, language } = useTranslation();
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [projects, setProjects] = useState<NewsItem[]>([]);
+  
+  const AREAS_OF_INTERVENTION = getAreasOfIntervention(language);
+  const OBJECTIVES = getObjectives(t);
 
-  // Load newsletters from admin panel (keeping localStorage for now until backend adds newsletter content endpoints)
+  // Load newsletters from backend API
   useEffect(() => {
-    const loadNewsletters = () => {
+    const loadNewsletters = async () => {
       try {
-        const stored = localStorage.getItem('imadel_admin_newsletters');
-        if (stored) {
-          const newsletters = JSON.parse(stored);
-          // Filter only published newsletters and map to news format
-          const publishedNews = newsletters
-            .filter((n: any) => n.published)
+        const response = await newslettersApi.getAll({ published: true });
+        
+        const rawNewsletters = 
+          (response as any).newsletters ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(rawNewsletters)) {
+          // Map to news format (already filtered by published: true in API call)
+          const publishedNews = rawNewsletters
+            .slice(0, 2) // Show up to 2 news items
             .map((n: any) => ({
-              id: n.id,
+              id: n._id || n.id,
               title: n.title,
-              description: n.content ? n.content.substring(0, 150) + '...' : '',
-              image: n.images && n.images[0] ? n.images[0] : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop',
-              badge: 'NEWS',
-              link: `/news/${n.id}`,
-              date: n.date
+              description: n.content ? n.content.substring(0, 150) + '...' : (n.description ? n.description.substring(0, 150) + '...' : ''),
+              image: n.images && n.images.length > 0 && n.images[0].url 
+                ? n.images[0].url 
+                : (n.images && n.images[0] ? n.images[0] : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop'),
+              badge: t('news'),
+              link: `/news/${n._id || n.id}`,
+              date: n.date || n.createdAt
             }));
           
-          // Use admin newsletters if available, otherwise use defaults
-          if (publishedNews.length > 0) {
-            setNewsItems(publishedNews);
-          }
+          setNewsItems(publishedNews);
         }
       } catch (error) {
-        console.error('Error loading newsletters:', error);
+        console.error('Error loading newsletters from API:', error);
+        // Do not fall back to localStorage – show only live backend data
+        setNewsItems([]);
       }
     };
 
@@ -336,7 +352,7 @@ const Home: React.FC = () => {
     return () => {
       window.removeEventListener('imadel:newsletters:updated', handleUpdate);
     };
-  }, []);
+  }, [t]);
 
   // Load projects from API
   useEffect(() => {
@@ -359,7 +375,7 @@ const Home: React.FC = () => {
               image: p.images && p.images.length > 0 && p.images[0].url 
                 ? p.images[0].url 
                 : 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
-              badge: p.location || 'PROJECT',
+              badge: p.location || t('projects'),
               link: `/project/${p._id || p.id}`,
             }));
           
@@ -397,17 +413,17 @@ const Home: React.FC = () => {
           <div className="hero-content">
             <div className="hero-text">
               <h1 className="hero-title">
-                Empowering Communities,<br />Building <span className="hero-highlight">Lasting Change</span>
+                {t('heroTitle')} <br />{t('heroTitleHighlight')} <span className="hero-highlight">{language === 'fr' ? 'Changement' : 'Change'}</span>
               </h1>
               <p className="hero-tagline">
-                Transforming lives across Mali through sustainable development initiatives in health, education, water access, and community empowerment.
+                {t('heroTagline')}
               </p>
               <div className="hero-actions">
-                <Link to="/getinvolved" className="btn-secondary" aria-label="Get involved with IMADEL">
-                  Become a Volunteer
+                <Link to="/getinvolved" className="btn-outline-hero" aria-label={t('becomeVolunteer')}>
+                  {t('becomeVolunteer')}
                 </Link>
-                <Link to="/donate" className="btn-primary" aria-label="Donate to IMADEL">
-                  Donate Now
+                <Link to="/donate" className="btn-primary-hero" aria-label={t('donateNow')}>
+                  {t('donateNow')}
                 </Link>
               </div>
             </div>
@@ -415,39 +431,39 @@ const Home: React.FC = () => {
         </section>
 
         {/* Quick Stats Section */}
-        <section className="quick-stats" aria-label="Our Impact Over the Years">
+        <section className="quick-stats" aria-label="Notre Impact au Fil des Ans">
           <div className="container">
-            <h2 className="stats-heading">Our Impact Over the Years</h2>
+            <h2 className="stats-heading">{t('ourImpact')}</h2>
             <div className="stats-inner">
-              <div className="stat" role="region" aria-label="15 plus years of experience">
+              <div className="stat" role="region" aria-label={language === 'fr' ? "Plus de 15 ans d'expérience" : "Over 15 years of experience"}>
                 <div className="num" aria-label="15 plus">
                   <AnimatedCounter end={15} suffix="+" duration={2000} />
                 </div>
-                <div className="label">Years of Service</div>
+                <div className="label">{t('yearsOfService')}</div>
               </div>
-              <div className="stat" role="region" aria-label="2000 plus lives touched">
+              <div className="stat" role="region" aria-label={language === 'fr' ? "Plus de 2000 vies touchées" : "Over 2000 lives touched"}>
                 <div className="num" aria-label="2000 plus">
                   <AnimatedCounter end={2000} suffix="+" duration={2500} />
                 </div>
-                <div className="label">Lives Touched</div>
+                <div className="label">{t('livesTouched')}</div>
               </div>
-              <div className="stat" role="region" aria-label="50 plus projects completed">
+              <div className="stat" role="region" aria-label={language === 'fr' ? "Plus de 50 projets réalisés" : "Over 50 projects completed"}>
                 <div className="num" aria-label="50 plus">
                   <AnimatedCounter end={50} suffix="+" duration={2200} />
                 </div>
-                <div className="label">Projects Completed</div>
+                <div className="label">{t('projectsCompleted')}</div>
               </div>
-              <div className="stat" role="region" aria-label="100 plus communities served">
+              <div className="stat" role="region" aria-label={language === 'fr' ? "Plus de 100 communautés servies" : "Over 100 communities served"}>
                 <div className="num" aria-label="100 plus">
                   <AnimatedCounter end={100} suffix="+" duration={2300} />
                 </div>
-                <div className="label">Communities Served</div>
+                <div className="label">{t('communitiesServed')}</div>
               </div>
-              <div className="stat" role="region" aria-label="20 plus partners">
+              <div className="stat" role="region" aria-label={language === 'fr' ? "Plus de 20 partenaires" : "Over 20 partners"}>
                 <div className="num" aria-label="20 plus">
                   <AnimatedCounter end={20} suffix="+" duration={2100} />
                 </div>
-                <div className="label">Active Partners</div>
+                <div className="label">{t('partnersCount')}</div>
               </div>
             </div>
           </div>
@@ -456,7 +472,7 @@ const Home: React.FC = () => {
         {/* Latest Updates Section - News & Projects */}
         <section className="latest-updates-section" aria-labelledby="updates-heading">
           <div className="container">
-            <h2 id="updates-heading">Latest News & Projects</h2>
+            <h2 id="updates-heading">{t('latestNews')}</h2>
 
             {newsItems.length === 0 && projects.length === 0 ? (
               <p
@@ -466,10 +482,10 @@ const Home: React.FC = () => {
                   color: 'var(--text-secondary, #616161)',
                 }}
               >
-                No recent news or projects are available at the moment. Please check back soon.
+                {language === 'fr' ? "Aucune actualité ou projet récent n'est disponible pour le moment. Veuillez revenir bientôt." : "No recent news or projects are available at the moment. Please check back soon."}
               </p>
             ) : (
-              <div className="updates-grid" role="list" aria-label="Latest news and projects">
+              <div className="updates-grid" role="list" aria-label="Dernières actualités et projets">
                 {/* Show up to 2 news items */}
                 {newsItems.slice(0, 2).map((news) => (
                   <NewsCard key={news.id} news={news} />
@@ -488,25 +504,25 @@ const Home: React.FC = () => {
           <div className="container">
             <div className="about-content">
               <div className="about-text">
-                <h2 id="about-heading">About IMADEL</h2>
+                <h2 id="about-heading">À Propos d'IMADEL</h2>
                 <p>
-                  IMADEL is the result of the desire of its members to contribute to the economic and social development 
-                  of the population. The members of IMADEL are all actors who have acquired and developed skills in the 
-                  field of local development. These experiences focus on priority sectors such as hydraulics, agriculture, 
-                  livestock, decentralization, capacity building, migration, environment/sanitation, health, education, etc. 
-                  These experiences have been widely shared with vulnerable groups.
+                  IMADEL est le fruit de la volonté de ses membres de contribuer au développement économique et social 
+                  de la population. Les membres d'IMADEL sont tous des acteurs ayant acquis et développé des compétences dans le 
+                  domaine du développement local. Ces expériences portent sur des secteurs prioritaires tels que l'hydraulique, l'agriculture, 
+                  l'élevage, la décentralisation, le renforcement des capacités, la migration, l'environnement/assainissement, la santé, l'éducation, etc. 
+                  Ces expériences ont été largement partagées avec les groupes vulnérables.
                 </p>
                 <p>
-                  For fifteen years, IMADEL has undertaken actions to accelerate the achievement of the Millennium Development 
-                  Goals. These actions have significantly contributed to access to safe drinking water, hygiene and sanitation, 
-                  food security, education and training in maternal and child health through large-scale actions for thousands 
-                  of men, women and children across Mali.
+                  Depuis quinze ans, IMADEL a entrepris des actions pour accélérer l'atteinte des Objectifs du Millénaire pour le Développement. 
+                  Ces actions ont contribué de manière significative à l'accès à l'eau potable, à l'hygiène et à l'assainissement, 
+                  à la sécurité alimentaire, à l'éducation et à la formation en santé maternelle et infantile par des actions de grande envergure pour des milliers 
+                  d'hommes, de femmes et d'enfants à travers le Mali.
                 </p>
               </div>
               <div className="about-image">
                 <LazyImage
                   src={ABOUT_IMAGE}
-                  alt="IMADEL team members working on local development projects in Mali"
+                  alt="Membres de l'équipe IMADEL travaillant sur des projets de développement local au Mali"
                   width={600}
                   height={400}
                 />
@@ -518,20 +534,20 @@ const Home: React.FC = () => {
         {/* Mission/Objectives Section */}
         <section className="mission-section" aria-labelledby="mission-heading">
           <div className="container">
-            <h2 id="mission-heading">Our Mission & Objectives</h2>
-            <div className="objectives-grid" role="list" aria-label="Organizational objectives">
+            <h2 id="mission-heading">{t('missionObjectives')}</h2>
+            <div className="objectives-grid" role="list" aria-label="Objectifs de l'organisation">
               {OBJECTIVES.map((objective) => (
                 <ObjectiveCard key={objective.id} objective={objective} />
               ))}
-                </div>
-                </div>
+            </div>
+          </div>
         </section>
 
         {/* Areas of Intervention Section */}
         <section className="areas-section" aria-labelledby="areas-heading">
           <div className="container">
-            <h2 id="areas-heading">Areas of Intervention</h2>
-            <div className="areas-grid" role="list" aria-label="Areas of intervention">
+            <h2 id="areas-heading">{t('areasOfIntervention')}</h2>
+            <div className="areas-grid" role="list" aria-label="Domaines d'intervention">
               {AREAS_OF_INTERVENTION.map((area, index) => (
                 <div key={index} className="area-item" role="listitem">
                   {area}
@@ -545,10 +561,10 @@ const Home: React.FC = () => {
         {/* Partners Preview Section */}
         <section className="partners-preview-section" aria-labelledby="partners-heading">
           <div className="container">
-            <h2 id="partners-heading">Our Partners</h2>
-            <p className="partners-subtitle">Working together for local development</p>
-            <Link to="/partners" className="btn-outline" aria-label="View all partners">
-              View All Partners
+            <h2 id="partners-heading">{t('partnersPreview')}</h2>
+            <p className="partners-subtitle">{language === 'fr' ? "Travailler ensemble pour le développement local" : "Working together for local development"}</p>
+            <Link to="/partners" className="btn-outline" aria-label={language === 'fr' ? "Voir tous les partenaires" : "See all partners"}>
+              {t('seeAllPartners')}
             </Link>
           </div>
         </section>
@@ -556,14 +572,14 @@ const Home: React.FC = () => {
         {/* Call to Action Section */}
         <section className="cta-section" aria-labelledby="cta-heading">
           <div className="container">
-            <h2 id="cta-heading">Together, let's make a difference!</h2>
-            <p>Every day, IMADEL acts on the ground to help the most vulnerable populations. Join us in our mission to create sustainable, equitable and participatory development.</p>
+            <h2 id="cta-heading">{t('ctaTitle')}</h2>
+            <p>{t('ctaDescription')}</p>
             <div className="cta-buttons">
-              <Link to="/getinvolved" className="btn-primary" aria-label="Get involved with IMADEL">
-                Get Involved
+              <Link to="/getinvolved" className="btn-primary" aria-label={t('getInvolved')}>
+                {t('getInvolved')}
               </Link>
-              <Link to="/donate" className="btn-secondary" aria-label="Donate to IMADEL">
-                Donate
+              <Link to="/donate" className="btn-secondary" aria-label={t('donate')}>
+                {t('donate')}
               </Link>
             </div>
           </div>

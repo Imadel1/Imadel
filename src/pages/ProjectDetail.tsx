@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+import { useTranslation } from '../utils/i18n';
 import './ProjectDetail.css';
 
 interface ContentItem {
@@ -24,8 +25,9 @@ const ProjectDetail: React.FC = () => {
   // Determine if this is a project or newsletter based on URL
   const isNewsletter = location.includes('/news/');
   const storageKey = isNewsletter ? 'imadel_admin_newsletters' : 'imadel_admin_projects';
+  const { t, language } = useTranslation();
   const backLink = isNewsletter ? '/' : '/ourwork';
-  const backText = isNewsletter ? 'Back to Home' : 'Back to Projects';
+  const backText = isNewsletter ? t('backToHome') : t('backToProjects');
   const contentType = isNewsletter ? 'News' : 'Project';
 
   // Scroll to top when component mounts or ID changes
@@ -153,11 +155,11 @@ const ProjectDetail: React.FC = () => {
     <div className="project-detail-page">
       <div className="container" style={{ paddingBottom: 0, marginBottom: 0 }}>
         <nav className="breadcrumb" aria-label="Breadcrumb" style={{ marginBottom: '2rem', fontSize: '0.9rem' }}>
-          <Link to="/">Home</Link>
+          <Link to="/">{t('home')}</Link>
           <span aria-hidden="true"> / </span>
           {!isNewsletter && (
             <>
-              <Link to="/ourwork">Our Work</Link>
+              <Link to="/ourwork">{t('work')}</Link>
               <span aria-hidden="true"> / </span>
             </>
           )}
@@ -170,7 +172,7 @@ const ProjectDetail: React.FC = () => {
             
             {content.date && (
               <p className="content-date" style={{ color: 'var(--text-muted, #9e9e9e)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                Published: {new Date(content.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {t('publishedOn')}: {new Date(content.date).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             )}
             
@@ -194,7 +196,7 @@ const ProjectDetail: React.FC = () => {
                 aria-label={`Previous ${contentType.toLowerCase()}`}
                 style={{ flex: '1', minWidth: '150px' }}
               >
-                ← Previous {contentType}
+                ← {t('previous')} {contentType}
               </button>
               <Link 
                 to={backLink} 
@@ -210,7 +212,7 @@ const ProjectDetail: React.FC = () => {
                 aria-label={`Next ${contentType.toLowerCase()}`}
                 style={{ flex: '1', minWidth: '150px' }}
               >
-                Next {contentType} →
+                {t('next')} {contentType} →
               </button>
             </div>
           </div>

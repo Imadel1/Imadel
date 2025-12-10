@@ -194,14 +194,14 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-primary, 0 4px 15px rgba(255, 107, 0, 0.3));
+  box-shadow: none;
   font-family: var(--font-sans);
 }
 
 .submit-button:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-primary-hover, 0 8px 25px rgba(255, 107, 0, 0.4));
+  box-shadow: none;
 }
 
 .submit-button:active:not(:disabled) {

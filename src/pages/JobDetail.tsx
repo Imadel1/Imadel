@@ -15,6 +15,7 @@ interface JobItem {
   type?: string;
   applyUrl?: string;
   published?: boolean;
+  deadline?: string;
 }
 
 interface FormData {
@@ -66,6 +67,16 @@ const JobDetail: React.FC = () => {
         const jobData = (response as any).job || (response as any).data;
 
         if (response.success && jobData) {
+          // Check if job deadline has passed
+          const deadline = jobData.deadline ? new Date(jobData.deadline) : null;
+          const isExpired = deadline && deadline < new Date();
+          
+          // If expired or not published, don't show the job
+          if (isExpired || !jobData.published) {
+            setJob(null);
+            return;
+          }
+          
           setJob({
             id: jobData._id || jobData.id,
             title: jobData.title,
@@ -75,6 +86,7 @@ const JobDetail: React.FC = () => {
             type: jobData.type || jobData.employmentType || '',
             applyUrl: jobData.applyUrl || '',
             published: jobData.published,
+            deadline: jobData.deadline,
           });
         } else {
           setJob(null);
@@ -194,6 +206,16 @@ const JobDetail: React.FC = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    // Check if deadline has passed
+    if (job?.deadline) {
+      const deadline = new Date(job.deadline);
+      if (deadline < new Date()) {
+        setSubmitStatus('error');
+        alert('Sorry, the application deadline for this position has passed.');
+        return;
+      }
+    }
+    
     if (!validateForm()) {
       return;
     }
@@ -276,6 +298,23 @@ const JobDetail: React.FC = () => {
 
           <aside className="application-form" aria-label="Job application form">
             <h2>Apply for this Position</h2>
+            {job.deadline && new Date(job.deadline) < new Date() ? (
+              <div style={{ 
+                padding: '2rem', 
+                background: '#fee', 
+                border: '2px solid #dc3545', 
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <h3 style={{ color: '#dc3545', marginBottom: '1rem' }}>Application Deadline Passed</h3>
+                <p style={{ color: '#666', marginBottom: '1rem' }}>
+                  The application deadline for this position was {new Date(job.deadline).toLocaleString()}.
+                </p>
+                <p style={{ color: '#666' }}>
+                  Applications are no longer being accepted for this position.
+                </p>
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} noValidate>
               <div className="form-group">
                 <label htmlFor="name">
@@ -417,6 +456,7 @@ const JobDetail: React.FC = () => {
                 {isSubmitting ? 'Submitting...' : 'Submit Application'}
               </button>
             </form>
+            )}
           </aside>
         </div>
       </div>

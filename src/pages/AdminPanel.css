@@ -19,7 +19,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 3px solid #FF6B00;
+  border-bottom: 3px solid var(--primary, #FF6B00);
 }
 
 .admin-header h1 {
@@ -52,12 +52,12 @@
   font-size: 0.9rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  background: #FF6B00;
+  background: var(--primary, #FF6B00);
   color: white;
 }
 
 .admin-controls button:hover {
-  background: #e55a00;
+  background: var(--primary-dark, #e55a00);
   transform: translateY(-1px);
 }
 
@@ -67,14 +67,14 @@
 
 .admin-controls button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.3);
+  border: 2px solid var(--primary, #FF6B00);
 }
 
 .import-label {
   display: inline-block;
   position: relative;
   overflow: hidden;
-  background: #FF6B00;
+  background: var(--primary, #FF6B00);
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -86,7 +86,7 @@
 }
 
 .import-label:hover {
-  background: #e55a00;
+  background: var(--primary-dark, #e55a00);
   transform: translateY(-1px);
 }
 
@@ -105,7 +105,7 @@
   gap: 4px;
   padding: 12px 32px;
   background: #f9f9f9;
-  border-bottom: 2px solid #FF6B00;
+  border-bottom: 2px solid var(--primary, #FF6B00);
   flex-wrap: wrap;
 }
 
@@ -124,20 +124,20 @@
 }
 
 .admin-tabs button.active {
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   background: white;
-  border-bottom: 3px solid #FF6B00;
+  border-bottom: 3px solid var(--primary, #FF6B00);
   margin-bottom: -2px;
 }
 
 .admin-tabs button:hover:not(.active) {
-  background: rgba(255, 107, 0, 0.1);
-  color: #FF6B00;
+  background: #FFE5D6;
+  color: var(--primary, #FF6B00);
 }
 
 .admin-tabs button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.3);
+  border: 2px solid var(--primary, #FF6B00);
 }
 
 .admin-main {
@@ -156,11 +156,11 @@
 
 .panel h2 {
   margin: 0 0 20px 0;
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   font-size: 1.4rem;
   font-weight: 700;
   padding-bottom: 8px;
-  border-bottom: 3px solid #FF6B00;
+  border-bottom: 3px solid var(--primary, #FF6B00);
   display: inline-block;
 }
 
@@ -190,8 +190,8 @@
 .form-row input:focus,
 .form-row textarea:focus {
   outline: none;
-  border-color: #FF6B00;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+  border-color: var(--primary, #FF6B00);
+  border-width: 3px;
 }
 
 .form-row textarea {
@@ -212,7 +212,7 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #FF6B00;
+  accent-color: var(--primary, #FF6B00);
 }
 
 .form-actions {
@@ -239,8 +239,8 @@
 }
 
 .checkbox-label-inline:hover {
-  background: rgba(255, 107, 0, 0.15);
-  border-color: #FF6B00;
+  background: #FFE5D6;
+  border-color: var(--primary, #FF6B00);
 }
 
 .checkbox-label-inline .help-text {
@@ -262,14 +262,14 @@
   font-size: 0.9rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  background: #FF6B00;
+  background: var(--primary, #FF6B00);
   color: white;
 }
 
 .form-actions button:hover,
 .btn-primary:hover {
   transform: translateY(-1px);
-  background: #e55a00;
+  background: var(--primary-dark, #e55a00);
 }
 
 .form-actions button:active {
@@ -278,7 +278,7 @@
 
 .form-actions button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.3);
+  border: 2px solid var(--primary, #FF6B00);
 }
 
 .entity-list {
@@ -301,7 +301,7 @@
 
 .entity-list li:hover {
   background: #fff9f5;
-  border-color: #FF6B00;
+  border-color: var(--primary, #FF6B00);
   transform: translateX(3px);
 }
 
@@ -321,11 +321,11 @@
 }
 
 .entity-head span {
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   font-weight: 600;
   font-size: 0.9rem;
   padding: 4px 12px;
-  background: rgba(255, 107, 0, 0.1);
+  background: #FFE5D6;
   border-radius: 20px;
 }
 
@@ -368,31 +368,31 @@
 
 .entity-actions button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+  border: 2px solid #f44336;
 }
 
 .entity-actions a {
   font-size: 0.8rem;
   padding: 6px 14px;
   text-decoration: none;
-  border: 2px solid #FF6B00;
+  border: 2px solid var(--primary, #FF6B00);
   border-radius: 6px;
   background: white;
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   font-weight: 600;
   transition: all 0.3s ease;
   display: inline-block;
 }
 
 .entity-actions a:hover {
-  background: #FF6B00;
+  background: var(--primary, #FF6B00);
   color: white;
   transform: translateY(-1px);
 }
 
 .entity-actions a:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+  border-width: 3px;
 }
 
 /* Simple loading / error text for admin entities */
@@ -420,11 +420,11 @@
   font-size: 1.2rem;
   font-weight: 700;
   padding-bottom: 8px;
-  border-bottom: 2px solid #FF6B00;
+  border-bottom: 2px solid var(--primary, #FF6B00);
 }
 
 .json-block {
-  background: linear-gradient(135deg, #FF6B00 0%, #e55a00 100%);
+  background: var(--primary, #FF6B00);
   color: white;
   padding: 16px;
   border-radius: 8px;
@@ -432,7 +432,7 @@
   overflow: auto;
   font-size: 0.85rem;
   font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
-  border: 2px solid #cc4f00;
+  border: 2px solid var(--primary-darker, #cc4f00);
   line-height: 1.6;
 }
 
@@ -442,17 +442,17 @@
 }
 
 .json-block::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--primary-darker, #cc4f00);
   border-radius: 4px;
 }
 
 .json-block::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.5);
+  background: #ffffff;
   border-radius: 4px;
 }
 
 .json-block::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.7);
+  background: #f0f0f0;
 }
 
 /* Areas of Intervention Section */
@@ -461,7 +461,7 @@
   padding: 14px;
   background: #fff9f5;
   border-radius: 6px;
-  border: 2px solid #FF6B00;
+  border: 2px solid var(--primary, #FF6B00);
 }
 
 .section-label {
@@ -492,14 +492,14 @@
 
 .checkbox-item:hover {
   background: #fff9f5;
-  border-color: #FF6B00;
+  border-color: var(--primary, #FF6B00);
 }
 
 .checkbox-item input[type="checkbox"] {
   cursor: pointer;
   width: 18px;
   height: 18px;
-  accent-color: #FF6B00;
+  accent-color: var(--primary, #FF6B00);
 }
 
 .checkbox-item span {
@@ -512,7 +512,7 @@
   padding: 0.5rem;
   background: #fff9f5;
   border-radius: 6px;
-  border-left: 3px solid #FF6B00;
+  border-left: 3px solid var(--primary, #FF6B00);
 }
 
 .entity-areas small {
@@ -526,7 +526,7 @@
   padding: 14px;
   background: white;
   border-radius: 6px;
-  border: 2px solid #FF6B00;
+  border: 2px solid var(--primary, #FF6B00);
   border-style: dashed;
 }
 
@@ -539,15 +539,15 @@
 
 .section-header label {
   font-weight: 700;
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   font-size: 0.95rem;
 }
 
 .btn-add-image {
   padding: 6px 14px;
-  border: 2px solid #FF6B00;
+  border: 2px solid var(--primary, #FF6B00);
   background: white;
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
@@ -556,7 +556,7 @@
 }
 
 .btn-add-image:hover {
-  background: #FF6B00;
+  background: var(--primary, #FF6B00);
   color: white;
   transform: translateY(-1px);
 }
@@ -579,8 +579,8 @@
 
 .image-input-row input:focus {
   outline: none;
-  border-color: #FF6B00;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  border-color: var(--primary, #FF6B00);
+  border-width: 3px;
 }
 
 .btn-remove {
@@ -598,6 +598,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.btn-remove svg {
+  width: 16px;
+  height: 16px;
 }
 
 .btn-remove:hover {
@@ -620,8 +625,8 @@
 }
 
 .checkbox-label:hover {
-  background: rgba(255, 107, 0, 0.15);
-  border-color: #FF6B00;
+  background: #FFE5D6;
+  border-color: var(--primary, #FF6B00);
 }
 
 .checkbox-label .help-text {
@@ -640,7 +645,7 @@
   border-radius: 12px;
   font-weight: 600;
   background: #FFE5D6;
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
 }
 
 .badge-success {
@@ -655,10 +660,10 @@
 }
 
 .entity-images small {
-  background: rgba(255, 107, 0, 0.1);
+  background: #FFE5D6;
   padding: 4px 8px;
   border-radius: 4px;
-  color: #FF6B00;
+  color: var(--primary, #FF6B00);
   font-weight: 600;
 }
 

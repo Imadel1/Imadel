@@ -23,6 +23,25 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.logo-container:hover {
+  opacity: 0.8;
+}
+
+.logo-container:focus {
+  outline: none;
+  background: transparent;
+}
+
+.logo-container:active {
+  background: transparent;
 }
 
 .logo-container img {
@@ -64,19 +83,18 @@ nav {
   font-family: var(--font-sans, 'Poppins', sans-serif);
   transition: all 0.3s ease;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: none;
 }
 
 .donate-button:hover {
   background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+  box-shadow: none;
   color: var(--text-on-primary, #ffffff);
 }
 
 .donate-button:focus {
-  outline: 3px solid rgba(255, 107, 0, 0.3);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .nav-link,
@@ -114,9 +132,7 @@ nav a:hover::after {
 
 .nav-link:focus,
 nav a:focus {
-  outline: 2px solid var(--primary, #FF6B00);
-  outline-offset: 4px;
-  border-radius: 2px;
+  outline: none;
 }
 
 /* Active link state (desktop) */
@@ -153,9 +169,7 @@ nav a.active::after,
 }
 
 .menu-toggle:focus {
-  outline: 2px solid var(--primary, #FF6B00);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: none;
 }
 
 /* Mobile & Tablet Navigation */
@@ -183,7 +197,7 @@ nav a.active::after,
     padding: 0.85rem;
     gap: 0.25rem;
     align-items: stretch;
-    border: 2px solid var(--primary, #FF6B00);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(12px);

@@ -37,6 +37,7 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -56,11 +57,35 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className }) => {
     return () => observer.disconnect();
   }, []);
 
+  // Handle SVG loading - SVGs sometimes don't fire onLoad
+  useEffect(() => {
+    if (isInView && imgRef.current) {
+      const img = imgRef.current;
+      const isSvg = src.endsWith('.svg') || src.includes('.svg');
+      
+      // For SVGs, check if already loaded or set a timeout
+      if (isSvg) {
+        // Check if image is already complete (cached)
+        if (img.complete && img.naturalWidth > 0) {
+          setIsLoaded(true);
+        } else {
+          // Fallback: show SVG after a short delay if onLoad doesn't fire
+          const timeout = setTimeout(() => {
+            setIsLoaded(true);
+          }, 200);
+          
+          return () => clearTimeout(timeout);
+        }
+      }
+    }
+  }, [isInView, src]);
+
   return (
     <div className="lazy-image-wrapper" ref={containerRef}>
       {!isLoaded && <div className="image-placeholder" aria-hidden="true" />}
       {isInView && (
         <img
+          ref={imgRef}
           src={src}
           alt={alt}
           className={className}
@@ -71,7 +96,7 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className }) => {
             // Hide broken images
             (e.target as HTMLImageElement).style.display = 'none';
           }}
-          style={{ opacity: isLoaded ? 1 : 0 }}
+          style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
         />
       )}
     </div>
@@ -274,10 +299,10 @@ const Partners: React.FC = () => {
       {/* Hero Section */}
       <section className="partners-hero" aria-labelledby="partners-hero-heading">
         <div className="container">
-          <h1 id="partners-hero-heading">Our Partners</h1>
+          <h1 id="partners-hero-heading">Nos Partenaires</h1>
           <p>
-            We are proud to collaborate with these outstanding organizations that share our commitment
-            to creating lasting change and improving lives across communities in Mali and beyond.
+            Nous sommes fiers de collaborer avec ces organisations exceptionnelles qui partagent notre engagement
+            à créer un changement durable et à améliorer la vie des communautés au Mali et au-delà.
           </p>
         </div>
       </section>
@@ -285,8 +310,8 @@ const Partners: React.FC = () => {
       {/* Partners Grid */}
       <section className="partners-section" aria-labelledby="partners-section-heading">
         <div className="container">
-          <h2 id="partners-section-heading" className="sr-only">Partner Organizations</h2>
-          <div className="partners-grid" role="list" aria-label="List of partner organizations">
+          <h2 id="partners-section-heading" className="sr-only">Organisations Partenaires</h2>
+          <div className="partners-grid" role="list" aria-label="Liste des organisations partenaires">
             {partnersData.map((partner, index) => (
               <a
                 key={index}
@@ -295,13 +320,13 @@ const Partners: React.FC = () => {
                 rel="noopener noreferrer"
                 className="partner-card"
                 role="listitem"
-                aria-label={`${partner.name} - ${partner.description}. Opens in new window.`}
+                aria-label={`${partner.name} - ${partner.description}. Ouvre dans une nouvelle fenêtre.`}
               >
                 <div className="partner-logo-container">
                   {partner.image ? (
                     <LazyImage
                       src={partner.image}
-                      alt={`${partner.name} logo`}
+                      alt={`Logo ${partner.name}`}
                       className="partner-logo"
                     />
                   ) : (

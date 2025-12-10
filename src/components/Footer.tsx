@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FaFacebookF, FaLinkedinIn, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useTranslation } from "../utils/i18n";
-import "./Footer.css";
+import "./footer.css";
 import logo from "../assets/cropped-nouveau_logo.png";
 
 const Footer: React.FC = () => {

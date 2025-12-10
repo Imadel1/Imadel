@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FaDroplet,
+  FaTint,
   FaHospital,
   FaBook,
   FaSeedling,
   FaCreditCard,
-  FaMobile,
-  FaBuildingColumns
-} from "react-icons/fa6";
+  FaUniversity,
+  FaMobileAlt
+} from "react-icons/fa";
 import { donationsApi } from '../services/api';
 import DonationForm from '../components/DonationForm';
 import { getSettings, subscribeToSettings, type Settings } from '../utils/settings';
@@ -139,7 +139,7 @@ const Donate: React.FC = () => {
                 role="tab"
                 aria-selected={activeTab === 'mobile'}
               >
-                <FaMobile size={18} style={{ marginRight: '0.5rem' }} />
+                <FaMobileAlt size={18} style={{ marginRight: '0.5rem' }} />
                 {t('mobileMoney')}
               </button>
               <button
@@ -148,7 +148,7 @@ const Donate: React.FC = () => {
                 role="tab"
                 aria-selected={activeTab === 'bank'}
               >
-                <FaBuildingColumns size={18} style={{ marginRight: '0.5rem' }} />
+                <FaUniversity size={18} style={{ marginRight: '0.5rem' }} />
                 {t('bankTransfer')}
               </button>
               <button
@@ -449,7 +449,7 @@ const Donate: React.FC = () => {
             <div className="impact-grid">
               <div className="impact-item">
                 <div className="impact-icon" aria-hidden="true">
-                  <FaDroplet size={40} color="var(--primary, #FF6B00)" />
+                  <FaTint size={40} color="var(--primary, #FF6B00)" />
                 </div>
                 <h4>Eau Propre</h4>
                 <p>Aidez à fournir un accès à l'eau potable pour les communautés</p>

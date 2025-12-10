@@ -1,10 +1,15 @@
-// Fix for Donate.tsx - Line 72 Type Error
-// Replace the DonationResponse interface and update the handleMobileMoneySubmit function
-
 import React, { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTint, FaHospital, FaBook, FaSeedling, FaCreditCard, FaMobileAlt, FaUniversity } from 'react-icons/fa';
+import {
+  FaDroplet as FaTint,
+  FaHospital,
+  FaBook,
+  FaSeedling,
+  FaCreditCard,
+  FaMobile,          
+  FaBuildingColumns     
+} from "react-icons/fa6";
 import { donationsApi } from '../services/api';
 import DonationForm from '../components/DonationForm';
 import { getSettings, subscribeToSettings, type Settings } from '../utils/settings';
@@ -134,7 +139,7 @@ const Donate: React.FC = () => {
                 role="tab"
                 aria-selected={activeTab === 'mobile'}
               >
-                <FaMobileAlt size={18} style={{ marginRight: '0.5rem' }} />
+                <FaMobile size={18} style={{ marginRight: '0.5rem' }} />
                 {t('mobileMoney')}
               </button>
               <button
@@ -143,7 +148,7 @@ const Donate: React.FC = () => {
                 role="tab"
                 aria-selected={activeTab === 'bank'}
               >
-                <FaUniversity size={18} style={{ marginRight: '0.5rem' }} />
+                <FaBuildingColumns size={18} style={{ marginRight: '0.5rem' }} />
                 {t('bankTransfer')}
               </button>
               <button

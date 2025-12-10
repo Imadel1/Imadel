@@ -21,7 +21,8 @@
       {
         "ignore": [
           "user-select",
-          "backdrop-filter"
+          "backdrop-filter",
+          "min-height: auto"
         ]
       }
     ],

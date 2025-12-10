@@ -238,7 +238,7 @@ export const translations = {
     
     // Home Page
     heroTitle: 'Petit Effort',
-    heroTitleHighlight: 'Grand Changement',
+    heroTitleHighlight: 'Grand ',
     heroTagline: 'Nous sommes prêts à fournir un meilleur service pour rendre le monde heureux',
     becomeVolunteer: 'Devenir Bénévole',
     donateNow: 'Faire un Don Maintenant',

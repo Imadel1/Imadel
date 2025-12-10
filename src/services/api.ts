@@ -93,51 +93,51 @@ async function apiRequest<T>(
 
 // ==================== AUTHENTICATION ====================
 
+// Remove any duplicate LoginResponse declarations
+export interface Admin {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+}
+
+// authApi
 export const authApi = {
-  /**
-   * Login admin user
-   * POST /api/auth/login
-   */
   login: async (email: string, password: string): Promise<LoginResponse> => {
     const response = await apiRequest<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
 
-    if (response.success && response.token) {
-      setToken(response.token);
+    // apiRequest returns ApiResponse<T>, so extract data
+    if (response.success && response.data) {
+      const data = response.data; // this has token and admin
+      setToken(data.token);
+      return data; // return the actual LoginResponse
     }
 
-    return response as LoginResponse;
+    throw new Error(response.error || response.message || 'Login failed');
   },
 
-  /**
-   * Get current admin profile
-   * GET /api/auth/me
-   */
-  getMe: async () => {
-    return apiRequest('/auth/me');
+  getMe: async (): Promise<Admin> => {
+    const response = await apiRequest<Admin>('/auth/me');
+    if (response.success && response.data) {
+      return response.data;
+    }
+    throw new Error(response.error || 'Failed to fetch profile');
   },
 
-  /**
-   * Logout (clears token)
-   */
-  logout: () => {
+  logout: (): void => {
     removeToken();
   },
 
-  /**
-   * Check if user is authenticated
-   */
   isAuthenticated: (): boolean => {
     return getToken() !== null;
   },
 
-  /**
-   * Get stored token
-   */
   getToken,
 };
+
 
 // ==================== PROJECTS ====================
 

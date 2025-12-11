@@ -109,11 +109,13 @@ export const authApi = {
       body: JSON.stringify({ email, password }),
     });
 
-    // apiRequest returns ApiResponse<T>, so extract data
-    if (response.success && response.data) {
-      const data = response.data; // this has token and admin
-      setToken(data.token);
-      return data; // return the actual LoginResponse
+    // Handle both shapes: { success, data: { token, admin } } and { success, token, admin }
+    if (response.success) {
+      const data = (response as any).data ?? response;
+      if (data?.token) {
+        setToken(data.token);
+        return data as LoginResponse;
+      }
     }
 
     throw new Error(response.error || response.message || 'Login failed');

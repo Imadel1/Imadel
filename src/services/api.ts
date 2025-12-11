@@ -63,13 +63,10 @@ async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   const token = getToken();
   
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
+  const headers = new Headers(options.headers || {});
+  headers.set('Content-Type', 'application/json');
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.Authorization = `Bearer ${token}`;
   }
 
   try {

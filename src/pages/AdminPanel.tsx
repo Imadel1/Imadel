@@ -3,6 +3,7 @@ import { FaXmark, FaCheck, FaEye, FaStar } from 'react-icons/fa6';
 import './AdminPanel.css';
 import { authApi, projectsApi, jobsApi, partnersApi, officesApi, donationsApi, applicationsApi } from '../services/api';
 import { useTranslation } from '../utils/i18n';
+import logo from '../assets/cropped-nouveau_logo.png';
 
 /**
  * BACKEND INTEGRATION NOTES:
@@ -1106,7 +1107,7 @@ export default function AdminPanel() {
     <div className="admin-panel">
       <header className="admin-header">
         <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-          <img src="/src/assets/cropped-nouveau_logo.png" alt="IMADEL Logo" style={{height: '40px', width: 'auto'}} />
+          <img src={logo} alt="IMADEL Logo" style={{height: '40px', width: 'auto'}} />
           <h1>{t('adminPanel')}</h1>
         </div>
         <div className="admin-controls">

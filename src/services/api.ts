@@ -353,6 +353,53 @@ export const donationsApi = {
 
 export const applicationsApi = {
   /**
+   * Submit a new job application
+   * POST /api/applications
+   * Backend will automatically send confirmation email to applicant
+   */
+  create: async (applicationData: {
+    jobId: string;
+    applicantName: string;
+    applicantEmail: string;
+    applicantPhone: string;
+    applicantAddress: string;
+    coverLetter?: string;
+    resume: File;
+  }) => {
+    const token = getToken();
+    const formData = new FormData();
+    
+    formData.append('jobId', applicationData.jobId);
+    formData.append('applicantName', applicationData.applicantName);
+    formData.append('applicantEmail', applicationData.applicantEmail);
+    formData.append('applicantPhone', applicationData.applicantPhone);
+    formData.append('applicantAddress', applicationData.applicantAddress);
+    if (applicationData.coverLetter) {
+      formData.append('coverLetter', applicationData.coverLetter);
+    }
+    formData.append('resume', applicationData.resume);
+
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/applications`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `API Error: ${response.statusText}`);
+    }
+
+    return data;
+  },
+
+  /**
    * Get all applications (with optional filters)
    * GET /api/applications?status=&jobId=
    */
@@ -376,10 +423,10 @@ export const applicationsApi = {
    * Update application status / notes
    * PUT /api/applications/:id
    */
-  updateStatus: async (id: string, status: string, adminNotes?: string) => {
+  updateStatus: async (id: string, body: { status: string; adminNotes?: string }) => {
     return apiRequest(`/applications/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ status, adminNotes }),
+      body: JSON.stringify(body),
     });
   },
 
@@ -399,7 +446,9 @@ export const applicationsApi = {
 export const newslettersApi = {
   /**
    * Get all newsletter content items
-   * GET /api/newsletters/content or GET /api/newsletters (if backend supports content)
+   * GET /api/newsletters?published=true
+   * Note: Backend may return content items or subscribers based on query params
+   * If /newsletters doesn't work, try /newsletters/content as fallback
    */
   getAll: async (params?: { published?: boolean }) => {
     const queryParams = new URLSearchParams();
@@ -407,20 +456,31 @@ export const newslettersApi = {
       queryParams.append('published', params.published.toString());
     }
     const query = queryParams.toString();
-    return apiRequest(`/newsletters/content${query ? `?${query}` : ''}`);
+    
+    try {
+      // Try the main newsletters endpoint first
+      return await apiRequest(`/newsletters${query ? `?${query}` : ''}`);
+    } catch (error: any) {
+      // If that fails with 404, try the content endpoint as fallback
+      if (error.message?.includes('404') || error.message?.includes('Not Found')) {
+        return await apiRequest(`/newsletters/content${query ? `?${query}` : ''}`);
+      }
+      throw error;
+    }
   },
 
   /**
    * Get all subscribers (admin only)
-   * GET /api/newsletters
+   * GET /api/newsletters/subscribers
    */
   getSubscribers: async () => {
-    return apiRequest('/newsletters');
+    return apiRequest('/newsletters/subscribers');
   },
 
   /**
    * Subscribe to newsletter
    * POST /api/newsletters/subscribe
+   * Backend will automatically send confirmation email to subscriber
    */
   subscribe: async (email: string) => {
     return apiRequest('/newsletters/subscribe', {

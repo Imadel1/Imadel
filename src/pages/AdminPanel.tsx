@@ -515,7 +515,7 @@ export default function AdminPanel() {
             const normalizedApplications: Application[] = rawApplications.map((a: any) => ({
               id: a.id || a._id || uid('app_'),
               jobId: a.job?.id || a.job?._id || a.job || '',
-              jobTitle: a.jobTitle || a.job?.title || 'Unknown Job',
+              jobTitle: a.jobTitle || a.job?.title || 'Poste inconnu',
               fullName: a.fullName,
               email: a.email,
               phone: a.phone,
@@ -543,7 +543,10 @@ export default function AdminPanel() {
   const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
     try {
       setLoading(prev => ({ ...prev, [`app_${applicationId}`]: true }));
-      const response = await applicationsApi.updateStatus(applicationId, newStatus, adminNotes || undefined);
+      const response = await applicationsApi.updateStatus(applicationId, {
+        status: newStatus,
+        adminNotes: adminNotes || undefined,
+      });
 
       if (response.success !== false) {
         // Refresh applications list
@@ -554,7 +557,7 @@ export default function AdminPanel() {
             const normalizedApplications: Application[] = rawApplications.map((a: any) => ({
               id: a.id || a._id || uid('app_'),
               jobId: a.job?.id || a.job?._id || a.job || '',
-              jobTitle: a.jobTitle || a.job?.title || 'Unknown Job',
+              jobTitle: a.jobTitle || a.job?.title || 'Poste inconnu',
               fullName: a.fullName,
               email: a.email,
               phone: a.phone,
@@ -1133,15 +1136,15 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('projects')}</h2>
             {errors.projects && <p className="entity-error">{errors.projects}</p>}
-            {loading.projects && <p className="entity-loading">Loading projects…</p>}
+            {loading.projects && <p className="entity-loading">Chargement des projets…</p>}
             <div className="form-row">
-              <input placeholder="Title *" value={projectForm.title||''} onChange={e=>setProjectForm({...projectForm, title:e.target.value})} />
-              <input placeholder="Country" value={projectForm.country||''} onChange={e=>setProjectForm({...projectForm, country:e.target.value})} />
-              <textarea placeholder="Summary" rows={3} value={projectForm.summary||''} onChange={e=>setProjectForm({...projectForm, summary:e.target.value})} />
-              <textarea placeholder="Content (HTML or Markdown)" rows={5} value={projectForm.content||''} onChange={e=>setProjectForm({...projectForm, content:e.target.value})} />
+              <input placeholder="Titre *" value={projectForm.title||''} onChange={e=>setProjectForm({...projectForm, title:e.target.value})} />
+              <input placeholder="Pays" value={projectForm.country||''} onChange={e=>setProjectForm({...projectForm, country:e.target.value})} />
+              <textarea placeholder="Résumé" rows={3} value={projectForm.summary||''} onChange={e=>setProjectForm({...projectForm, summary:e.target.value})} />
+              <textarea placeholder="Contenu (HTML ou Markdown)" rows={5} value={projectForm.content||''} onChange={e=>setProjectForm({...projectForm, content:e.target.value})} />
               
               <div className="areas-section">
-                <label className="section-label">Areas of Intervention (Select Multiple)</label>
+                <label className="section-label">Domaines d'intervention (sélection multiple)</label>
                 <div className="checkbox-group">
                   {AREAS_OF_INTERVENTION.map(area => (
                     <label key={area} className="checkbox-item">
@@ -1165,13 +1168,13 @@ export default function AdminPanel() {
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>Image URLs</label>
-                  <button type="button" className="btn-add-image" onClick={addImageToProject}>+ Add Image</button>
+                  <label>URLs d'images</label>
+                  <button type="button" className="btn-add-image" onClick={addImageToProject}>+ Ajouter une image</button>
                 </div>
                 {(projectForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
                     <input 
-                      placeholder={`Image URL ${idx + 1}`} 
+                      placeholder={`URL de l'image ${idx + 1}`} 
                       value={img} 
                       onChange={e => updateProjectImage(idx, e.target.value)} 
                     />
@@ -1185,8 +1188,8 @@ export default function AdminPanel() {
               <div className="form-actions">
                 <label className="checkbox-label-inline">
                   <input type="checkbox" checked={!!projectForm.published} onChange={e=>setProjectForm({...projectForm, published:e.target.checked})} /> 
-                  Published
-                  <span className="help-text">Make visible on website</span>
+                  Publié
+                  <span className="help-text">Rendre visible sur le site</span>
                 </label>
                 <button className="btn-primary" onClick={addProject}>
                   {editingProjectId ? t('save') : t('addProject')}
@@ -1205,7 +1208,7 @@ export default function AdminPanel() {
                   <div className="entity-meta">{p.summary}</div>
                   {p.areasOfIntervention && p.areasOfIntervention.length > 0 && (
                     <div className="entity-areas">
-                      <small><strong>Areas:</strong> {p.areasOfIntervention.join(', ')}</small>
+                      <small><strong>Domaines :</strong> {p.areasOfIntervention.join(', ')}</small>
                     </div>
                   )}
                   {p.images && p.images.length > 0 && (
@@ -1230,9 +1233,9 @@ export default function AdminPanel() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     >
-                      Edit
+                      Modifier
                     </button>
-                    <button className="btn-danger" onClick={()=>removeProject(p.id)}>Remove</button>
+                    <button className="btn-danger" onClick={()=>removeProject(p.id)}>Supprimer</button>
                   </div>
                 </li>
               ))}
@@ -1244,13 +1247,13 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('jobs')}</h2>
             {errors.jobs && <p className="entity-error">{errors.jobs}</p>}
-            {loading.jobs && <p className="entity-loading">Loading jobs…</p>}
+            {loading.jobs && <p className="entity-loading">Chargement des emplois…</p>}
             <div className="form-row">
-              <input placeholder="Job title *" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} />
-              <input placeholder="Location" value={jobForm.location||''} onChange={e=>setJobForm({...jobForm, location:e.target.value})} />
+                  <input placeholder="Titre du poste *" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} />
+                  <input placeholder="Lieu" value={jobForm.location||''} onChange={e=>setJobForm({...jobForm, location:e.target.value})} />
               <div>
                 <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#1a1a2e' }}>
-                  Application Deadline <span style={{ color: '#e74c3c' }}>*</span>
+                  Date limite de candidature <span style={{ color: '#e74c3c' }}>*</span>
                 </label>
                 <input 
                   type="datetime-local" 
@@ -1260,22 +1263,22 @@ export default function AdminPanel() {
                   style={{ padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '6px', fontSize: '0.9rem', width: '100%' }}
                 />
               </div>
-              <textarea placeholder="Description" rows={5} value={jobForm.description||''} onChange={e=>setJobForm({...jobForm, description:e.target.value})} />
+                  <textarea placeholder="Description" rows={5} value={jobForm.description||''} onChange={e=>setJobForm({...jobForm, description:e.target.value})} />
               
               {/* Auto-generated Apply URL Section */}
               <div style={{ padding: '1rem', background: '#fff9f5', borderRadius: '6px', border: '2px solid #FFE5D6' }}>
-                <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--primary, #FF6B00)' }}>
-                  Apply URL (Auto-generated)
+                  <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--primary, #FF6B00)' }}>
+                  URL de candidature (auto-générée)
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input 
-                    type="text" 
-                    readOnly
-                    value={
+                    <input 
+                      type="text" 
+                      readOnly
+                      value={
                       editingJobId 
                         ? (jobForm.applyUrl || `${window.location.origin}/job/${editingJobId}/apply`)
-                        : (jobForm.applyUrl || 'Will be generated when job is saved')
-                    }
+                        : (jobForm.applyUrl || 'Sera générée lors de l’enregistrement du poste')
+                      }
                     style={{ 
                       flex: 1, 
                       padding: '0.5rem', 
@@ -1293,7 +1296,7 @@ export default function AdminPanel() {
                       onClick={() => {
                         const url = jobForm.applyUrl || `${window.location.origin}/job/${editingJobId}/apply`;
                         navigator.clipboard.writeText(url);
-                        alert('Apply URL copied to clipboard!');
+                        alert('URL de candidature copiée dans le presse-papiers !');
                       }}
                       style={{
                         padding: '0.5rem 1rem',
@@ -1376,9 +1379,9 @@ export default function AdminPanel() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     >
-                      Edit
+                      Modifier
                     </button>
-                    <button className="btn-danger" onClick={()=>removeJob(j.id)}>Remove</button>
+                    <button className="btn-danger" onClick={()=>removeJob(j.id)}>Supprimer</button>
                   </div>
                 </li>
               ))}
@@ -1390,7 +1393,7 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('applications')}</h2>
             {errors.applications && <p className="entity-error">{errors.applications}</p>}
-            {loading.applications && <p className="entity-loading">Loading applications…</p>}
+            {loading.applications && <p className="entity-loading">Chargement des candidatures…</p>}
 
             {/* Filters */}
             <div className="application-filters" style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -1448,11 +1451,11 @@ export default function AdminPanel() {
             {/* Application Stats */}
             <div className="application-stats" style={{ marginBottom: '2rem', padding: '1rem', background: '#f8f9fa', borderRadius: '8px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                <div><strong>Total:</strong> {applications.length}</div>
-                <div><strong>Pending:</strong> {applications.filter(a => a.status === 'pending').length}</div>
-                <div><strong>Reviewing:</strong> {applications.filter(a => a.status === 'reviewing').length}</div>
-                <div><strong>Accepted:</strong> {applications.filter(a => a.status === 'accepted').length}</div>
-                <div><strong>Rejected:</strong> {applications.filter(a => a.status === 'rejected').length}</div>
+                <div><strong>Total :</strong> {applications.length}</div>
+                <div><strong>En attente :</strong> {applications.filter(a => a.status === 'pending').length}</div>
+                <div><strong>En cours d'examen :</strong> {applications.filter(a => a.status === 'reviewing').length}</div>
+                <div><strong>Acceptées :</strong> {applications.filter(a => a.status === 'accepted').length}</div>
+                <div><strong>Rejetées :</strong> {applications.filter(a => a.status === 'rejected').length}</div>
               </div>
             </div>
 
@@ -1580,7 +1583,7 @@ export default function AdminPanel() {
                   <textarea
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="Add internal notes about this application..."
+                    placeholder="Ajouter des notes internes sur cette candidature..."
                     rows={3}
                     style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
                   />
@@ -1716,16 +1719,16 @@ export default function AdminPanel() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     >
-                      View Details
+                      Voir les détails
                     </button>
                     <a href={`mailto:${a.email}`} target="_blank" rel="noreferrer">Email</a>
-                    {a.resume && <a href={a.resume} target="_blank" rel="noreferrer">Resume</a>}
+                    {a.resume && <a href={a.resume} target="_blank" rel="noreferrer">CV</a>}
                   </div>
                 </li>
               ))}
               {applications.length === 0 && !loading.applications && (
                 <li style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-                  No applications found
+                  Aucune candidature trouvée
                 </li>
               )}
             </ul>
@@ -1736,22 +1739,22 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('partners')}</h2>
             {errors.partners && <p className="entity-error">{errors.partners}</p>}
-            {loading.partners && <p className="entity-loading">Loading partners…</p>}
+            {loading.partners && <p className="entity-loading">Chargement des partenaires…</p>}
             <div className="form-row">
-              <input placeholder="Partner name *" value={partnerForm.name||''} onChange={e=>setPartnerForm({...partnerForm, name:e.target.value})} />
-              <input placeholder="Logo URL" value={partnerForm.logo||''} onChange={e=>setPartnerForm({...partnerForm, logo:e.target.value})} />
-              <input placeholder="Website URL" value={partnerForm.website||''} onChange={e=>setPartnerForm({...partnerForm, website:e.target.value})} />
+              <input placeholder="Nom du partenaire *" value={partnerForm.name||''} onChange={e=>setPartnerForm({...partnerForm, name:e.target.value})} />
+              <input placeholder="URL du logo" value={partnerForm.logo||''} onChange={e=>setPartnerForm({...partnerForm, logo:e.target.value})} />
+              <input placeholder="URL du site web" value={partnerForm.website||''} onChange={e=>setPartnerForm({...partnerForm, website:e.target.value})} />
               <textarea placeholder="Description" rows={3} value={partnerForm.description||''} onChange={e=>setPartnerForm({...partnerForm, description:e.target.value})} />
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>Additional Image URLs</label>
-                  <button type="button" className="btn-add-image" onClick={addImageToPartner}>+ Add Image</button>
+                  <label>Autres URLs d'images</label>
+                  <button type="button" className="btn-add-image" onClick={addImageToPartner}>+ Ajouter une image</button>
                 </div>
                 {(partnerForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
                     <input 
-                      placeholder={`Image URL ${idx + 1}`} 
+                      placeholder={`URL de l'image ${idx + 1}`} 
                       value={img} 
                       onChange={e => updatePartnerImage(idx, e.target.value)} 
                     />
@@ -1764,7 +1767,7 @@ export default function AdminPanel() {
               
               <div className="form-actions">
                 <button className="btn-primary" onClick={addPartner}>
-                  {editingPartnerId ? t('save') : t('addPartner')}
+                  {editingPartnerId ? 'Enregistrer le partenaire' : 'Ajouter un partenaire'}
                 </button>
               </div>
             </div>
@@ -1776,7 +1779,7 @@ export default function AdminPanel() {
                   <div className="entity-meta">{p.description}</div>
                   {p.images && p.images.length > 0 && (
                     <div className="entity-images">
-                      <small>{p.images.length} additional image(s)</small>
+                      <small>{p.images.length} image(s) supplémentaire(s)</small>
                     </div>
                   )}
                   <div className="entity-actions">
@@ -1794,10 +1797,10 @@ export default function AdminPanel() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     >
-                      Edit
+                      Modifier
                     </button>
-                    <a href={p.website||'#'} target="_blank" rel="noreferrer">Website</a> 
-                    <button className="btn-danger" onClick={()=>removePartner(p.id)}>Remove</button>
+                    <a href={p.website||'#'} target="_blank" rel="noreferrer">Site web</a> 
+                    <button className="btn-danger" onClick={()=>removePartner(p.id)}>Supprimer</button>
                   </div>
                 </li>
               ))}
@@ -1810,19 +1813,19 @@ export default function AdminPanel() {
             <h2>{t('newsletters')}</h2>
             {errors.newsletters && <p className="entity-error">{errors.newsletters}</p>}
             <div className="form-row">
-              <input placeholder="Title *" value={newsletterForm.title||''} onChange={e=>setNewsletterForm({...newsletterForm, title:e.target.value})} />
+              <input placeholder="Titre *" value={newsletterForm.title||''} onChange={e=>setNewsletterForm({...newsletterForm, title:e.target.value})} />
               <input type="date" placeholder="Date" value={newsletterForm.date||''} onChange={e=>setNewsletterForm({...newsletterForm, date:e.target.value})} />
-              <textarea placeholder="Content (HTML or Markdown)" rows={5} value={newsletterForm.content||''} onChange={e=>setNewsletterForm({...newsletterForm, content:e.target.value})} />
+              <textarea placeholder="Contenu (HTML ou Markdown)" rows={5} value={newsletterForm.content||''} onChange={e=>setNewsletterForm({...newsletterForm, content:e.target.value})} />
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>Image URLs</label>
-                  <button type="button" className="btn-add-image" onClick={addImageToNewsletter}>+ Add Image</button>
+                  <label>URLs d'images</label>
+                  <button type="button" className="btn-add-image" onClick={addImageToNewsletter}>+ Ajouter une image</button>
                 </div>
                 {(newsletterForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
                     <input 
-                      placeholder={`Image URL ${idx + 1}`} 
+                      placeholder={`URL de l'image ${idx + 1}`} 
                       value={img} 
                       onChange={e => updateNewsletterImage(idx, e.target.value)} 
                     />
@@ -1836,11 +1839,11 @@ export default function AdminPanel() {
               <div className="form-actions">
                 <label className="checkbox-label-inline">
                   <input type="checkbox" checked={!!newsletterForm.published} onChange={e=>setNewsletterForm({...newsletterForm, published:e.target.checked})} /> 
-                  Published
-                  <span className="help-text">Make visible on website</span>
+                  Publié
+                  <span className="help-text">Rendre visible sur le site</span>
                 </label>
                 <button className="btn-primary" onClick={addNewsletter}>
-                  {editingNewsletterId ? 'Save Newsletter' : 'Add Newsletter'}
+                  {editingNewsletterId ? 'Enregistrer l’actualité' : 'Ajouter une actualité'}
                 </button>
               </div>
             </div>
@@ -1851,7 +1854,7 @@ export default function AdminPanel() {
                   <div className="entity-head">
                     <strong>{n.title}</strong> 
                     <span className="badge">{n.date}</span>
-                    {n.published && <span className="badge badge-success">Published</span>}
+                    {n.published && <span className="badge badge-success">Publié</span>}
                   </div>
                   <div className="entity-meta">{n.content?.slice(0, 100)}...</div>
                   {n.images && n.images.length > 0 && (
@@ -1888,7 +1891,7 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('donations')}</h2>
             {errors.donations && <p className="entity-error">{errors.donations}</p>}
-            {loading.donations && <p className="entity-loading">Loading donations…</p>}
+            {loading.donations && <p className="entity-loading">Chargement des dons…</p>}
 
             <div className="donations-stats" style={{ marginBottom: '2rem', padding: '1rem', background: '#f8f9fa', borderRadius: '8px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
@@ -1896,10 +1899,10 @@ export default function AdminPanel() {
                   <strong>{t('totalDonations')}:</strong> {donations.length}
                 </div>
                 <div>
-                  <strong>Successful:</strong> {donations.filter(d => d.paymentStatus === 'success').length}
+                  <strong>Réussis :</strong> {donations.filter(d => d.paymentStatus === 'success').length}
                 </div>
                 <div>
-                  <strong>Total Amount:</strong> {
+                  <strong>Montant total :</strong> {
                     donations
                       .filter(d => d.paymentStatus === 'success')
                       .reduce((sum, d) => sum + d.amount, 0)
@@ -1907,7 +1910,7 @@ export default function AdminPanel() {
                   } {donations[0]?.currency || 'XOF'}
                 </div>
                 <div>
-                  <strong>Pending:</strong> {donations.filter(d => d.paymentStatus === 'pending').length}
+                  <strong>En attente :</strong> {donations.filter(d => d.paymentStatus === 'pending').length}
                 </div>
               </div>
             </div>
@@ -1916,26 +1919,26 @@ export default function AdminPanel() {
               {donations.map(d => (
                 <li key={d.id}>
                   <div className="entity-head">
-                    <strong>{d.isAnonymous ? 'Anonymous' : d.donorName}</strong>
+                    <strong>{d.isAnonymous ? 'Anonyme' : d.donorName}</strong>
                     <span className={`badge ${d.paymentStatus === 'success' ? 'badge-success' : d.paymentStatus === 'failed' ? 'badge-danger' : 'badge-warning'}`}>
                       {d.paymentStatus}
                     </span>
                   </div>
                   <div className="entity-meta">
-                    <div><strong>Amount:</strong> {d.amount.toLocaleString()} {d.currency}</div>
-                    <div><strong>Email:</strong> {d.donorEmail}</div>
-                    {d.donorPhone && <div><strong>Phone:</strong> {d.donorPhone}</div>}
-                    {d.purpose && <div><strong>Purpose:</strong> {d.purpose}</div>}
-                    {d.message && <div><strong>Message:</strong> {d.message}</div>}
-                    <div><strong>Reference:</strong> {d.paymentReference}</div>
-                    {d.paidAt && <div><strong>Paid At:</strong> {new Date(d.paidAt).toLocaleString()}</div>}
-                    {d.createdAt && <div><strong>Created:</strong> {new Date(d.createdAt).toLocaleString()}</div>}
+                    <div><strong>Montant :</strong> {d.amount.toLocaleString()} {d.currency}</div>
+                    <div><strong>Email :</strong> {d.donorEmail}</div>
+                    {d.donorPhone && <div><strong>Téléphone :</strong> {d.donorPhone}</div>}
+                    {d.purpose && <div><strong>Objectif :</strong> {d.purpose}</div>}
+                    {d.message && <div><strong>Message :</strong> {d.message}</div>}
+                    <div><strong>Référence :</strong> {d.paymentReference}</div>
+                    {d.paidAt && <div><strong>Payé le :</strong> {new Date(d.paidAt).toLocaleString()}</div>}
+                    {d.createdAt && <div><strong>Créé le :</strong> {new Date(d.createdAt).toLocaleString()}</div>}
                   </div>
                 </li>
               ))}
               {donations.length === 0 && !loading.donations && (
                 <li style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-                  No donations yet
+                  Aucun don pour le moment
                 </li>
               )}
             </ul>
@@ -1946,12 +1949,12 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('offices')}</h2>
             <div className="form-row">
-              <input placeholder="Country" value={officeForm.country||''} onChange={e=>setOfficeForm({...officeForm, country:e.target.value})} />
-              <input placeholder="City" value={officeForm.city||''} onChange={e=>setOfficeForm({...officeForm, city:e.target.value})} />
-              <input placeholder="Address" value={officeForm.address||''} onChange={e=>setOfficeForm({...officeForm, address:e.target.value})} />
+              <input placeholder="Pays" value={officeForm.country||''} onChange={e=>setOfficeForm({...officeForm, country:e.target.value})} />
+              <input placeholder="Ville" value={officeForm.city||''} onChange={e=>setOfficeForm({...officeForm, city:e.target.value})} />
+              <input placeholder="Adresse" value={officeForm.address||''} onChange={e=>setOfficeForm({...officeForm, address:e.target.value})} />
               <input placeholder="Latitude" type="number" value={officeForm.lat||'' as any} onChange={e=>setOfficeForm({...officeForm, lat: e.target.value? parseFloat(e.target.value): undefined})} />
               <input placeholder="Longitude" type="number" value={officeForm.lng||'' as any} onChange={e=>setOfficeForm({...officeForm, lng: e.target.value? parseFloat(e.target.value): undefined})} />
-              <div className="form-actions"><button onClick={addOffice}>Add office</button></div>
+              <div className="form-actions"><button onClick={addOffice}>Ajouter un bureau</button></div>
             </div>
 
             <ul className="entity-list">
@@ -1959,7 +1962,7 @@ export default function AdminPanel() {
                 <li key={o.id}>
                   <div className="entity-head"><strong>{o.country}</strong> <span>{o.city}</span></div>
                   <div className="entity-meta">{o.address} {o.lat && o.lng ? `(${o.lat}, ${o.lng})` : ''}</div>
-                  <div className="entity-actions"><button onClick={()=>removeOffice(o.id)}>Remove</button></div>
+                  <div className="entity-actions"><button onClick={()=>removeOffice(o.id)}>Supprimer</button></div>
                 </li>
               ))}
             </ul>
@@ -2106,7 +2109,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankMali.bankName}
                     onChange={(e) => updateBankMali({ bankName: e.target.value })}
-                    placeholder="Bank Name"
+                    placeholder="Nom de la banque"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2116,7 +2119,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankMali.accountName}
                     onChange={(e) => updateBankMali({ accountName: e.target.value })}
-                    placeholder="Account Name"
+                    placeholder="Nom du compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2126,7 +2129,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankMali.accountNumber}
                     onChange={(e) => updateBankMali({ accountNumber: e.target.value })}
-                    placeholder="Account Number"
+                    placeholder="Numéro de compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2136,7 +2139,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankMali.agency}
                     onChange={(e) => updateBankMali({ agency: e.target.value })}
-                    placeholder="Agency"
+                    placeholder="Agence"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2146,7 +2149,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankMali.swiftCode}
                     onChange={(e) => updateBankMali({ swiftCode: e.target.value })}
-                    placeholder="Swift Code"
+                    placeholder="Code SWIFT"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2162,7 +2165,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankInternational.bankName}
                     onChange={(e) => updateBankInternational({ bankName: e.target.value })}
-                    placeholder="Bank Name"
+                    placeholder="Nom de la banque"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2172,7 +2175,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankInternational.accountName}
                     onChange={(e) => updateBankInternational({ accountName: e.target.value })}
-                    placeholder="Account Name"
+                    placeholder="Nom du compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2182,7 +2185,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankInternational.accountNumber}
                     onChange={(e) => updateBankInternational({ accountNumber: e.target.value })}
-                    placeholder="Account Number"
+                    placeholder="Numéro de compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2202,7 +2205,7 @@ export default function AdminPanel() {
                     type="text"
                     value={settings.bankInternational.swiftCode}
                     onChange={(e) => updateBankInternational({ swiftCode: e.target.value })}
-                    placeholder="Swift Code"
+                    placeholder="Code SWIFT"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>

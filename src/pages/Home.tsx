@@ -312,34 +312,40 @@ const Home: React.FC = () => {
     const loadNewsletters = async () => {
       try {
         const response = await newslettersApi.getAll({ published: true });
-        
-        const rawNewsletters = 
-          (response as any).newsletters ||
-          (response as any).data ||
-          response;
 
-        if (response.success !== false && Array.isArray(rawNewsletters)) {
-          // Map to news format (already filtered by published: true in API call)
-          const publishedNews = rawNewsletters
-            .slice(0, 2) // Show up to 2 news items
-            .map((n: any) => ({
-              id: n._id || n.id,
-              title: n.title,
-              description: n.content ? n.content.substring(0, 150) + '...' : (n.description ? n.description.substring(0, 150) + '...' : ''),
-              image: n.images && n.images.length > 0 && n.images[0].url 
-                ? n.images[0].url 
-                : (n.images && n.images[0] ? n.images[0] : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop'),
-              badge: t('news'),
-              link: `/news/${n._id || n.id}`,
-              date: n.date || n.createdAt
-            }));
-          
-          setNewsItems(publishedNews);
-        }
+        const rawNewsletters =
+          (response as any)?.newsletters ||
+          (response as any)?.data ||
+          response ||
+          [];
+
+        const list = Array.isArray(rawNewsletters) ? rawNewsletters : [];
+
+        const publishedNews = list
+          .slice(0, 2) // Show up to 2 news items
+          .map((n: any) => ({
+            id: n._id || n.id,
+            title: n.title,
+            description: n.content
+              ? n.content.substring(0, 150) + '...'
+              : n.description
+              ? n.description.substring(0, 150) + '...'
+              : '',
+            image:
+              n.images && n.images.length > 0 && n.images[0].url
+                ? n.images[0].url
+                : n.images && n.images[0]
+                ? n.images[0]
+                : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop',
+            badge: t('news'),
+            link: `/news/${n._id || n.id}`,
+            date: n.date || n.createdAt,
+          }));
+
+        setNewsItems(publishedNews);
       } catch (error) {
         console.error('Error loading newsletters from API:', error);
-        // Do not fall back to localStorage – show only live backend data
-        setNewsItems([]);
+        setNewsItems([]); // Graceful fallback: show no news instead of error
       }
     };
 

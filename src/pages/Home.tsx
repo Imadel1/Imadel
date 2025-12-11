@@ -39,7 +39,7 @@ const getAreasOfIntervention = (language: string) => [
   language === 'fr' ? "Hygiène/Assainissement" : "Hygiene/Sanitation",
   language === 'fr' ? "Éducation" : "Education",
   language === 'fr' ? "Formation" : "Training",
-  language === 'fr' ? "Plaidoyer/Lobbying" : "Advocacy/Lobbying",
+  language === 'fr' ? "Plaidoyer / Lobbyisme" : "Advocacy / Lobbying",
   language === 'fr' ? "Environnement" : "Environment",
   language === 'fr' ? "Santé" : "Health",
   language === 'fr' ? "Développement local" : "Local development"
@@ -344,6 +344,7 @@ const Home: React.FC = () => {
 
         setNewsItems(publishedNews);
       } catch (error) {
+        console.error('Error loading newsletters from API:', error);
         setNewsItems([]); // Graceful fallback: show no news instead of error
       }
     };

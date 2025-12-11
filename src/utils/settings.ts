@@ -90,9 +90,6 @@ export const applyTheme = (theme: Theme): void => {
     root.style.setProperty('--primary-alpha-3', 'rgba(255, 107, 0, 0.3)');
     root.style.setProperty('--shadow-primary-hover', '0 8px 25px rgba(255, 107, 0, 0.4)');
   }
-  
-  // Dispatch event to notify components of theme change
-  window.dispatchEvent(new CustomEvent('imadel:theme:changed', { detail: { theme } }));
 };
 
 // Listen for settings updates

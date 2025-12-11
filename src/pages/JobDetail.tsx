@@ -2,7 +2,7 @@ import React, { useState, useEffect, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaBriefcase } from 'react-icons/fa';
 import './JobDetail.css';
-import { jobsApi } from '../services/api';
+import { jobsApi, applicationsApi } from '../services/api';
 
 interface JobItem {
   id: string;
@@ -224,18 +224,39 @@ const JobDetail: React.FC = () => {
     setSubmitStatus('idle');
 
     try {
-      // TODO: Handle form submission with backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSubmitStatus('success');
-      setFormData({ name: '', email: '', phone: '', address: '', coverLetter: '' });
-      setResume(null);
-      
-      setTimeout(() => {
-        navigate('/getinvolved');
-      }, 2000);
-    } catch (error) {
+      if (!job || !resume) {
+        throw new Error('Missing required information');
+      }
+
+      // Submit application to backend
+      // Backend will automatically send confirmation email to the applicant
+      const response = await applicationsApi.create({
+        jobId: job.id,
+        applicantName: formData.name,
+        applicantEmail: formData.email,
+        applicantPhone: formData.phone,
+        applicantAddress: formData.address,
+        coverLetter: formData.coverLetter || undefined,
+        resume: resume,
+      });
+
+      if (response.success) {
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', phone: '', address: '', coverLetter: '' });
+        setResume(null);
+        
+        // Show success message and redirect after a delay
+        setTimeout(() => {
+          navigate('/getinvolved');
+        }, 3000);
+      } else {
+        throw new Error(response.message || 'Failed to submit application');
+      }
+    } catch (error: any) {
+      console.error('Error submitting application:', error);
       setSubmitStatus('error');
+      // Show error message to user
+      alert(error.message || 'There was an error submitting your application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -437,7 +458,13 @@ const JobDetail: React.FC = () => {
 
               {submitStatus === 'success' && (
                 <div className="success-message" role="alert">
-                  Application submitted successfully! Redirecting...
+                  <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Application Submitted Successfully!</h3>
+                  <p style={{ marginBottom: '0.5rem' }}>
+                    Thank you for your interest in this position. A confirmation email has been sent to <strong>{formData.email}</strong>.
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>
+                    Redirecting to job listings...
+                  </p>
                 </div>
               )}
 

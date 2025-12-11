@@ -43,21 +43,14 @@ function AppContent() {
     const settings = getSettings();
     applyTheme(settings.theme || 'orange');
     
-    // Listen for theme changes from admin panel
-    const handleThemeChange = (event: CustomEvent) => {
-      applyTheme(event.detail.theme || 'orange');
-    };
-    
     const handleSettingsUpdate = () => {
       const updatedSettings = getSettings();
       applyTheme(updatedSettings.theme || 'orange');
     };
     
-    window.addEventListener('imadel:theme:changed', handleThemeChange as EventListener);
     window.addEventListener('imadel:settings:updated', handleSettingsUpdate);
     
     return () => {
-      window.removeEventListener('imadel:theme:changed', handleThemeChange as EventListener);
       window.removeEventListener('imadel:settings:updated', handleSettingsUpdate);
     };
   }, []);

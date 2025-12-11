@@ -17,6 +17,31 @@
   min-width: 40px;
 }
 
+/* Responsive adjustments for language switcher */
+@media (max-width: 768px) {
+  .lang-btn {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    min-width: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lang-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    min-width: 32px;
+  }
+}
+
+@media (max-width: 360px) {
+  .lang-btn {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    min-width: 30px;
+  }
+}
+
 .lang-btn:hover {
   background: rgba(255, 107, 0, 0.1);
 }

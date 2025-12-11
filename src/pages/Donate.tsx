@@ -61,7 +61,7 @@ const Donate: React.FC = () => {
     try {
       const amountNum = parseFloat(mobileMoneyForm.amount);
       if (isNaN(amountNum) || amountNum < 100) {
-        setMobileError('Le montant minimum est de 100 XOF');
+        setMobileError(t('minimumAmountError'));
         setIsProcessingMobile(false);
         return;
       }
@@ -88,11 +88,11 @@ const Donate: React.FC = () => {
           setMobileError(response.message || 'Erreur lors de l\'initialisation du paiement');
         }
       } else {
-        setMobileError(response.message || 'Erreur lors de l\'initialisation du paiement');
+        setMobileError(response.message || t('paymentInitError'));
       }
     } catch (err: any) {
       console.error('Mobile Money error:', err);
-      setMobileError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
+      setMobileError(err.message || t('genericError'));
     } finally {
       setIsProcessingMobile(false);
     }
@@ -166,48 +166,48 @@ const Donate: React.FC = () => {
             {activeTab === 'mobile' && (
               <div className="tab-panel" role="tabpanel">
                 <div className="mobile-money-section">
-                  <h3>Mobile Money</h3>
+                  <h3>{t('mobileMoneyTitle')}</h3>
                   
                   <div className="payment-options">
                     <div className="payment-option">
-                      <h4>Option 1: Paiement Manuel</h4>
+                      <h4>{t('option1ManualPayment')}</h4>
                       <p className="option-description">
-                        Effectuez un virement manuel vers l'un de nos numéros Mobile Money, puis envoyez votre reçu.
+                        {t('manualPaymentDesc')}
                       </p>
                       
                       <div className="mobile-money-numbers">
                         <div className="mobile-number-card">
-                          <h5>Orange Money</h5>
+                          <h5>{t('orangeMoney')}</h5>
                           <div className="number-display">
                             <strong>{settings.orangeMoney}</strong>
                           </div>
-                          <p className="account-name">Nom du compte: IMADEL</p>
+                          <p className="account-name">{t('accountNameLabel')}: {t('accountNameValue')}</p>
                         </div>
                         
                         <div className="mobile-number-card">
-                          <h5>Malitel</h5>
+                          <h5>{t('malitel')}</h5>
                           <div className="number-display">
                             <strong>{settings.malitel}</strong>
                           </div>
-                          <p className="account-name">Nom du compte: IMADEL</p>
+                          <p className="account-name">{t('accountNameLabel')}: {t('accountNameValue')}</p>
                         </div>
                       </div>
 
                       <div className="donation-note-inline">
                         <p>
-                          Après votre virement, envoyez votre reçu à <a href="mailto:imadel@imadel.net">imadel@imadel.net</a> avec l'objet "Don Mobile Money".
+                          {t('afterTransferSendReceipt')} <a href="mailto:imadel@imadel.net">imadel@imadel.net</a> {t('withSubject')} "{t('donationSubject')}".
                         </p>
                       </div>
                     </div>
 
                     <div className="divider">
-                      <span>OU</span>
+                      <span>{t('or')}</span>
                     </div>
 
                     <div className="payment-option">
-                      <h4>Option 2: Paiement Automatique</h4>
+                      <h4>{t('option2AutomaticPayment')}</h4>
                       <p className="option-description">
-                        Paiement sécurisé et instantané en ligne. Entrez vos informations et vous serez redirigé vers la page de paiement sécurisée.
+                        {t('automaticPaymentDesc')}
                       </p>
                       
                       <form className="donation-form" onSubmit={handleMobileMoneySubmit}>
@@ -219,7 +219,7 @@ const Donate: React.FC = () => {
 
                         <div className="form-group">
                           <label htmlFor="mobile-donorName">
-                            Nom complet <span className="required">*</span>
+                            {t('fullName')} <span className="required">{t('required')}</span>
                           </label>
                           <input
                             type="text"
@@ -227,13 +227,13 @@ const Donate: React.FC = () => {
                             value={mobileMoneyForm.donorName}
                             onChange={(e) => setMobileMoneyForm({ ...mobileMoneyForm, donorName: e.target.value })}
                             required
-                            placeholder="Votre nom complet"
+                            placeholder={t('fullNamePlaceholder')}
                           />
                         </div>
 
                         <div className="form-group">
                           <label htmlFor="mobile-donorEmail">
-                            Email <span className="required">*</span>
+                            {t('email')} <span className="required">{t('required')}</span>
                           </label>
                           <input
                             type="email"
@@ -241,13 +241,13 @@ const Donate: React.FC = () => {
                             value={mobileMoneyForm.donorEmail}
                             onChange={(e) => setMobileMoneyForm({ ...mobileMoneyForm, donorEmail: e.target.value })}
                             required
-                            placeholder="votre@email.com"
+                            placeholder={t('emailPlaceholder')}
                           />
                         </div>
 
                         <div className="form-group">
                           <label htmlFor="mobile-phoneNumber">
-                            Numéro de téléphone <span className="required">*</span>
+                            {t('phoneNumberLabel')} <span className="required">{t('required')}</span>
                           </label>
                           <input
                             type="tel"
@@ -255,26 +255,26 @@ const Donate: React.FC = () => {
                             value={mobileMoneyForm.phoneNumber}
                             onChange={(e) => setMobileMoneyForm({ ...mobileMoneyForm, phoneNumber: e.target.value })}
                             required
-                            placeholder="+223 XX XX XX XX"
+                            placeholder={t('phoneNumberPlaceholder')}
                           />
                         </div>
 
                         <div className="form-group">
-                          <label htmlFor="mobile-provider">Opérateur</label>
+                          <label htmlFor="mobile-provider">{t('provider')}</label>
                           <select
                             id="mobile-provider"
                             value={mobileMoneyForm.provider}
                             onChange={(e) => setMobileMoneyForm({ ...mobileMoneyForm, provider: e.target.value as 'orange' | 'malitel' })}
                           >
-                            <option value="orange">Orange Money</option>
-                            <option value="malitel">Malitel</option>
+                            <option value="orange">{t('orangeMoney')}</option>
+                            <option value="malitel">{t('malitel')}</option>
                           </select>
                         </div>
 
                         <div className="form-row">
                           <div className="form-group">
                             <label htmlFor="mobile-amount">
-                              Montant <span className="required">*</span>
+                              {t('amountLabel')} <span className="required">{t('required')}</span>
                             </label>
                             <input
                               type="number"
@@ -284,12 +284,12 @@ const Donate: React.FC = () => {
                               required
                               min="100"
                               step="1"
-                              placeholder="100"
+                              placeholder={t('amountPlaceholder')}
                             />
                           </div>
 
                           <div className="form-group">
-                            <label htmlFor="mobile-currency">Devise</label>
+                            <label htmlFor="mobile-currency">{t('currencyLabel')}</label>
                             <select
                               id="mobile-currency"
                               value={mobileMoneyForm.currency}
@@ -305,7 +305,7 @@ const Donate: React.FC = () => {
                         </div>
 
                         <div className="form-group">
-                          <label htmlFor="mobile-purpose">Objectif du don</label>
+                          <label htmlFor="mobile-purpose">{t('purposeOfDonation')}</label>
                           <select
                             id="mobile-purpose"
                             value={mobileMoneyForm.purpose}
@@ -324,7 +324,7 @@ const Donate: React.FC = () => {
                           className="btn-donate"
                           disabled={isProcessingMobile}
                         >
-                          {isProcessingMobile ? 'Traitement...' : 'Traiter le Paiement'}
+                          {isProcessingMobile ? t('processing') : t('processPayment')}
                         </button>
                       </form>
                     </div>
@@ -337,56 +337,56 @@ const Donate: React.FC = () => {
             {activeTab === 'bank' && (
               <div className="tab-panel" role="tabpanel">
             <div className="bank-transfer">
-                  <h3>Virement Bancaire</h3>
+                  <h3>{t('bankTransferTitle')}</h3>
                   
               <div className="bank-details">
                 <div className="bank-info">
-                      <h4>Compte Bancaire au Mali</h4>
+                      <h4>{t('bankAccountMali')}</h4>
                   <dl>
                     <div className="bank-detail-item">
-                          <dt>Nom de la Banque:</dt>
+                          <dt>{t('bankName')}:</dt>
                       <dd>{settings.bankMali.bankName}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Nom du Compte:</dt>
+                          <dt>{t('accountName')}:</dt>
                           <dd>{settings.bankMali.accountName}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Numéro de Compte:</dt>
+                          <dt>{t('accountNumber')}:</dt>
                       <dd>{settings.bankMali.accountNumber}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Agence:</dt>
+                          <dt>{t('agency')}:</dt>
                       <dd>{settings.bankMali.agency}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Code Swift:</dt>
+                          <dt>{t('swiftCode')}:</dt>
                       <dd>{settings.bankMali.swiftCode}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div className="bank-info">
-                      <h4>Virement International</h4>
+                      <h4>{t('internationalTransfer')}</h4>
                   <dl>
                     <div className="bank-detail-item">
-                          <dt>Nom de la Banque:</dt>
+                          <dt>{t('bankName')}:</dt>
                       <dd>{settings.bankInternational.bankName}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Nom du Compte:</dt>
+                          <dt>{t('accountName')}:</dt>
                       <dd>{settings.bankInternational.accountName}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Numéro de Compte:</dt>
+                          <dt>{t('accountNumber')}:</dt>
                       <dd>{settings.bankInternational.accountNumber}</dd>
                     </div>
                     <div className="bank-detail-item">
-                      <dt>IBAN:</dt>
+                      <dt>{t('iban')}:</dt>
                       <dd>{settings.bankInternational.iban}</dd>
                     </div>
                     <div className="bank-detail-item">
-                          <dt>Code Swift:</dt>
+                          <dt>{t('swiftCode')}:</dt>
                       <dd>{settings.bankInternational.swiftCode}</dd>
                     </div>
                   </dl>
@@ -394,24 +394,24 @@ const Donate: React.FC = () => {
               </div>
 
                   <div className="divider">
-                    <span>OU</span>
+                    <span>{t('or')}</span>
                   </div>
 
                   <div className="payment-option">
-                    <h4>Paiement en Ligne</h4>
+                    <h4>{t('onlinePayment')}</h4>
                     <p className="option-description">
-                      Vous pouvez aussi payer en ligne en sélectionnant "Virement via passerelle" dans le formulaire ci-dessous.
+                      {t('onlinePaymentDesc')}
                     </p>
                     <DonationForm defaultPaymentMethod="bank" />
             </div>
 
             <div className="donation-note" role="note" aria-labelledby="donation-note-heading">
-                    <h3 id="donation-note-heading">Note Importante</h3>
+                    <h3 id="donation-note-heading">{t('importantNote')}</h3>
               <p>
-                      Veuillez inclure votre nom et "Don" dans la description du virement pour un suivi correct de votre contribution.
+                      {t('bankTransferNote1')}
               </p>
               <p>
-                      Pour les reçus de dons ou toute question, veuillez contacter notre équipe financière à :
+                      {t('bankTransferNote2')}
               </p>
                     <a href="mailto:imadel@imadel.net" aria-label="Email de l'équipe financière IMADEL">
                 imadel@imadel.net
@@ -425,9 +425,9 @@ const Donate: React.FC = () => {
             {activeTab === 'card' && (
               <div className="tab-panel" role="tabpanel">
                 <div className="card-payment-section">
-                  <h3>Carte Bancaire</h3>
+                  <h3>{t('cardPaymentTitle')}</h3>
                   <p className="option-description">
-                    Paiement sécurisé par carte bancaire (Visa, Mastercard). Entrez vos informations et vous serez redirigé vers la page de paiement sécurisée.
+                    {t('cardPaymentDesc')}
                   </p>
                   <DonationForm defaultPaymentMethod="card" />
                 </div>
@@ -435,54 +435,52 @@ const Donate: React.FC = () => {
             )}
 
             <div className="tax-info" role="note" aria-labelledby="tax-info-heading">
-              <h3 id="tax-info-heading">Avantages Fiscaux</h3>
+              <h3 id="tax-info-heading">{t('taxBenefits')}</h3>
               <p>
-                IMADEL est une organisation non gouvernementale enregistrée au Mali. Vos dons peuvent être déductibles des impôts
-                selon votre pays de résidence et les lois fiscales locales. Veuillez consulter un conseiller fiscal pour
-                des informations spécifiques à votre situation.
+                {t('taxBenefitsDesc')}
               </p>
             </div>
           </section>
 
           <section className="impact-section" aria-labelledby="impact-heading">
-            <h2 id="impact-heading">Votre Don Fait la Différence</h2>
+            <h2 id="impact-heading">{t('yourDonationMakesDifference')}</h2>
             <div className="impact-grid">
               <div className="impact-item">
                 <div className="impact-icon" aria-hidden="true">
                   <FaTint size={40} color="var(--primary, #FF6B00)" />
                 </div>
-                <h4>Eau Propre</h4>
-                <p>Aidez à fournir un accès à l'eau potable pour les communautés</p>
+                <h4>{t('cleanWater')}</h4>
+                <p>{t('cleanWaterDesc')}</p>
               </div>
               <div className="impact-item">
                 <div className="impact-icon" aria-hidden="true">
                   <FaHospital size={40} color="var(--primary, #FF6B00)" />
                 </div>
-                <h4>Soins de Santé</h4>
-                <p>Soutenez les programmes de santé et les initiatives de soins maternels</p>
+                <h4>{t('healthcareTitle')}</h4>
+                <p>{t('healthcareDesc')}</p>
               </div>
               <div className="impact-item">
                 <div className="impact-icon" aria-hidden="true">
                   <FaBook size={40} color="var(--primary, #FF6B00)" />
                 </div>
-                <h4>Éducation</h4>
-                <p>Financez des programmes éducatifs et la réhabilitation d'écoles</p>
+                <h4>{t('educationTitle')}</h4>
+                <p>{t('educationDesc')}</p>
               </div>
               <div className="impact-item">
                 <div className="impact-icon" aria-hidden="true">
                   <FaSeedling size={40} color="var(--primary, #FF6B00)" />
                 </div>
-                <h4>Sécurité Alimentaire</h4>
-                <p>Contribuez aux programmes de sécurité alimentaire et de nutrition</p>
+                <h4>{t('foodSecurity')}</h4>
+                <p>{t('foodSecurityDesc')}</p>
               </div>
             </div>
           </section>
 
           <section className="cta-section">
-            <h2>Impliquez-vous</h2>
-            <p>Au-delà des dons, il existe de nombreuses façons de soutenir notre mission.</p>
+            <h2>{t('getInvolvedTitle')}</h2>
+            <p>{t('getInvolvedDesc')}</p>
             <Link to="/getinvolved" className="btn-primary">
-              En Savoir Plus
+              {t('learnMore')}
             </Link>
           </section>
         </div>

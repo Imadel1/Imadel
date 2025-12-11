@@ -1,5 +1,6 @@
 .about-us {
   padding-top: 0;
+  overflow-x: hidden; /* Prevent horizontal scroll on mobile (keeps header width consistent) */
 }
 
 .container {
@@ -19,6 +20,7 @@
   text-align: center;
   margin-bottom: 0;
   overflow: hidden;
+  width: 100%;
 }
 
 .hero-background {

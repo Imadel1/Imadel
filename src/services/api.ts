@@ -8,8 +8,9 @@
  * VITE_API_BASE_URL=https://imadelapi-production.up.railway.app/api
  */
 
+// Ensure base URL includes /api
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://imadelapi-production.up.railway.app';
+  (import.meta.env.VITE_API_BASE_URL || 'https://imadelapi-production.up.railway.app/api').replace(/\/$/, '');
 
 // Token management
 const getToken = (): string | null => {
@@ -63,12 +64,13 @@ async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   const token = getToken();
   
-  const headers = new Headers(options.headers || {});
-headers.set('Content-Type', 'application/json');
-
-if (token) {
-  headers.set('Authorization', `Bearer ${token}`);
-}
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> | undefined),
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

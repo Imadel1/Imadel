@@ -419,7 +419,7 @@ const Home: React.FC = () => {
           <div className="hero-content">
             <div className="hero-text">
               <h1 className="hero-title">
-                {t('heroTitle')} <br />{t('heroTitleHighlight')} <span className="hero-highlight">{language === 'fr' ? 'Changement' : 'Change'}</span>
+                {t('heroTitle')} <br /><span className="hero-highlight">{t('heroTitleHighlight')}</span>
               </h1>
               <p className="hero-tagline">
                 {t('heroTagline')}

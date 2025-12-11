@@ -459,17 +459,25 @@ export const newslettersApi = {
     }
     const query = queryParams.toString();
 
-    // Public fetch without auth header
+    // Public fetch without auth header; returns undefined on 401/403/404
     const publicFetch = async (path: string) => {
-      const res = await fetch(`${API_BASE_URL}${path}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.message || res.statusText);
+      try {
+        const res = await fetch(`${API_BASE_URL}${path}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if ([401, 403, 404].includes(res.status)) return undefined;
+          throw new Error(data?.message || res.statusText);
+        }
+        return data;
+      } catch (err: any) {
+        if (err?.message?.includes('Unauthorized') || err?.message?.includes('Not authorized') || err?.message?.includes('Not Found')) {
+          return undefined;
+        }
+        throw err;
       }
-      return data;
     };
 
     // Try public endpoints first (no auth), then fallback to secured apiRequest
@@ -495,8 +503,15 @@ export const newslettersApi = {
       }
     }
 
-    // Final fallback with apiRequest (may include token if logged in)
-    return await apiRequest(`/newsletters${query ? `?${query}` : ''}`);
+    // Final fallback with apiRequest (may include token if logged in). If still unauthorized/not found, return empty array.
+    try {
+      return await apiRequest(`/newsletters${query ? `?${query}` : ''}`);
+    } catch (err: any) {
+      if (err?.message?.includes('Unauthorized') || err?.message?.includes('Not authorized') || err?.message?.includes('Not Found')) {
+        return [];
+      }
+      throw err;
+    }
   },
 
   /**

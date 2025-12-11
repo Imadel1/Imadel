@@ -63,13 +63,13 @@ async function apiRequest<T>(
 ): Promise<ApiResponse<T>> {
   const token = getToken();
   
-  const headers: Record<string, string> = {
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
+    ...options.headers,
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   try {

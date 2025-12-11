@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "../utils/i18n";
 import LanguageSwitcher from "./LanguageSwitcher";
 import "./Header.css";
@@ -7,16 +7,7 @@ import logo from "../assets/cropped-nouveau_logo.png";
 
 const Header = () => {
   const { t } = useTranslation();
-  const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-  const isHome = location.pathname === "/";
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -37,8 +28,8 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // On non-home pages, always show the solid (scrolled) style
-  const headerClass = !isHome || scrolled ? "scrolled" : "";
+  // Always use solid (scrolled) style to ensure visibility across pages
+  const headerClass = "scrolled";
 
   return (
     <header className={`${headerClass} ${isMenuOpen ? "menu-open" : ""}`}>

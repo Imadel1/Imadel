@@ -106,7 +106,6 @@ export const translations = {
     accepted: 'Accepté',
     rejected: 'Rejeté',
     fullName: 'Nom complet',
-    email: 'Email',
     phone: 'Téléphone',
     address: 'Adresse',
     resume: 'CV',
@@ -149,8 +148,6 @@ export const translations = {
     mobileMoneyTitle: 'Mobile Money',
     option1ManualPayment: 'Option 1: Paiement Manuel',
     manualPaymentDesc: 'Effectuez un virement manuel vers l\'un de nos numéros Mobile Money, puis envoyez votre reçu.',
-    orangeMoney: 'Orange Money',
-    malitel: 'Malitel',
     accountNameLabel: 'Nom du compte',
     accountNameValue: 'IMADEL',
     afterTransferSendReceipt: 'Après votre virement, envoyez votre reçu à',
@@ -161,19 +158,20 @@ export const translations = {
     automaticPaymentDesc: 'Paiement sécurisé et instantané en ligne. Entrez vos informations et vous serez redirigé vers la page de paiement sécurisée.',
     provider: 'Opérateur',
     phoneNumberLabel: 'Numéro de téléphone',
-    fullName: 'Nom complet',
+    phoneNumberPlaceholder: '+223 XX XX XX XX',
+    fullNamePlaceholder: 'Votre nom complet',
+    email: 'Email',
+    emailPlaceholder: 'votre@email.com',
+    required: '*',
+    amountLabel: 'Montant',
+    amountPlaceholder: '100',
+    currencyLabel: 'Devise',
     purposeOfDonation: 'Objectif du don',
     processing: 'Traitement...',
     processPayment: 'Traiter le Paiement',
     bankTransferTitle: 'Virement Bancaire',
     bankAccountMali: 'Compte Bancaire au Mali',
     internationalTransfer: 'Virement International',
-    bankName: 'Nom de la Banque',
-    accountName: 'Nom du Compte',
-    accountNumber: 'Numéro de Compte',
-    agency: 'Agence',
-    swiftCode: 'Code Swift',
-    iban: 'IBAN',
     onlinePayment: 'Paiement en Ligne',
     onlinePaymentDesc: 'Vous pouvez aussi payer en ligne en sélectionnant "Virement via passerelle" dans le formulaire ci-dessous.',
     importantNote: 'Note Importante',
@@ -194,7 +192,6 @@ export const translations = {
     foodSecurityDesc: 'Contribuez aux programmes de sécurité alimentaire et de nutrition',
     getInvolvedTitle: 'Impliquez-vous',
     getInvolvedDesc: 'Au-delà des dons, il existe de nombreuses façons de soutenir notre mission.',
-    learnMore: 'En Savoir Plus',
     minimumAmountError: 'Le montant minimum est de 100 XOF',
     paymentInitError: 'Erreur lors de l\'initialisation du paiement',
     genericError: 'Une erreur est survenue. Veuillez réessayer.',
@@ -204,23 +201,11 @@ export const translations = {
     water: 'Eau potable',
     emergency: 'Urgence',
     other: 'Autre',
-    
-    // Donate Page - NEW KEYS ADDED
-    waysToDonate: 'Moyens de donner',
-    paymentMethods: 'Méthodes de paiement',
-    mobileMoney: 'Mobile Money',
-    bankTransfer: 'Virement bancaire',
-    cardPayment: 'Paiement par carte',
-    
-    // Project Listing
     showingProjects: 'Affichage de',
     ofProjects: 'sur',
     readMore: 'LIRE PLUS',
     previousPage: 'Précédent',
     nextPage: 'Suivant',
-    projectsCompleted: 'Projets Réalisés',
-    
-    // Get Involved
     getInvolvedInMission: 'Impliquez-vous dans notre mission',
     joinUsToMakeDifference: 'Rejoignez-nous pour faire la différence dans les communautés à travers le Mali',
     servingLocalDevelopment: 'Au service du développement local',
@@ -288,7 +273,7 @@ export const translations = {
     
     // Home Page
     heroTitle: 'Petit Effort',
-    heroTitleHighlight: 'Grand ',
+    heroTitleHighlight: 'Grand Changement',
     heroTagline: 'Nous sommes prêts à fournir un meilleur service pour rendre le monde heureux',
     becomeVolunteer: 'Devenir Bénévole',
     donateNow: 'Faire un Don Maintenant',
@@ -296,6 +281,7 @@ export const translations = {
     ourImpact: 'Notre Impact au Fil des Ans',
     yearsOfService: 'Années de Service',
     livesTouched: 'Vies Touchées',
+    projectsCompleted: 'Projets Réalisés',
     communitiesServed: 'Communautés Servies',
     partnersCount: 'Partenaires',
     latestNews: 'Dernières Actualités et Projets',
@@ -308,7 +294,6 @@ export const translations = {
     partnersPreview: 'Nos Partenaires',
     ctaTitle: 'Rejoignez Notre Mission',
     ctaDescription: 'Ensemble, nous pouvons créer un changement durable dans les communautés à travers le Mali.',
-    learnMore: 'En Savoir Plus',
     
     // Objectives
     objective1Title: 'Soutenir les Communautés',
@@ -382,7 +367,6 @@ export const translations = {
     shortlisted: 'Shortlisted',
     accepted: 'Accepted',
     rejected: 'Rejected',
-    fullName: 'Full Name',
     email: 'Email',
     phone: 'Phone',
     address: 'Address',
@@ -397,8 +381,6 @@ export const translations = {
     blueTheme: 'Blue',
     themeDescription: 'Choose the primary color theme for the website. Changes will be applied immediately.',
     phoneNumber: 'Phone Number',
-    orangeMoney: 'Orange Money',
-    malitel: 'Malitel',
     bankMali: 'Bank Account - Mali',
     bankInternational: 'International Transfer',
     bankName: 'Bank Name',
@@ -423,6 +405,7 @@ export const translations = {
     withSubject: 'with subject',
     provider: 'Provider',
     phoneNumberLabel: 'Phone Number',
+    fullName: 'Full Name',
     purposeOfDonation: 'Purpose of Donation',
     processPayment: 'Process Payment',
     waysToDonate: 'Ways to Donate',
@@ -442,7 +425,6 @@ export const translations = {
     automaticPaymentDesc: 'Secure and instant online payment. Enter your information and you will be redirected to the secure payment page.',
     phoneNumberPlaceholder: '+223 XX XX XX XX',
     fullNamePlaceholder: 'Your full name',
-    email: 'Email',
     emailPlaceholder: 'your@email.com',
     required: '*',
     amountLabel: 'Amount',
@@ -452,12 +434,6 @@ export const translations = {
     bankTransferTitle: 'Bank Transfer',
     bankAccountMali: 'Bank Account in Mali',
     internationalTransfer: 'International Transfer',
-    bankName: 'Bank Name',
-    accountName: 'Account Name',
-    accountNumber: 'Account Number',
-    agency: 'Agency',
-    swiftCode: 'Swift Code',
-    iban: 'IBAN',
     onlinePayment: 'Online Payment',
     onlinePaymentDesc: 'You can also pay online by selecting "Bank Transfer via Gateway" in the form below.',
     importantNote: 'Important Note',
@@ -478,7 +454,6 @@ export const translations = {
     foodSecurityDesc: 'Contribute to food security and nutrition programs',
     getInvolvedTitle: 'Get Involved',
     getInvolvedDesc: 'Beyond donations, there are many ways to support our mission.',
-    learnMore: 'Learn More',
     minimumAmountError: 'The minimum amount is 100 XOF',
     paymentInitError: 'Error initializing payment',
     genericError: 'An error occurred. Please try again.',
@@ -488,23 +463,10 @@ export const translations = {
     water: 'Drinking Water',
     emergency: 'Emergency',
     other: 'Other',
-    
-    // Donate Page - NEW KEYS ADDED
-    waysToDonate: 'Ways to Donate',
-    paymentMethods: 'Payment Methods',
-    mobileMoney: 'Mobile Money',
-    bankTransfer: 'Bank Transfer',
-    cardPayment: 'Card Payment',
-    
-    // Project Listing
     showingProjects: 'Showing',
     ofProjects: 'of',
-    readMore: 'READ MORE',
     previousPage: 'Previous',
     nextPage: 'Next',
-    projectsCompleted: 'Projects Completed',
-    
-    // Get Involved
     getInvolvedInMission: 'Get Involved in Our Mission',
     joinUsToMakeDifference: 'Join us to make a difference in communities across Mali',
     servingLocalDevelopment: 'Serving Local Development',
@@ -576,10 +538,12 @@ export const translations = {
     heroTagline: 'We are ready to provide better service to make the world happy',
     becomeVolunteer: 'Become a Volunteer',
     donateNow: 'Donate Now',
+    readMore: 'READ MORE',
     news: 'NEWS',
     ourImpact: 'Our Impact Over the Years',
     yearsOfService: 'Years of Service',
     livesTouched: 'Lives Touched',
+    projectsCompleted: 'Projects Completed',
     communitiesServed: 'Communities Served',
     partnersCount: 'Partners',
     latestNews: 'Latest News & Projects',
@@ -592,7 +556,6 @@ export const translations = {
     partnersPreview: 'Our Partners',
     ctaTitle: 'Join Our Mission',
     ctaDescription: 'Together, we can create lasting change in communities across Mali.',
-    learnMore: 'Learn More',
     
     // Objectives
     objective1Title: 'Support Communities',
@@ -613,9 +576,15 @@ export const translations = {
 };
 
 // Get translation for a key
-export const t = (key: keyof typeof translations.fr, lang?: Language): string => {
+type TranslationKeysFr = keyof typeof translations.fr;
+
+export const t = (key: TranslationKeysFr, lang?: Language): string => {
   const currentLang = lang || getLanguage();
-  return translations[currentLang][key] || key;
+  const value = translations[currentLang][key];
+  if (value === undefined && typeof import.meta !== 'undefined' && import.meta.env?.MODE !== 'production') {
+    console.warn(`Missing translation for key "${key}" in language "${currentLang}"`);
+  }
+  return value ?? key;
 };
 
 // Hook for React components

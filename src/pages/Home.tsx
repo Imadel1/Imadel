@@ -344,7 +344,6 @@ const Home: React.FC = () => {
 
         setNewsItems(publishedNews);
       } catch (error) {
-        console.error('Error loading newsletters from API:', error);
         setNewsItems([]); // Graceful fallback: show no news instead of error
       }
     };

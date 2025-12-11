@@ -448,9 +448,8 @@ export const applicationsApi = {
 export const newslettersApi = {
   /**
    * Get all newsletter content items
-   * GET /api/newsletters?published=true
-   * Note: Backend may return content items or subscribers based on query params
-   * If /newsletters doesn't work, try /newsletters/public or /newsletters/content as fallback
+   * GET /api/newsletters?published=true (public, no auth)
+   * If unauthorized or not found, return empty list without throwing.
    */
   getAll: async (params?: { published?: boolean }) => {
     const queryParams = new URLSearchParams();
@@ -459,53 +458,17 @@ export const newslettersApi = {
     }
     const query = queryParams.toString();
 
-    // Public fetch without auth header; returns undefined on 401/403/404
-    const publicFetch = async (path: string) => {
-      try {
-        const res = await fetch(`${API_BASE_URL}${path}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          if ([401, 403, 404].includes(res.status)) return undefined;
-          throw new Error(data?.message || res.statusText);
-        }
-        return data;
-      } catch (err: any) {
-        if (err?.message?.includes('Unauthorized') || err?.message?.includes('Not authorized') || err?.message?.includes('Not Found')) {
-          return undefined;
-        }
-        throw err;
-      }
-    };
-
-    // Try public endpoints first (no auth), then fallback to secured apiRequest
-    const paths = [
-      `/newsletters/public${query ? `?${query}` : ''}`,
-      `/newsletters/content${query ? `?${query}` : ''}`,
-      `/newsletters${query ? `?${query}` : ''}`,
-    ];
-
-    for (const p of paths) {
-      try {
-        return await publicFetch(p);
-      } catch (err: any) {
-        // continue to next path on 401/403/404
-        if (
-          err.message?.includes('Unauthorized') ||
-          err.message?.includes('Not authorized') ||
-          err.message?.includes('Not Found')
-        ) {
-          continue;
-        }
-        throw err;
-      }
-    }
-
-    // Final fallback with apiRequest (may include token if logged in). If still unauthorized/not found, return empty array.
     try {
-      return await apiRequest(`/newsletters${query ? `?${query}` : ''}`);
+      const res = await fetch(`${API_BASE_URL}/newsletters${query ? `?${query}` : ''}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if ([401, 403, 404].includes(res.status)) return [];
+        throw new Error(data?.message || res.statusText);
+      }
+      return data;
     } catch (err: any) {
       if (err?.message?.includes('Unauthorized') || err?.message?.includes('Not authorized') || err?.message?.includes('Not Found')) {
         return [];

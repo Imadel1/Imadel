@@ -415,6 +415,11 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
   border-left: 4px solid var(--primary, #FF6B00);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  line-height: 1.4;
 }
 
 .area-item:hover {

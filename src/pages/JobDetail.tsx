@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaBriefcase } from 'react-icons/fa';
 import './JobDetail.css';
 import { jobsApi, applicationsApi } from '../services/api';
+import { useTranslation } from '../utils/i18n';
 
 interface JobItem {
   id: string;
@@ -49,6 +50,7 @@ const JobDetail: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const { t } = useTranslation();
 
   // Scroll to top when component mounts or ID changes
   useEffect(() => {
@@ -105,10 +107,10 @@ const JobDetail: React.FC = () => {
       <div className="job-detail-page">
         <div className="container">
           <div className="error-message">
-            <h1>Job Not Found</h1>
-            <p>The job posting you're looking for doesn't exist or has been removed.</p>
+            <h1>{t('jobNotFoundTitle')}</h1>
+            <p>{t('jobNotFoundDesc')}</p>
             <Link to="/getinvolved" className="btn-primary">
-              View All Job Openings
+              {t('viewAllJobOpenings')}
             </Link>
           </div>
         </div>
@@ -211,7 +213,7 @@ const JobDetail: React.FC = () => {
       const deadline = new Date(job.deadline);
       if (deadline < new Date()) {
         setSubmitStatus('error');
-        alert('Sorry, the application deadline for this position has passed.');
+        alert(t('deadlinePassedAlert'));
         return;
       }
     }
@@ -266,17 +268,17 @@ const JobDetail: React.FC = () => {
     <div className="job-detail-page">
       <div className="container">
         <nav className="breadcrumb" aria-label="Breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{t('home')}</Link>
           <span aria-hidden="true"> / </span>
-          <Link to="/getinvolved">Get Involved</Link>
+          <Link to="/getinvolved">{t('getInvolved')}</Link>
           <span aria-hidden="true"> / </span>
           <span aria-current="page">{job.title}</span>
         </nav>
 
         <div className="job-detail-container">
           <div className="job-detail-content">
-            <Link to="/getinvolved" className="back-button" aria-label="Back to job offers">
-              Back to Job Offers
+            <Link to="/getinvolved" className="back-button" aria-label={t('backToJobs')}>
+              {t('backToJobs')}
             </Link>
 
             <header className="job-header">
@@ -290,13 +292,13 @@ const JobDetail: React.FC = () => {
             </header>
 
             <div className="job-description">
-              <h2>Job Description</h2>
+              <h2>{t('jobDescription')}</h2>
               <p>{job.fullDescription}</p>
             </div>
 
             {job.requirements && job.requirements.length > 0 && (
               <div className="job-requirements">
-                <h2>Requirements</h2>
+                <h2>{t('requirements')}</h2>
                 <ul role="list">
                   {job.requirements.map((req, index) => (
                     <li key={index}>{req}</li>
@@ -307,7 +309,7 @@ const JobDetail: React.FC = () => {
 
             {job.responsibilities && job.responsibilities.length > 0 && (
               <div className="job-responsibilities">
-                <h2>Responsibilities</h2>
+                <h2>{t('responsibilities')}</h2>
                 <ul role="list">
                   {job.responsibilities.map((resp, index) => (
                     <li key={index}>{resp}</li>
@@ -318,7 +320,7 @@ const JobDetail: React.FC = () => {
           </div>
 
           <aside className="application-form" aria-label="Job application form">
-            <h2>Apply for this Position</h2>
+            <h2>{t('applyForPosition')}</h2>
             {job.deadline && new Date(job.deadline) < new Date() ? (
               <div style={{ 
                 padding: '2rem', 
@@ -327,19 +329,19 @@ const JobDetail: React.FC = () => {
                 borderRadius: '8px',
                 textAlign: 'center'
               }}>
-                <h3 style={{ color: '#dc3545', marginBottom: '1rem' }}>Application Deadline Passed</h3>
+                <h3 style={{ color: '#dc3545', marginBottom: '1rem' }}>{t('deadlinePassedTitle')}</h3>
                 <p style={{ color: '#666', marginBottom: '1rem' }}>
-                  The application deadline for this position was {new Date(job.deadline).toLocaleString()}.
+                  {t('deadlinePassedDescPrefix')} {new Date(job.deadline).toLocaleString()}.
                 </p>
                 <p style={{ color: '#666' }}>
-                  Applications are no longer being accepted for this position.
+                  {t('deadlinePassedDescSuffix')}
                 </p>
               </div>
             ) : (
             <form onSubmit={handleSubmit} noValidate>
               <div className="form-group">
                 <label htmlFor="name">
-                  Full Name <span className="required" aria-label="required">*</span>
+                  {t('fullName')} <span className="required" aria-label="required">*</span>
                 </label>
                 <input
                   type="text"
@@ -360,7 +362,7 @@ const JobDetail: React.FC = () => {
 
               <div className="form-group">
                 <label htmlFor="email">
-                  Email Address <span className="required" aria-label="required">*</span>
+                  {t('emailAddress')} <span className="required" aria-label="required">*</span>
                 </label>
                 <input
                   type="email"
@@ -381,7 +383,7 @@ const JobDetail: React.FC = () => {
 
               <div className="form-group">
                 <label htmlFor="phone">
-                  Phone Number <span className="required" aria-label="required">*</span>
+                  {t('phoneNumber')} <span className="required" aria-label="required">*</span>
                 </label>
                 <input
                   type="tel"
@@ -402,7 +404,7 @@ const JobDetail: React.FC = () => {
 
               <div className="form-group">
                 <label htmlFor="address">
-                  Address <span className="required" aria-label="required">*</span>
+                  {t('addressLabel')} <span className="required" aria-label="required">*</span>
                 </label>
                 <input
                   type="text"
@@ -423,7 +425,7 @@ const JobDetail: React.FC = () => {
 
               <div className="form-group">
                 <label htmlFor="resume">
-                  Resume/CV <span className="required" aria-label="required">*</span>
+                  {t('resumeLabel')} <span className="required" aria-label="required">*</span>
                 </label>
                 <input
                   type="file"
@@ -441,36 +443,36 @@ const JobDetail: React.FC = () => {
                     {errors.resume}
                   </span>
                 )}
-                <small>PDF or Word document, max 5MB</small>
+                <small>{t('resumeHelp')}</small>
               </div>
 
               <div className="form-group">
-                <label htmlFor="coverLetter">Cover Letter</label>
+                <label htmlFor="coverLetter">{t('coverLetter')}</label>
                 <textarea
                   id="coverLetter"
                   name="coverLetter"
                   value={formData.coverLetter}
                   onChange={handleInputChange}
                   rows={6}
-                  placeholder="Tell us why you're interested in this position..."
+                  placeholder={t('coverLetterPlaceholder')}
                 />
               </div>
 
               {submitStatus === 'success' && (
                 <div className="success-message" role="alert">
-                  <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Application Submitted Successfully!</h3>
+                  <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>{t('applicationSubmittedTitle')}</h3>
                   <p style={{ marginBottom: '0.5rem' }}>
-                    Thank you for your interest in this position. A confirmation email has been sent to <strong>{formData.email}</strong>.
+                    {t('applicationSubmittedMessagePrefix')} <strong>{formData.email}</strong>.
                   </p>
                   <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>
-                    Redirecting to job listings...
+                    {t('redirectingToJobs')}
                   </p>
                 </div>
               )}
 
               {submitStatus === 'error' && (
                 <div className="error-message" role="alert">
-                  There was an error submitting your application. Please try again.
+                  {t('applicationError')}
                 </div>
               )}
 
@@ -478,9 +480,9 @@ const JobDetail: React.FC = () => {
                 type="submit" 
                 className="submit-button"
                 disabled={isSubmitting}
-                aria-label={isSubmitting ? 'Submitting application' : 'Submit job application'}
+                aria-label={isSubmitting ? t('submittingApplication') : t('submitJobApplication')}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                {isSubmitting ? t('submitting') : t('submitApplication')}
               </button>
             </form>
             )}

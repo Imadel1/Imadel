@@ -367,17 +367,29 @@ export const applicationsApi = {
     applicantAddress: string;
     coverLetter?: string;
     resume: File;
+    jobTitle?: string;
   }) => {
     const token = getToken();
     const formData = new FormData();
     
     formData.append('jobId', applicationData.jobId);
+    // Also append generic "job" field for backend variants
+    formData.append('job', applicationData.jobId);
+    if (applicationData.jobTitle) {
+      formData.append('jobTitle', applicationData.jobTitle);
+    }
     formData.append('applicantName', applicationData.applicantName);
+    // Fallback fields some backends expect
+    formData.append('name', applicationData.applicantName);
     formData.append('applicantEmail', applicationData.applicantEmail);
+    formData.append('email', applicationData.applicantEmail);
     formData.append('applicantPhone', applicationData.applicantPhone);
+    formData.append('phone', applicationData.applicantPhone);
     formData.append('applicantAddress', applicationData.applicantAddress);
+    formData.append('address', applicationData.applicantAddress);
     if (applicationData.coverLetter) {
       formData.append('coverLetter', applicationData.coverLetter);
+      formData.append('message', applicationData.coverLetter);
     }
     formData.append('resume', applicationData.resume);
 
@@ -448,8 +460,9 @@ export const applicationsApi = {
 export const newslettersApi = {
   /**
    * Get all newsletter content items
-   * GET /api/newsletters?published=true (public, no auth)
-   * If unauthorized or not found, return empty list without throwing.
+   * GET /api/newsletters?published=true
+   * Note: Backend may return content items or subscribers based on query params
+   * If /newsletters doesn't work, try /newsletters/public or /newsletters/content as fallback
    */
   getAll: async (params?: { published?: boolean }) => {
     const queryParams = new URLSearchParams();
@@ -458,17 +471,53 @@ export const newslettersApi = {
     }
     const query = queryParams.toString();
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/newsletters${query ? `?${query}` : ''}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        if ([401, 403, 404].includes(res.status)) return [];
-        throw new Error(data?.message || res.statusText);
+    // Public fetch without auth header; returns undefined on 401/403/404
+    const publicFetch = async (path: string) => {
+      try {
+        const res = await fetch(`${API_BASE_URL}${path}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if ([401, 403, 404].includes(res.status)) return undefined;
+          throw new Error(data?.message || res.statusText);
+        }
+        return data;
+      } catch (err: any) {
+        if (err?.message?.includes('Unauthorized') || err?.message?.includes('Not authorized') || err?.message?.includes('Not Found')) {
+          return undefined;
+        }
+        throw err;
       }
-      return data;
+    };
+
+    // Try public endpoints first (no auth), then fallback to secured apiRequest
+    const paths = [
+      `/newsletters/public${query ? `?${query}` : ''}`,
+      `/newsletters/content${query ? `?${query}` : ''}`,
+      `/newsletters${query ? `?${query}` : ''}`,
+    ];
+
+    for (const p of paths) {
+      try {
+        return await publicFetch(p);
+      } catch (err: any) {
+        // continue to next path on 401/403/404
+        if (
+          err.message?.includes('Unauthorized') ||
+          err.message?.includes('Not authorized') ||
+          err.message?.includes('Not Found')
+        ) {
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    // Final fallback with apiRequest (may include token if logged in). If still unauthorized/not found, return empty array.
+    try {
+      return await apiRequest(`/newsletters${query ? `?${query}` : ''}`);
     } catch (err: any) {
       if (err?.message?.includes('Unauthorized') || err?.message?.includes('Not authorized') || err?.message?.includes('Not Found')) {
         return [];

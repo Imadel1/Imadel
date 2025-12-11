@@ -234,6 +234,7 @@ const JobDetail: React.FC = () => {
       // Backend will automatically send confirmation email to the applicant
       const response = await applicationsApi.create({
         jobId: job.id,
+        jobTitle: job.title,
         applicantName: formData.name,
         applicantEmail: formData.email,
         applicantPhone: formData.phone,

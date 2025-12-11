@@ -58,6 +58,7 @@ export const translations = {
     partners: 'Partenaires',
     contact: 'Contact',
     donate: 'Faire un Don',
+    learnMore: 'En Savoir Plus',
     
     // Admin Panel
     adminPanel: 'Panneau d\'Administration',
@@ -320,7 +321,7 @@ export const translations = {
     partners: 'Partners',
     contact: 'Contact',
     donate: 'Donate',
-    
+    learnMore: 'Learn More',
     // Admin Panel
     adminPanel: 'Admin Panel',
     projects: 'Projects',

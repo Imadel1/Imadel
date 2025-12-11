@@ -1403,13 +1403,13 @@ export default function AdminPanel() {
                 onChange={(e) => setApplicationFilter({ ...applicationFilter, status: e.target.value || undefined })}
                 style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
               >
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="reviewing">Reviewing</option>
-                <option value="shortlisted">Shortlisted</option>
-                <option value="interviewed">Interviewed</option>
-                <option value="accepted">Accepted</option>
-                <option value="rejected">Rejected</option>
+                <option value="">{t('allStatuses')}</option>
+                <option value="pending">{t('pending')}</option>
+                <option value="reviewing">{t('reviewing')}</option>
+                <option value="shortlisted">{t('shortlisted')}</option>
+                <option value="interviewed">{t('interviewed')}</option>
+                <option value="accepted">{t('accepted')}</option>
+                <option value="rejected">{t('rejected')}</option>
               </select>
               <select
                 value={applicationFilter.jobId || ''}

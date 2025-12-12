@@ -15,42 +15,6 @@ interface JobItem {
   listingType?: 'job' | 'proposal';
 }
 
-// Default fallback jobs if admin hasn't added any
-const DEFAULT_JOBS: JobItem[] = [
-  {
-    id: '1',
-    title: 'Spécialiste en Sauvegarde Environnementale',
-    description:
-      'IMADEL recrute un Spécialiste en Sauvegarde Environnementale pour le projet "Mise en œuvre des Activités de Mobilisation Communautaire, Prévention."',
-    link: '/job/1',
-    category: 'Environnement'
-  },
-  {
-    id: '2',
-    title: 'Coordinateur – Projet Protection des Réfugiés',
-    description:
-      'Avis de recrutement d\'un Coordinateur pour la mise en œuvre des activités dans le cadre du projet "Mesures Sectorielles pour la Protection des Réfugiés."',
-    link: '/job/2',
-    category: 'Protection'
-  },
-  {
-    id: '3',
-    title: 'Coordinateur – Projet Cohésion Sociale',
-    description:
-      'Recrutement d\'un Coordinateur pour le projet "Mise en œuvre des Activités de Mobilisation Communautaire, Cohésion Sociale et Réalisation."',
-    link: '/job/3',
-    category: 'Développement Social'
-  },
-  {
-    id: '4',
-    title: 'Superviseur Santé',
-    description:
-      'Termes de Référence (TDR) pour le recrutement d\'un Superviseur Santé pour les initiatives de santé communautaire à venir.',
-    link: '/job/4',
-    category: 'Santé'
-  },
-];
-
 const GetInvolved: React.FC = () => {
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [proposals, setProposals] = useState<JobItem[]>([]);

@@ -170,7 +170,6 @@ const OurWork: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<any[]>([]);
-  const [allProjects, setAllProjects] = useState<any[]>([]);
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
@@ -218,9 +217,6 @@ const OurWork: React.FC = () => {
           response;
 
         if (response.success !== false && Array.isArray(rawProjects)) {
-          // Store all projects with areasOfIntervention
-          setAllProjects(rawProjects);
-          
           // Debug: Log raw project data structure
           console.log('=== RAW PROJECTS DATA ===');
           console.log('Total projects:', rawProjects.length);

@@ -12,6 +12,7 @@ interface JobItem {
   location?: string;
   applyUrl?: string;
   published?: boolean;
+  listingType?: 'job' | 'proposal';
 }
 
 // Default fallback jobs if admin hasn't added any
@@ -51,18 +52,19 @@ const DEFAULT_JOBS: JobItem[] = [
 ];
 
 const GetInvolved: React.FC = () => {
-  const [jobs, setJobs] = useState<JobItem[]>(DEFAULT_JOBS);
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [proposals, setProposals] = useState<JobItem[]>([]);
 
-  // Load jobs from API
+  // Load jobs and proposals from API
   useEffect(() => {
     const loadJobs = async () => {
       try {
         const response = await jobsApi.getAll();
         
         if (response.success && response.jobs) {
-          // Filter only published jobs that haven't passed their deadline
+          // Filter only published items that haven't passed their deadline
           const now = new Date();
-          const publishedJobs = response.jobs
+          const publishedItems = response.jobs
             .filter((j: any) => {
               // Must be published
               if (!j.published) return false;
@@ -82,17 +84,22 @@ const GetInvolved: React.FC = () => {
               applyUrl: j.applyUrl || '',
               link: `/job/${j._id || j.id}`,
               category: j.location || 'General',
-              deadline: j.deadline
+              deadline: j.deadline,
+              listingType: j.listingType || 'job'
             }));
           
-          if (publishedJobs.length > 0) {
-            setJobs(publishedJobs);
-          }
+          // Separate jobs and proposals
+          const jobsList = publishedItems.filter((item: JobItem) => item.listingType !== 'proposal');
+          const proposalsList = publishedItems.filter((item: JobItem) => item.listingType === 'proposal');
+          
+          setJobs(jobsList);
+          setProposals(proposalsList);
         }
       } catch (error) {
         console.error('Error loading jobs from API:', error);
         // Do not fall back to localStorage – show only live backend data
         setJobs([]);
+        setProposals([]);
       }
     };
 
@@ -116,6 +123,41 @@ const GetInvolved: React.FC = () => {
             Découvrez les opportunités de travailler avec nous ou de soutenir les projets de santé et de développement communautaire en cours.
             Rejoignez notre équipe de personnes passionnées qui font la différence à travers le Mali.
           </p>
+        </div>
+      </section>
+
+      <section className="proposals-section" aria-labelledby="proposals-heading">
+        <div className="container">
+          <h2 id="proposals-heading">Appels d'Offres & Appels à Propositions</h2>
+          <p className="section-description">
+            Découvrez nos opportunités de partenariat et nos appels d'offres pour des projets de développement communautaire.
+          </p>
+          <div className="job-list" role="list" aria-label="Appels d'offres">
+            {proposals.length > 0 ? (
+              proposals.map((proposal) => (
+                <article key={proposal.id} className="job-card" role="listitem">
+                  {(proposal.category || proposal.location) && (
+                    <span className="job-category" aria-label={`Catégorie: ${proposal.category || proposal.location}`}>
+                      {proposal.category || proposal.location}
+                    </span>
+                  )}
+                  <h3>{proposal.title}</h3>
+                  <p>{proposal.description}</p>
+                  <Link 
+                    to={proposal.link || `/job/${proposal.id}`} 
+                    className="read-more"
+                    aria-label={`En savoir plus sur ${proposal.title}`}
+                  >
+                    Lire plus →
+                  </Link>
+                </article>
+              ))
+            ) : (
+              <p className="no-jobs-message" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary, #616161)' }}>
+                Aucun appel d'offres disponible pour le moment. Veuillez vérifier plus tard.
+              </p>
+            )}
+          </div>
         </div>
       </section>
 

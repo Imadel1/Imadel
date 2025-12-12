@@ -34,9 +34,22 @@
   color: var(--text-secondary, #616161);
 }
 
-.job-offers {
+.proposals-section {
   padding: 4rem 2rem;
   background: var(--bg, #ffffff);
+}
+
+.proposals-section h2 {
+  text-align: center;
+  font-family: var(--font-display);
+  color: var(--primary, #FF6B00);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.job-offers {
+  padding: 4rem 2rem;
+  background: var(--bg-alt, #f8f9fa);
 }
 
 .job-offers h2 {

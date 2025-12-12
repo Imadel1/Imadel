@@ -78,6 +78,7 @@ type Job = {
   requirements?: string[];
   responsibilities?: string[];
   type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+  listingType?: 'job' | 'proposal'; // 'job' for job offers, 'proposal' for calls for proposals
   status?: 'open' | 'closed' | 'filled';
   category?: string;
   salary?: { min?: number; max?: number; currency?: string };
@@ -312,6 +313,7 @@ export default function AdminPanel() {
             applyUrl: j.applyUrl,
             published: j.published,
             deadline: j.deadline,
+            listingType: j.listingType || 'job',
             images: Array.isArray(j.images)
               ? j.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
               : [],
@@ -687,7 +689,7 @@ export default function AdminPanel() {
   // Forms state
   const [officeForm, setOfficeForm] = useState<Partial<Office>>({ active: true });
   const [projectForm, setProjectForm] = useState<Partial<Project>>({ published: false, areasOfIntervention: [] });
-  const [jobForm, setJobForm] = useState<Partial<Job>>({ published: false });
+  const [jobForm, setJobForm] = useState<Partial<Job>>({ published: false, listingType: 'job' });
   const [partnerForm, setPartnerForm] = useState<Partial<Partner>>({ active: true, images: [] });
   const [newsletterForm, setNewsletterForm] = useState<Partial<Newsletter>>({ published: false, author: 'IMADEL' });
 
@@ -934,6 +936,7 @@ export default function AdminPanel() {
         responsibilities?: string[];
         location: string;
         type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+        listingType?: 'job' | 'proposal';
         category?: string;
         deadline: string;
         status?: 'open' | 'closed' | 'filled';
@@ -949,6 +952,7 @@ export default function AdminPanel() {
         images: images,
         deadline: new Date(jobForm.deadline).toISOString(),
         type: (jobForm as any).type || 'full-time',
+        listingType: jobForm.listingType || 'job',
         category: (jobForm as any).category,
         status: (jobForm as any).status || 'open',
         requirements: (jobForm as any).requirements || [],
@@ -989,7 +993,7 @@ export default function AdminPanel() {
 
           setJobs(jobs.map(j => (j.id === editingJobId ? updatedJob : j)));
           setEditingJobId(null);
-          setJobForm({ published: false });
+          setJobForm({ published: false, listingType: 'job' });
           window.dispatchEvent(new CustomEvent('imadel:jobs:updated'));
         }
       } else {
@@ -1546,8 +1550,19 @@ export default function AdminPanel() {
             {loading.jobs && <p className="entity-loading">Chargement des emplois…</p>}
             <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="job-title">Titre du poste <span className="required">*</span></label>
-                    <input id="job-title" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} />
+                    <label htmlFor="job-listing-type">Type <span className="required">*</span></label>
+                    <select 
+                      id="job-listing-type"
+                      value={jobForm.listingType || 'job'} 
+                      onChange={e=>setJobForm({...jobForm, listingType: e.target.value as 'job' | 'proposal'})}
+                    >
+                      <option value="job">Offre d'emploi</option>
+                      <option value="proposal">Appel d'offres / Appel à propositions</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="job-title">Titre {jobForm.listingType === 'proposal' ? "de l'appel" : 'du poste'} <span className="required">*</span></label>
+                    <input id="job-title" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} placeholder={jobForm.listingType === 'proposal' ? "Ex: Appel d'offres pour projet d'eau potable" : "Ex: Coordinateur de projet"} />
                   </div>
                   <div className="form-group">
                     <label htmlFor="job-location">Lieu</label>
@@ -1663,7 +1678,8 @@ export default function AdminPanel() {
                 <li key={j.id}>
                   <div className="entity-head">
                     <strong>{j.title}</strong> 
-                    <span className="badge">{j.location}</span>
+                    <span className="badge">{j.listingType === 'proposal' ? 'Appel d\'offres' : 'Emploi'}</span>
+                    {j.location && <span className="badge">{j.location}</span>}
                     {j.published && <span className="badge badge-success">Published</span>}
                   </div>
                   <div className="entity-meta">{j.description}</div>
@@ -1684,6 +1700,8 @@ export default function AdminPanel() {
                           applyUrl: j.applyUrl,
                           published: j.published,
                           images: j.images,
+                          listingType: j.listingType || 'job',
+                          deadline: j.deadline,
                         });
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}

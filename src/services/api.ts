@@ -255,6 +255,7 @@ export const jobsApi = {
     responsibilities?: string[];
     location: string;
     type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+    listingType?: 'job' | 'proposal';
     category?: string;
     deadline: string;
     status?: 'open' | 'closed' | 'filled';
@@ -280,6 +281,7 @@ export const jobsApi = {
     responsibilities?: string[];
     location: string;
     type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+    listingType?: 'job' | 'proposal';
     category?: string;
     deadline: string;
     status?: 'open' | 'closed' | 'filled';

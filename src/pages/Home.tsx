@@ -190,27 +190,25 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
       ? `/news/${news.id}`
       : `/project/${news.id}`);
   return (
-    <article className="news-card">
-      <div className="news-image">
-        <LazyImage
-          src={news.image || aboutImage}
-          alt={news.title}
-          width={350}
-          height={200}
-          className="news-img"
-        />
-      </div>
-      <div className="news-content">
-        <h3>{news.title}</h3>
-        <Link
-          to={targetLink}
-          className="read-more"
-          aria-label={language === 'fr' ? `En savoir plus sur ${news.title}` : `Read more about ${news.title}`}
-        >
-          {t('readMore')}
-        </Link>
-      </div>
-    </article>
+    <Link to={targetLink} className="news-card-link" aria-label={language === 'fr' ? `Voir les détails de ${news.title}` : `View details of ${news.title}`}>
+      <article className="news-card">
+        <div className="news-image">
+          <LazyImage
+            src={news.image || aboutImage}
+            alt={news.title}
+            width={350}
+            height={200}
+            className="news-img"
+          />
+        </div>
+        <div className="news-content">
+          <h3>{news.title}</h3>
+          <span className="read-more">
+            {t('readMore')}
+          </span>
+        </div>
+      </article>
+    </Link>
   );
 };
 

@@ -36,7 +36,7 @@ const ABOUT_IMAGE = aboutImage;
 const getAreasOfIntervention = (language: string) => [
   language === 'fr' ? "Hydraulique rurale et urbaine" : "Rural and urban hydraulics",
   language === 'fr' ? "Décentralisation" : "Decentralization",
-  language === 'fr' ? "Hygiène/Assainissement" : "Hygiene/Sanitation",
+  language === 'fr' ? "Hygiène/ Assainissement" : "Hygiene/Sanitation",
   language === 'fr' ? "Éducation" : "Education",
   language === 'fr' ? "Formation" : "Training",
   language === 'fr' ? "Plaidoyer / Lobbyisme" : "Advocacy / Lobbying",
@@ -184,6 +184,11 @@ interface NewsCardProps {
 
 const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   const { t, language } = useTranslation();
+  const targetLink =
+    news.link ||
+    (news.badge === t('news')
+      ? `/news/${news.id}`
+      : `/project/${news.id}`);
   return (
     <article className="news-card">
       <div className="news-image">
@@ -197,7 +202,11 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
       </div>
       <div className="news-content">
         <h3>{news.title}</h3>
-        <Link to={`/news/${news.id}`} className="read-more" aria-label={language === 'fr' ? `En savoir plus sur ${news.title}` : `Read more about ${news.title}`}>
+        <Link
+          to={targetLink}
+          className="read-more"
+          aria-label={language === 'fr' ? `En savoir plus sur ${news.title}` : `Read more about ${news.title}`}
+        >
           {t('readMore')}
         </Link>
       </div>
@@ -311,6 +320,44 @@ const Home: React.FC = () => {
   useEffect(() => {
     const loadNewsletters = async () => {
       try {
+        // Try backend "news" via projects with category=news
+        try {
+          const projectsResponse = await projectsApi.getAll({ category: 'news', published: true });
+          const rawProjects =
+            (projectsResponse as any).projects ||
+            (projectsResponse as any).data ||
+            projectsResponse;
+
+          if (projectsResponse.success !== false && Array.isArray(rawProjects) && rawProjects.length > 0) {
+            const newsFromProjects = rawProjects
+              .slice(0, 2)
+              .map((p: any) => ({
+                id: p._id || p.id,
+                title: p.title,
+                description: p.description
+                  ? p.description.substring(0, 150) + '...'
+                  : p.fullDescription
+                  ? p.fullDescription.substring(0, 150) + '...'
+                  : '',
+                image:
+                  p.images && p.images.length > 0 && p.images[0].url
+                    ? p.images[0].url
+                    : p.images && p.images[0]
+                    ? p.images[0]
+                    : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop',
+                badge: t('news'),
+                link: `/project/${p._id || p.id}`,
+                date: p.date || p.createdAt,
+              }));
+
+            setNewsItems(newsFromProjects);
+            return;
+          }
+        } catch (err) {
+          console.warn('News via projects (category=news) not available, falling back to newsletters.');
+        }
+
+        // Fallback: newsletters (public endpoints)
         const response = await newslettersApi.getAll({ published: true });
 
         const rawNewsletters =
@@ -389,7 +436,6 @@ const Home: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading projects from API:', error);
-        // Do not fall back to localStorage – show only live backend data
         setProjects([]);
       }
     };
@@ -403,7 +449,7 @@ const Home: React.FC = () => {
     return () => {
       window.removeEventListener('imadel:projects:updated', handleUpdate);
     };
-  }, []);
+  }, [t]);
 
   return (
     <div className="home">
@@ -555,9 +601,14 @@ const Home: React.FC = () => {
             <h2 id="areas-heading">{t('areasOfIntervention')}</h2>
             <div className="areas-grid" role="list" aria-label="Domaines d'intervention">
               {AREAS_OF_INTERVENTION.map((area, index) => (
-                <div key={index} className="area-item" role="listitem">
-                  {area}
-                </div>
+                <Link
+                  key={index}
+                  to={`/ourwork?area=${encodeURIComponent(area)}`}
+                  className="area-item"
+                  role="listitem"
+                >
+                  <span className="area-text">{area}</span>
+                </Link>
               ))}
             </div>
           </div>

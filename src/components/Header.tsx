@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useTranslation } from "../utils/i18n";
-import LanguageSwitcher from "./LanguageSwitcher";
 import "./Header.css";
 import logo from "../assets/cropped-nouveau_logo.png";
 
@@ -85,7 +84,6 @@ const Header = () => {
       </nav>
 
       <div className="header-right">
-        <LanguageSwitcher />
         <Link to="/donate" className="donate-button">{t('donate')}</Link>
         <div className="menu-toggle" onClick={toggleMenu}>
           {isMenuOpen ? "✕" : "☰"}

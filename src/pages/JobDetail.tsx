@@ -205,6 +205,14 @@ const JobDetail: React.FC = () => {
     }
   };
 
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Échec de la conversion du fichier'));
+      reader.readAsDataURL(file);
+    });
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -221,6 +229,10 @@ const JobDetail: React.FC = () => {
     if (!validateForm()) {
       return;
     }
+    if (!formData.coverLetter.trim()) {
+      setErrors(prev => ({ ...prev, coverLetter: t('coverLetter') }));
+      return;
+    }
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
@@ -230,17 +242,19 @@ const JobDetail: React.FC = () => {
         throw new Error('Missing required information');
       }
 
+      // Convert resume to base64 data URL (backend expects a string URL)
+      const uploadedUrl = await fileToBase64(resume);
+
       // Submit application to backend
-      // Backend will automatically send confirmation email to the applicant
       const response = await applicationsApi.create({
         jobId: job.id,
         jobTitle: job.title,
-        applicantName: formData.name,
-        applicantEmail: formData.email,
-        applicantPhone: formData.phone,
-        applicantAddress: formData.address,
-        coverLetter: formData.coverLetter || undefined,
-        resume: resume,
+        fullName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        coverLetter: formData.coverLetter || 'N/A',
+        resumeUrl: uploadedUrl,
       });
 
       if (response.success) {

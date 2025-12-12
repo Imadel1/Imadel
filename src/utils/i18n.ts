@@ -1,50 +1,18 @@
 // Internationalization (i18n) utility
 // Supports language switching between French and English
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export type Language = 'fr' | 'en';
 
-const STORAGE_KEY = 'imadel_language';
+// Language is now fixed to French across the site
+const FIXED_LANGUAGE: Language = 'fr';
 
-// Get current language from localStorage or default to French
-export const getLanguage = (): Language => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'en' || stored === 'fr') {
-      return stored;
-    }
-  } catch {}
-  return 'fr'; // Default to French
-};
-
-// Set language
-export const setLanguage = (lang: Language): void => {
-  try {
-    localStorage.setItem(STORAGE_KEY, lang);
-    window.dispatchEvent(new CustomEvent('imadel:language:changed', { detail: { language: lang } }));
-  } catch {}
-};
-
-// Subscribe to language changes
+export const getLanguage = (): Language => FIXED_LANGUAGE;
+export const setLanguage = (_lang: Language): void => undefined;
 export const subscribeToLanguage = (callback: (lang: Language) => void): (() => void) => {
-  const handleChange = (e: CustomEvent) => {
-    callback(e.detail.language);
-  };
-  
-  const handleStorageChange = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY && e.newValue) {
-      callback(e.newValue as Language);
-    }
-  };
-
-  window.addEventListener('imadel:language:changed', handleChange as EventListener);
-  window.addEventListener('storage', handleStorageChange);
-
-  return () => {
-    window.removeEventListener('imadel:language:changed', handleChange as EventListener);
-    window.removeEventListener('storage', handleStorageChange);
-  };
+  callback(FIXED_LANGUAGE);
+  return () => undefined;
 };
 
 // Translation keys
@@ -648,21 +616,10 @@ export const t = (key: TranslationKeysFr, lang?: Language): string => {
 
 // Hook for React components
 export const useTranslation = () => {
-  const [language, setLanguageState] = useState<Language>(getLanguage());
-
-  useEffect(() => {
-    const unsubscribe = subscribeToLanguage((lang) => {
-      setLanguageState(lang);
-    });
-    return unsubscribe;
-  }, []);
-
+  const [language] = useState<Language>(getLanguage());
   return {
     language,
     t: (key: keyof typeof translations.fr) => t(key, language),
-    setLanguage: (lang: Language) => {
-      setLanguage(lang);
-      setLanguageState(lang);
-    },
+    setLanguage: (_lang: Language) => undefined,
   };
 };

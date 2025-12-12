@@ -1,16 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaLinkedinIn, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useTranslation } from "../utils/i18n";
+import NewsletterModal from "./NewsletterModal";
 import "./footer.css";
 import logo from "../assets/cropped-nouveau_logo.png";
 
 const Footer: React.FC = () => {
   const { t, language } = useTranslation();
+  const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
   
   return (
-    <footer className="footer">
+    <>
+      <footer className="footer">
       <div className="footer-container">
         {/* Logo and Description */}
         <div className="footer-brand">
@@ -59,6 +62,13 @@ const Footer: React.FC = () => {
               <FaTiktok />
             </a>
           </div>
+          <button 
+            className="footer-newsletter-btn"
+            onClick={() => setIsNewsletterModalOpen(true)}
+            aria-label="S'abonner à la newsletter"
+          >
+            S'abonner à la newsletter
+          </button>
         </div>
       </div>
 
@@ -66,6 +76,12 @@ const Footer: React.FC = () => {
         <p>© {new Date().getFullYear()} IMADEL. {t('allRightsReserved')}.</p>
       </div>
     </footer>
+    
+    <NewsletterModal 
+      isOpen={isNewsletterModalOpen} 
+      onClose={() => setIsNewsletterModalOpen(false)} 
+    />
+    </>
   );
 };
 

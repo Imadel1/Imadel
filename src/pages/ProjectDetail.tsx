@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { useTranslation } from '../utils/i18n';
+import { newsApi, projectsApi } from '../services/api';
 import './ProjectDetail.css';
 
 interface ContentItem {
@@ -21,6 +22,7 @@ const ProjectDetail: React.FC = () => {
   const navigate = useNavigate();
   const [content, setContent] = useState<ContentItem | null>(null);
   const [allContent, setAllContent] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Determine if this is a project or newsletter based on URL
   const isNewsletter = location.includes('/news/');
@@ -36,89 +38,152 @@ const ProjectDetail: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
-    const loadContent = () => {
+    const loadContent = async () => {
+      if (!id) return;
+      setLoading(true);
       try {
+        // Load detail
         if (isNewsletter) {
-          // For newsletters, only check admin panel
-          const stored = localStorage.getItem(storageKey);
-          if (stored) {
-            const items = JSON.parse(stored);
-            const publishedItems = items.filter((item: any) => item.published);
-            setAllContent(publishedItems);
-            
-            const foundItem = publishedItems.find((item: any) => item.id === id);
-            if (foundItem) {
-              setContent({
-                id: foundItem.id,
-                title: foundItem.title,
-                description: foundItem.description || foundItem.summary || foundItem.content,
-                content: foundItem.content,
-                images: foundItem.images || ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
-                country: foundItem.country,
-                date: foundItem.date
-              });
-            }
+          const response = await newsApi.getById(id);
+          const n = (response as any).news || (response as any).data || response;
+
+          if (response.success !== false && n) {
+            setContent({
+              id: n._id || n.id,
+              title: n.title,
+              description: n.description,
+              content: n.description,
+              images: n.image ? [n.image] : ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
+              date: n.date || n.createdAt,
+            });
+            return;
           }
         } else {
-          // For projects, only use dynamic/admin projects (no hardcoded defaults)
-          const stored = localStorage.getItem(storageKey);
-          let allProjects: ContentItem[] = [];
+          const response = await projectsApi.getById(id);
+          const p = (response as any).project || (response as any).data || response;
 
-          if (stored) {
-            const adminProjects = JSON.parse(stored);
-            const publishedProjects = adminProjects
-              .filter((p: any) => p.published)
-              .map((p: any) => ({
-                id: p.id,
-                title: p.title,
-                description: p.summary || p.content || p.description,
-                content: p.content,
-                images: p.images || ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
-                country: p.country
-              }));
-
-            allProjects = publishedProjects;
-          }
-
-          setAllContent(allProjects);
-
-          // Find the specific project
-          const foundProject = allProjects.find((p: any) => p.id === id);
-          if (foundProject) {
+          if (response.success !== false && p) {
             setContent({
-              id: foundProject.id,
-              title: foundProject.title,
-              description: foundProject.description,
-              content: foundProject.content || foundProject.description,
-              images: foundProject.images || ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
-              country: foundProject.country
+              id: p._id || p.id,
+              title: p.title,
+              description: p.description || p.fullDescription,
+              content: p.fullDescription || p.description,
+              images:
+                Array.isArray(p.images) && p.images.length
+                  ? p.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
+                  : ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
+              country: p.location,
             });
+            return;
           }
         }
+
+        // Fallback to any locally stored content (legacy)
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          const items = JSON.parse(stored);
+          const publishedItems = items.filter((item: any) => item.published);
+          setAllContent(publishedItems);
+          const foundItem = publishedItems.find((item: any) => item.id === id);
+          if (foundItem) {
+            setContent({
+              id: foundItem.id,
+              title: foundItem.title,
+              description: foundItem.description || foundItem.summary || foundItem.content,
+              content: foundItem.content || foundItem.description,
+              images: foundItem.images || ['https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'],
+              country: foundItem.country,
+              date: foundItem.date,
+            });
+            return;
+          }
+        }
+
+        setContent(null);
       } catch (error) {
         console.error('Error loading content:', error);
+        setContent(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadContent();
+  }, [id, isNewsletter, storageKey]);
 
-    // Listen for updates
-    const eventName = isNewsletter ? 'imadel:newsletters:updated' : 'imadel:projects:updated';
-    const handleUpdate = () => loadContent();
-    window.addEventListener(eventName, handleUpdate);
+  // Load collection for carousel navigation
+  useEffect(() => {
+    const loadCollection = async () => {
+      try {
+        if (isNewsletter) {
+          const response = await newsApi.getAll({ published: true });
+          const raw =
+            (response as any).news ||
+            (response as any).data ||
+            response ||
+            [];
+          if (response.success !== false && Array.isArray(raw)) {
+            const mapped = raw.map((n: any) => ({
+              id: n._id || n.id,
+              title: n.title,
+              description: n.description,
+              images: n.image ? [n.image] : undefined,
+              date: n.date || n.createdAt,
+            }));
+            setAllContent(mapped);
+            return;
+          }
+        } else {
+          const response = await projectsApi.getAll({ published: true });
+          const raw =
+            (response as any).projects ||
+            (response as any).data ||
+            response ||
+            [];
+          if (response.success !== false && Array.isArray(raw)) {
+            const mapped = raw.map((p: any) => ({
+              id: p._id || p.id,
+              title: p.title,
+              description: p.description || p.fullDescription,
+              images:
+                Array.isArray(p.images) && p.images.length
+                  ? p.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
+                  : undefined,
+              country: p.location,
+              date: p.date || p.createdAt,
+            }));
+            setAllContent(mapped);
+            return;
+          }
+        }
 
-    return () => {
-      window.removeEventListener(eventName, handleUpdate);
+        setAllContent([]);
+      } catch (error) {
+        console.error('Error loading list for navigation:', error);
+        setAllContent([]);
+      }
     };
-  }, [id, storageKey, isNewsletter]);
+
+    loadCollection();
+  }, [isNewsletter]);
+
+  if (loading) {
+    return (
+      <div className="project-detail-page">
+        <div className="container">
+          <p style={{ textAlign: 'center', padding: '2rem' }}>{t('loading')}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!content) {
     return (
       <div className="project-detail-page">
         <div className="container">
           <div className="error-message" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-            <h1>{contentType} Not Found</h1>
-            <p>The {contentType.toLowerCase()} you're looking for doesn't exist or has been removed.</p>
+            <h1>{isNewsletter ? 'Actualité introuvable' : 'Projet introuvable'}</h1>
+            <p>{isNewsletter ? 'Cette actualité est introuvable ou a été retirée.' : 'Ce projet est introuvable ou a été retiré.'}</p>
             <Link to={backLink} className="btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>
               {backText}
             </Link>

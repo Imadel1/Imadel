@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FaXmark, FaCheck, FaEye, FaStar } from 'react-icons/fa6';
 import './AdminPanel.css';
-import { authApi, projectsApi, jobsApi, partnersApi, officesApi, donationsApi, applicationsApi } from '../services/api';
+import { authApi, projectsApi, jobsApi, partnersApi, officesApi, donationsApi, applicationsApi, newsApi } from '../services/api';
 import { useTranslation } from '../utils/i18n';
 import logo from '../assets/cropped-nouveau_logo.png';
 
@@ -32,11 +32,19 @@ import logo from '../assets/cropped-nouveau_logo.png';
 // Data Types - Match these on backend
 type Office = {
   id: string;
+  name?: string;
   country: string;
   city?: string;
   address?: string;
   lat?: number;
   lng?: number;
+  type?: 'headquarters' | 'regional' | 'field';
+  contact?: {
+    phone?: string;
+    email?: string;
+    fax?: string;
+  };
+  active?: boolean;
 };
 
 type Project = {
@@ -48,6 +56,14 @@ type Project = {
   published?: boolean;
   images?: string[]; // Currently URLs, consider file upload integration
   areasOfIntervention?: string[]; // Multi-select field for filtering
+  startDate?: string;
+  endDate?: string;
+  status?: 'active' | 'completed' | 'upcoming' | 'archived';
+  impactStats?: {
+    beneficiaries?: number;
+    communities?: number;
+    budget?: number;
+  };
 };
 
 type Job = {
@@ -59,6 +75,12 @@ type Job = {
   published?: boolean;
   images?: string[];
   deadline?: string;
+  requirements?: string[];
+  responsibilities?: string[];
+  type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+  status?: 'open' | 'closed' | 'filled';
+  category?: string;
+  salary?: { min?: number; max?: number; currency?: string };
 };
 
 type Partner = {
@@ -67,6 +89,9 @@ type Partner = {
   logo?: string;
   website?: string;
   description?: string;
+  category?: 'funding' | 'implementation' | 'technical' | 'government' | 'community' | 'other';
+  partnershipStartDate?: string;
+  active?: boolean;
   images?: string[];
 };
 
@@ -77,18 +102,21 @@ type Newsletter = {
   published?: boolean;
   date?: string;
   images?: string[];
+  author?: string;
+  image?: string;
 };
 
 const AREAS_OF_INTERVENTION = [
-  "Rural and urban hydraulics",
-  "Decentralization",
-  "Hygiene/sanitation",
-  "Education",
+  "Hydraulique rurale et urbaine",
+  "Décentralisation",
+  "Hygiène/Assainissement",
+  "Éducation",
   "Formation",
-  "Advocacy/lobbying",
-  "Environment",
-  "Health",
-  "Local development"
+  "Plaidoyer/Lobbyisme",
+  "Environnement",
+  "Santé",
+  "Développement local",
+  "Actualités"
 ];
 
 // TODO: Replace localStorage with API calls
@@ -220,8 +248,34 @@ export default function AdminPanel() {
       try {
         // Fetch all projects (not just published ones for admin panel)
         const response = await projectsApi.getAll({ published: undefined });
-        if (response.success && response.projects) {
-          setProjects(response.projects);
+
+        const rawProjects =
+          (response as any).projects ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(rawProjects)) {
+          const normalized: Project[] = rawProjects.map((p: any) => ({
+            id: p._id || p.id || uid('project_'),
+            title: p.title,
+            summary: p.description,
+            content: p.fullDescription || p.description || '',
+            country: p.location,
+            published: p.published ?? true,
+            images: Array.isArray(p.images)
+              ? p.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
+              : [],
+            areasOfIntervention: p.category
+              ? p.category === 'news'
+                ? ['Actualités']
+                : [p.category]
+              : [],
+            startDate: p.startDate,
+            endDate: p.endDate,
+            status: p.status,
+            impactStats: p.impactStats,
+          }));
+          setProjects(normalized);
           window.dispatchEvent(new CustomEvent('imadel:projects:updated'));
         }
       } catch (error: any) {
@@ -298,9 +352,9 @@ export default function AdminPanel() {
             logo: p.logo,
             website: p.website,
             description: p.description,
-            images: Array.isArray(p.images)
-              ? p.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
-              : [],
+            category: p.category,
+            partnershipStartDate: p.partnershipStartDate,
+            active: p.active,
           }));
 
           setPartners(normalizedPartners);
@@ -316,22 +370,41 @@ export default function AdminPanel() {
     if (authenticated) fetchPartners();
   }, [authenticated]);
 
-  // Newsletters - Note: API has subscribers, but we need newsletter content items
-  // For now, keeping localStorage for newsletters until backend adds newsletter content endpoints
+  // Actualités (News API)
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [editingNewsletterId, setEditingNewsletterId] = useState<string | null>(null);
   useEffect(() => {
-    try { 
-      const raw = localStorage.getItem(STORAGE.NEWSLETTERS); 
-      if (raw) setNewsletters(JSON.parse(raw)); 
-    } catch {} 
-  }, []);
-  useEffect(() => { 
-    try { 
-      localStorage.setItem(STORAGE.NEWSLETTERS, JSON.stringify(newsletters)); 
-      window.dispatchEvent(new CustomEvent('imadel:newsletters:updated')); 
-    } catch {} 
-  }, [newsletters]);
+    const fetchNewsletters = async () => {
+      setLoading(prev => ({ ...prev, newsletters: true }));
+      setErrors(prev => ({ ...prev, newsletters: '' }));
+      try {
+        const response = await newsApi.getAll({ published: undefined });
+        const raw =
+          (response as any).news ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(raw)) {
+          const normalized = raw.map((n: any) => ({
+            id: n._id || n.id,
+            title: n.title,
+            content: n.description || '',
+            published: n.isPublished ?? true,
+            date: n.date || n.createdAt || new Date().toISOString(),
+            images: n.image ? [n.image] : [],
+          }));
+          setNewsletters(normalized);
+          window.dispatchEvent(new CustomEvent('imadel:newsletters:updated'));
+        }
+      } catch (error: any) {
+        console.error('Error fetching news:', error);
+        setErrors(prev => ({ ...prev, newsletters: error.message || 'Failed to load news' }));
+      } finally {
+        setLoading(prev => ({ ...prev, newsletters: false }));
+      }
+    };
+    if (authenticated) fetchNewsletters();
+  }, [authenticated]);
 
   // Settings
   const [settings, setSettings] = useState<Settings>(() => {
@@ -367,7 +440,7 @@ export default function AdminPanel() {
         });
         return merged;
       }
-    } catch {}
+    } catch {} 
     
     // Apply default theme
     import('../utils/settings').then(({ applyTheme }) => {
@@ -383,12 +456,12 @@ export default function AdminPanel() {
     });
   }, []);
 
-  useEffect(() => {
-    try {
+  useEffect(() => { 
+    try { 
       localStorage.setItem(STORAGE.SETTINGS, JSON.stringify(settings));
       // Dispatch event to notify other components of settings update
       window.dispatchEvent(new CustomEvent('imadel:settings:updated'));
-    } catch {}
+    } catch {} 
   }, [settings]);
 
   const updateSettings = (updates: Partial<Settings>) => {
@@ -612,11 +685,11 @@ export default function AdminPanel() {
   };
 
   // Forms state
-  const [officeForm, setOfficeForm] = useState<Partial<Office>>({});
+  const [officeForm, setOfficeForm] = useState<Partial<Office>>({ active: true });
   const [projectForm, setProjectForm] = useState<Partial<Project>>({ published: false, areasOfIntervention: [] });
   const [jobForm, setJobForm] = useState<Partial<Job>>({ published: false });
-  const [partnerForm, setPartnerForm] = useState<Partial<Partner>>({});
-  const [newsletterForm, setNewsletterForm] = useState<Partial<Newsletter>>({ published: false });
+  const [partnerForm, setPartnerForm] = useState<Partial<Partner>>({ active: true, images: [] });
+  const [newsletterForm, setNewsletterForm] = useState<Partial<Newsletter>>({ published: false, author: 'IMADEL' });
 
   const addOffice = async () => {
     if (!authenticated) { alert('Please log in'); return; }
@@ -625,11 +698,25 @@ export default function AdminPanel() {
     setLoading(prev => ({ ...prev, office: true }));
     try {
       const officeData = {
-        country: officeForm.country,
+        name: officeForm.country || 'Bureau',
+        type: (officeForm as any).type || 'field',
+        address: {
+          street: officeForm.address,
         city: officeForm.city,
-        address: officeForm.address,
+          region: undefined,
+          country: officeForm.country,
+          postalCode: undefined,
+        },
+        contact: {
+          phone: (officeForm as any).phone,
+          email: (officeForm as any).email,
+          fax: (officeForm as any).fax,
+        },
+        coordinates: {
         latitude: officeForm.lat,
-        longitude: officeForm.lng
+          longitude: officeForm.lng,
+        },
+        active: officeForm.active ?? true,
       };
       const response = await officesApi.create(officeData);
       if (response.success !== false) {
@@ -656,15 +743,17 @@ export default function AdminPanel() {
 
         const newOffice: Office = {
           id: created.id || created._id || uid('office_'),
-          country: created.country,
-          city: created.city || addr?.city,
-          address: normalizedAddress,
-          lat: created.latitude ?? created.lat,
-          lng: created.longitude ?? created.lng,
+          country: created.address?.country || created.country,
+          city: created.address?.city || created.city || addr?.city,
+          address: created.address?.street || normalizedAddress || officeForm.address,
+          lat: created.coordinates?.latitude ?? created.latitude ?? created.lat ?? officeForm.lat,
+          lng: created.coordinates?.longitude ?? created.longitude ?? created.lng ?? officeForm.lng,
+          active: created.active,
+          type: created.type,
         };
 
         setOffices([...offices, newOffice]);
-    setOfficeForm({});
+        setOfficeForm({ active: true });
         window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
       }
     } catch (error: any) {
@@ -694,32 +783,90 @@ export default function AdminPanel() {
 
   const addProject = async () => {
     if (!authenticated) { alert('Please log in'); return; }
-    if (!projectForm.title) { alert('Title is required'); return; }
+    if (!projectForm.title) { alert('Titre requis'); return; }
+    if (!projectForm.summary && !projectForm.content) { alert('Description requise'); return; }
     
     setLoading(prev => ({ ...prev, project: true }));
     try {
       // Map images array to backend format if needed
       const images = (projectForm.images || []).filter(img => img.trim()).map(url => ({ url }));
+      const categoryMapped: 'current' | 'completed' | 'news' = (projectForm.areasOfIntervention || []).includes('Actualités') ? 'news' : 'current';
       
-      const projectData = {
+      const projectData: {
+        title: string;
+        description: string;
+        fullDescription?: string;
+        category?: 'current' | 'completed' | 'news';
+        areasOfIntervention?: string[];
+        images?: { url: string; caption?: string }[];
+        location?: string;
+        startDate?: string;
+        endDate?: string;
+        status?: 'active' | 'completed' | 'upcoming' | 'archived';
+        impactStats?: { beneficiaries?: number; communities?: number; budget?: number };
+        published?: boolean;
+      } = {
         title: projectForm.title,
-        description: projectForm.summary || '',
-        fullDescription: projectForm.content || '',
+        description: projectForm.summary || projectForm.content || 'N/A',
+        fullDescription: projectForm.content || projectForm.summary || '',
         location: projectForm.country || '',
-        images: images,
+        images,
         published: !!projectForm.published,
-        // Map areas of intervention to category or add as separate field
-        // Note: Backend may need to be updated to handle areasOfIntervention
-        category: projectForm.areasOfIntervention?.[0] || 'current',
+        category: categoryMapped,
+        areasOfIntervention: projectForm.areasOfIntervention || [],
+        status: (projectForm as any).status || 'active',
+        startDate: projectForm.startDate || undefined,
+        endDate: projectForm.endDate || undefined,
+        impactStats:
+          projectForm.impactStats &&
+          (projectForm.impactStats.beneficiaries ||
+            projectForm.impactStats.communities ||
+            projectForm.impactStats.budget)
+            ? {
+                beneficiaries: projectForm.impactStats.beneficiaries,
+                communities: projectForm.impactStats.communities,
+                budget: projectForm.impactStats.budget,
+              }
+            : undefined,
       };
       
-      const response = await projectsApi.create(projectData);
+      // Log the data being sent to verify areasOfIntervention is included
+      console.log('Saving project with areasOfIntervention:', {
+        areasOfIntervention: projectData.areasOfIntervention,
+        count: projectData.areasOfIntervention?.length || 0,
+        isUpdate: !!editingProjectId
+      });
+      
+      let response;
+      if (editingProjectId) {
+        // Update existing project - ensure areasOfIntervention is sent
+        response = await projectsApi.update(editingProjectId, projectData);
       if (response.success && response.project) {
-        // Add areasOfIntervention to the project if backend supports it
-        const newProject = { ...response.project, areasOfIntervention: projectForm.areasOfIntervention || [] };
+          // Ensure areasOfIntervention is preserved in the updated project
+          const updatedProject = { 
+            ...response.project, 
+            areasOfIntervention: projectForm.areasOfIntervention || [] 
+          };
+          setProjects(projects.map(p => p.id === editingProjectId ? updatedProject : p));
+          setEditingProjectId(null);
+          setProjectForm({ published: false, areasOfIntervention: [] });
+          window.dispatchEvent(new CustomEvent('imadel:projects:updated'));
+          console.log('Project updated. Backend response areasOfIntervention:', response.project.areasOfIntervention);
+        }
+      } else {
+        // Create new project - ensure areasOfIntervention is sent
+        response = await projectsApi.create(projectData);
+        if (response.success && response.project) {
+          // Ensure areasOfIntervention is included in the saved project
+          const newProject = { 
+            ...response.project, 
+            areasOfIntervention: projectForm.areasOfIntervention || [] 
+          };
         setProjects([...projects, newProject]);
         setProjectForm({ published: false, areasOfIntervention: [] });
         window.dispatchEvent(new CustomEvent('imadel:projects:updated'));
+          console.log('Project created. Backend response areasOfIntervention:', response.project.areasOfIntervention);
+        }
       }
     } catch (error: any) {
       alert(error.message || 'Failed to add project');
@@ -774,14 +921,40 @@ export default function AdminPanel() {
     try {
       const images = (jobForm.images || []).filter(img => img.trim()).map(url => ({ url }));
       
-      const jobData = {
+      if (!jobForm.deadline) {
+        alert('La date limite est requise');
+        setLoading(prev => ({ ...prev, job: false }));
+        return;
+      }
+
+      const jobData: {
+        title: string;
+        description: string;
+        requirements?: string[];
+        responsibilities?: string[];
+        location: string;
+        type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+        category?: string;
+        deadline: string;
+        status?: 'open' | 'closed' | 'filled';
+        salary?: { min?: number; max?: number; currency?: string };
+        images?: { url: string; caption?: string }[];
+        published?: boolean;
+        applyUrl?: string;
+      } = {
         title: jobForm.title,
         description: jobForm.description || '',
         location: jobForm.location || '',
-        applyUrl: jobForm.applyUrl || '',
         published: !!jobForm.published,
         images: images,
-        deadline: jobForm.deadline ? new Date(jobForm.deadline).toISOString() : undefined,
+        deadline: new Date(jobForm.deadline).toISOString(),
+        type: (jobForm as any).type || 'full-time',
+        category: (jobForm as any).category,
+        status: (jobForm as any).status || 'open',
+        requirements: (jobForm as any).requirements || [],
+        responsibilities: (jobForm as any).responsibilities || [],
+        salary: (jobForm as any).salary,
+        applyUrl: jobForm.applyUrl,
       };
       
       // If editing, update existing job; otherwise create new
@@ -908,14 +1081,24 @@ export default function AdminPanel() {
     
     setLoading(prev => ({ ...prev, partner: true }));
     try {
-      const images = (partnerForm.images || []).filter(img => img.trim()).map(url => ({ url }));
-      
-      const partnerData = {
+      const partnerData: {
+        name: string;
+        logo: string;
+        description?: string;
+        website?: string;
+        category?: 'funding' | 'implementation' | 'technical' | 'government' | 'community' | 'other';
+        partnershipStartDate?: string;
+        active?: boolean;
+        images?: string[];
+      } = {
         name: partnerForm.name,
         logo: partnerForm.logo || '',
         website: partnerForm.website || '',
         description: partnerForm.description || '',
-        images: images,
+        category: (partnerForm as any).category || 'other',
+        partnershipStartDate: (partnerForm as any).partnershipStartDate,
+        active: partnerForm.active ?? true,
+        images: partnerForm.images || [],
       };
       
       if (editingPartnerId) {
@@ -932,14 +1115,17 @@ export default function AdminPanel() {
             logo: updated.logo,
             website: updated.website,
             description: updated.description,
+            category: updated.category,
+            partnershipStartDate: updated.partnershipStartDate,
+            active: updated.active,
             images: Array.isArray(updated.images)
               ? updated.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
-              : [],
+              : partnerForm.images || [],
           };
 
           setPartners(partners.map(p => (p.id === editingPartnerId ? updatedPartner : p)));
           setEditingPartnerId(null);
-          setPartnerForm({});
+          setPartnerForm({ active: true });
           window.dispatchEvent(new CustomEvent('imadel:partners:updated'));
         }
       } else {
@@ -956,13 +1142,16 @@ export default function AdminPanel() {
             logo: created.logo,
             website: created.website,
             description: created.description,
+            category: created.category,
+            partnershipStartDate: created.partnershipStartDate,
+            active: created.active,
             images: Array.isArray(created.images)
               ? created.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
               : [],
           };
 
           setPartners([...partners, newPartner]);
-          setPartnerForm({});
+        setPartnerForm({ active: true, images: [] });
           window.dispatchEvent(new CustomEvent('imadel:partners:updated'));
         }
       }
@@ -1011,42 +1200,74 @@ export default function AdminPanel() {
     }
   };
 
-  const addNewsletter = () => {
+  const addNewsletter = async () => {
     if (!authenticated) { alert('Please log in'); return; }
-    if (!newsletterForm.title) { alert('Newsletter title required'); return; }
+    if (!newsletterForm.title) { alert('Titre requis'); return; }
 
+    const payload = {
+      title: newsletterForm.title!,
+      description: newsletterForm.content || '',
+      author: (newsletterForm as any).author || 'IMADEL',
+      image: (newsletterForm.images || [])[0] || '',
+      date: newsletterForm.date || new Date().toISOString().split('T')[0],
+      isPublished: !!newsletterForm.published,
+    };
+
+    const loadingKey = editingNewsletterId ? `newsletter_update_${editingNewsletterId}` : 'newsletter_create';
+    setLoading(prev => ({ ...prev, [loadingKey]: true }));
+    setErrors(prev => ({ ...prev, newsletters: '' }));
+
+    try {
     if (editingNewsletterId) {
-      // Update existing newsletter
+        const response = await newsApi.update(editingNewsletterId, payload);
+        const updatedItem =
+          (response as any).news ||
+          (response as any).data ||
+          response;
+
+        const normalized = updatedItem && {
+          id: updatedItem._id || updatedItem.id || editingNewsletterId,
+          title: updatedItem.title ?? payload.title,
+          content: updatedItem.description ?? payload.description,
+          published: updatedItem.isPublished ?? payload.isPublished,
+          date: updatedItem.date || updatedItem.createdAt || payload.date || new Date().toISOString(),
+          images: updatedItem.image ? [updatedItem.image] : (newsletterForm.images || []),
+        };
+
       const updatedList = newsletters.map(n =>
         n.id === editingNewsletterId
-          ? {
-              ...n,
-              title: newsletterForm.title!,
-              content: newsletterForm.content,
-              published: !!newsletterForm.published,
-              date: newsletterForm.date || n.date,
-              images: newsletterForm.images || n.images || [],
-            }
+            ? (normalized || { ...n, ...payload })
           : n
       );
       setNewsletters(updatedList);
       setEditingNewsletterId(null);
       setNewsletterForm({ published: false });
     } else {
-      // Create new newsletter
-    const id = uid('newsletter_');
-      setNewsletters([
-        ...newsletters,
-        {
-          id,
-          title: newsletterForm.title!,
-          content: newsletterForm.content,
-          published: !!newsletterForm.published,
-          date: newsletterForm.date || new Date().toISOString().split('T')[0],
-          images: newsletterForm.images || [],
-        },
-      ]);
+        const response = await newsApi.create(payload);
+        const created =
+          (response as any).news ||
+          (response as any).data ||
+          response;
+
+        const normalized = {
+          id: created?._id || created?.id || uid('news_'),
+          title: created?.title ?? payload.title,
+          content: created?.description ?? payload.description,
+          published: created?.isPublished ?? payload.isPublished,
+          date: created?.date || created?.createdAt || payload.date || new Date().toISOString(),
+          images: created?.image ? [created.image] : (newsletterForm.images || []),
+        };
+
+        setNewsletters([...newsletters, normalized]);
       setNewsletterForm({ published: false });
+      }
+      window.dispatchEvent(new CustomEvent('imadel:newsletters:updated'));
+    } catch (error: any) {
+      console.error('Error saving newsletter:', error);
+      setErrors(prev => ({ ...prev, newsletters: error.message || 'Failed to save newsletter' }));
+      alert(error.message || 'Failed to save newsletter');
+    } finally {
+      setLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
   };
   
@@ -1066,12 +1287,26 @@ export default function AdminPanel() {
     images.splice(index, 1);
     setNewsletterForm({ ...newsletterForm, images });
   };
-  const removeNewsletter = (id: string) => {
+  const removeNewsletter = async (id: string) => {
     if (!authenticated) { alert('Please log in'); return; }
+    if (!confirm('Supprimer cette actualité ?')) return;
+    const loadingKey = `newsletter_delete_${id}`;
+    setLoading(prev => ({ ...prev, [loadingKey]: true }));
+    setErrors(prev => ({ ...prev, newsletters: '' }));
+    try {
+      await newsApi.delete(id);
     setNewsletters(newsletters.filter(n=>n.id!==id));
     if (editingNewsletterId === id) {
       setEditingNewsletterId(null);
     setNewsletterForm({ published: false });
+      }
+      window.dispatchEvent(new CustomEvent('imadel:newsletters:updated'));
+    } catch (error: any) {
+      console.error('Error deleting newsletter:', error);
+      setErrors(prev => ({ ...prev, newsletters: error.message || 'Failed to delete newsletter' }));
+      alert(error.message || 'Failed to delete newsletter');
+    } finally {
+      setLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
   };
 
@@ -1125,7 +1360,7 @@ export default function AdminPanel() {
         <button className={tab==='jobs'?'active':''} onClick={()=>setTab('jobs')}>{t('jobs')}</button>
         <button className={tab==='applications'?'active':''} onClick={()=>setTab('applications')}>{t('applications')}</button>
         <button className={tab==='partners'?'active':''} onClick={()=>setTab('partners')}>{t('partners')}</button>
-        <button className={tab==='newsletters'?'active':''} onClick={()=>setTab('newsletters')}>{t('newsletters')}</button>
+        <button className={tab==='newsletters'?'active':''} onClick={()=>setTab('newsletters')}>Actualités</button>
         <button className={tab==='donations'?'active':''} onClick={()=>setTab('donations')}>{t('donations')}</button>
         <button className={tab==='offices'?'active':''} onClick={()=>setTab('offices')}>{t('offices')}</button>
         <button className={tab==='data'?'active':''} onClick={()=>setTab('data')}>{t('data')}</button>
@@ -1139,10 +1374,66 @@ export default function AdminPanel() {
             {errors.projects && <p className="entity-error">{errors.projects}</p>}
             {loading.projects && <p className="entity-loading">Chargement des projets…</p>}
             <div className="form-row">
-              <input placeholder="Titre *" value={projectForm.title||''} onChange={e=>setProjectForm({...projectForm, title:e.target.value})} />
-              <input placeholder="Pays" value={projectForm.country||''} onChange={e=>setProjectForm({...projectForm, country:e.target.value})} />
-              <textarea placeholder="Résumé" rows={3} value={projectForm.summary||''} onChange={e=>setProjectForm({...projectForm, summary:e.target.value})} />
-              <textarea placeholder="Contenu (HTML ou Markdown)" rows={5} value={projectForm.content||''} onChange={e=>setProjectForm({...projectForm, content:e.target.value})} />
+              <div className="form-group">
+                <label htmlFor="project-title">Titre <span className="required">*</span></label>
+                <input id="project-title" placeholder="Ex: Projet d'accès à l'eau potable" value={projectForm.title||''} onChange={e=>setProjectForm({...projectForm, title:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="project-country">Pays</label>
+                <input id="project-country" placeholder="Ex: Mali" value={projectForm.country||''} onChange={e=>setProjectForm({...projectForm, country:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="project-summary">Résumé</label>
+                <textarea id="project-summary" placeholder="Brève description du projet..." rows={3} value={projectForm.summary||''} onChange={e=>setProjectForm({...projectForm, summary:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="project-content">Contenu (HTML ou Markdown)</label>
+                <textarea id="project-content" placeholder="Description détaillée du projet..." rows={5} value={projectForm.content||''} onChange={e=>setProjectForm({...projectForm, content:e.target.value})} />
+              </div>
+              <div className="two-col">
+                <label>
+                  <span>Date de début</span>
+                  <input type="date" value={projectForm.startDate||''} onChange={e=>setProjectForm({...projectForm, startDate: e.target.value})} />
+                </label>
+                <label>
+                  <span>Date de fin</span>
+                  <input type="date" value={projectForm.endDate||''} onChange={e=>setProjectForm({...projectForm, endDate: e.target.value})} />
+                </label>
+              </div>
+              <div className="two-col">
+                <div className="form-group">
+                  <label htmlFor="project-status">Statut</label>
+                  <select id="project-status" value={projectForm.status || 'active'} onChange={e=>setProjectForm({...projectForm, status: e.target.value as any})}>
+                    <option value="active">En cours</option>
+                    <option value="completed">Terminé</option>
+                    <option value="upcoming">À venir</option>
+                    <option value="archived">Archivé</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="project-beneficiaries">Bénéficiaires</label>
+                  <input type="number" id="project-beneficiaries" placeholder="Ex: 5000" value={projectForm.impactStats?.beneficiaries ?? ''} onChange={e=>setProjectForm({
+                    ...projectForm,
+                    impactStats: { ...(projectForm.impactStats || {}), beneficiaries: e.target.value ? Number(e.target.value) : undefined }
+                  })} />
+                </div>
+              </div>
+              <div className="two-col">
+                <div className="form-group">
+                  <label htmlFor="project-communities">Communautés</label>
+                  <input type="number" id="project-communities" placeholder="Ex: 10" value={projectForm.impactStats?.communities ?? ''} onChange={e=>setProjectForm({
+                    ...projectForm,
+                    impactStats: { ...(projectForm.impactStats || {}), communities: e.target.value ? Number(e.target.value) : undefined }
+                  })} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="project-budget">Budget</label>
+                  <input type="number" id="project-budget" placeholder="Ex: 500000" value={projectForm.impactStats?.budget ?? ''} onChange={e=>setProjectForm({
+                    ...projectForm,
+                    impactStats: { ...(projectForm.impactStats || {}), budget: e.target.value ? Number(e.target.value) : undefined }
+                  })} />
+                </div>
+              </div>
               
               <div className="areas-section">
                 <label className="section-label">Domaines d'intervention (sélection multiple)</label>
@@ -1174,11 +1465,15 @@ export default function AdminPanel() {
                 </div>
                 {(projectForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label htmlFor={`project-image-${idx}`}>URL de l'image {idx + 1}</label>
                     <input 
-                      placeholder={`URL de l'image ${idx + 1}`} 
+                        id={`project-image-${idx}`}
+                        placeholder="https://exemple.com/image.jpg"
                       value={img} 
                       onChange={e => updateProjectImage(idx, e.target.value)} 
                     />
+                    </div>
                     <button type="button" className="btn-remove" onClick={() => removeProjectImage(idx)} aria-label="Remove image">
                       <FaXmark />
                     </button>
@@ -1250,8 +1545,14 @@ export default function AdminPanel() {
             {errors.jobs && <p className="entity-error">{errors.jobs}</p>}
             {loading.jobs && <p className="entity-loading">Chargement des emplois…</p>}
             <div className="form-row">
-                  <input placeholder="Titre du poste *" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} />
-                  <input placeholder="Lieu" value={jobForm.location||''} onChange={e=>setJobForm({...jobForm, location:e.target.value})} />
+                  <div className="form-group">
+                    <label htmlFor="job-title">Titre du poste <span className="required">*</span></label>
+                    <input id="job-title" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="job-location">Lieu</label>
+                    <input id="job-location" value={jobForm.location||''} onChange={e=>setJobForm({...jobForm, location:e.target.value})} />
+                  </div>
               <div>
                 <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#1a1a2e' }}>
                   Date limite de candidature <span style={{ color: '#e74c3c' }}>*</span>
@@ -1264,7 +1565,10 @@ export default function AdminPanel() {
                   style={{ padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '6px', fontSize: '0.9rem', width: '100%' }}
                 />
               </div>
-                  <textarea placeholder="Description" rows={5} value={jobForm.description||''} onChange={e=>setJobForm({...jobForm, description:e.target.value})} />
+              <div className="form-group">
+                <label htmlFor="job-description">Description</label>
+                <textarea id="job-description" rows={5} value={jobForm.description||''} onChange={e=>setJobForm({...jobForm, description:e.target.value})} />
+              </div>
               
               {/* Auto-generated Apply URL Section */}
               <div style={{ padding: '1rem', background: '#fff9f5', borderRadius: '6px', border: '2px solid #FFE5D6' }}>
@@ -1326,11 +1630,15 @@ export default function AdminPanel() {
                 </div>
                 {(jobForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label htmlFor={`job-image-${idx}`}>Image URL {idx + 1}</label>
                     <input 
-                      placeholder={`Image URL ${idx + 1}`} 
+                        id={`job-image-${idx}`}
+                        placeholder="https://exemple.com/image.jpg"
                       value={img} 
                       onChange={e => updateJobImage(idx, e.target.value)} 
                     />
+                    </div>
                     <button type="button" className="btn-remove" onClick={() => removeJobImage(idx)} aria-label="Remove image">
                       <FaXmark />
                     </button>
@@ -1402,14 +1710,14 @@ export default function AdminPanel() {
                 value={applicationFilter.status || ''}
                 onChange={(e) => setApplicationFilter({ ...applicationFilter, status: e.target.value || undefined })}
                 style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
-              >
-                <option value="">{t('allStatuses')}</option>
-                <option value="pending">{t('pending')}</option>
-                <option value="reviewing">{t('reviewing')}</option>
-                <option value="shortlisted">{t('shortlisted')}</option>
-                <option value="interviewed">{t('interviewed')}</option>
-                <option value="accepted">{t('accepted')}</option>
-                <option value="rejected">{t('rejected')}</option>
+                >
+                 <option value="">{t('allStatuses')}</option>
+                 <option value="pending">{t('pending')}</option>
+                 <option value="reviewing">{t('reviewing')}</option>
+                 <option value="shortlisted">{t('shortlisted')}</option>
+                 <option value="interviewed">{t('interviewed')}</option>
+                 <option value="accepted">{t('accepted')}</option>
+                 <option value="rejected">{t('rejected')}</option>
               </select>
               <select
                 value={applicationFilter.jobId || ''}
@@ -1470,7 +1778,7 @@ export default function AdminPanel() {
                 border: '2px solid var(--primary, #FF6B00)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.5rem' }}>
-                  <h3 style={{ margin: 0, color: 'var(--primary, #FF6B00)' }}>Application Details</h3>
+                  <h3 style={{ margin: 0, color: 'var(--primary, #FF6B00)' }}>Détails de la candidature</h3>
                   <button 
                     onClick={() => { setSelectedApplication(null); setAdminNotes(''); }} 
                     style={{ 
@@ -1504,23 +1812,23 @@ export default function AdminPanel() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                   <div>
-                    <strong>Applicant Name:</strong>
+                    <strong>Nom du candidat :</strong>
                     <p>{selectedApplication.fullName}</p>
                   </div>
                   <div>
-                    <strong>Email:</strong>
+                    <strong>Email :</strong>
                     <p><a href={`mailto:${selectedApplication.email}`}>{selectedApplication.email}</a></p>
                   </div>
                   <div>
-                    <strong>Phone:</strong>
+                    <strong>Téléphone :</strong>
                     <p><a href={`tel:${selectedApplication.phone}`}>{selectedApplication.phone}</a></p>
                   </div>
                   <div>
-                    <strong>Job Position:</strong>
+                    <strong>Poste :</strong>
                     <p>{selectedApplication.jobTitle}</p>
                   </div>
                   <div>
-                    <strong>Apply URL:</strong>
+                    <strong>URL de candidature :</strong>
                     <p style={{ wordBreak: 'break-all', fontSize: '0.9rem' }}>
                       <a 
                         href={selectedApplication.jobId ? `${window.location.origin}/job/${selectedApplication.jobId}/apply` : '#'} 
@@ -1533,7 +1841,7 @@ export default function AdminPanel() {
                     </p>
                   </div>
                   <div>
-                    <strong>Status:</strong>
+                    <strong>Statut :</strong>
                     <p>
                       <span className={`badge ${selectedApplication.status === 'accepted' ? 'badge-success' : selectedApplication.status === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>
                         {selectedApplication.status}
@@ -1541,25 +1849,25 @@ export default function AdminPanel() {
                     </p>
                   </div>
                   <div>
-                    <strong>Applied At:</strong>
+                    <strong>Soumis le :</strong>
                     <p>{selectedApplication.appliedAt ? new Date(selectedApplication.appliedAt).toLocaleString() : 'N/A'}</p>
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <strong>Address:</strong>
+                    <strong>Adresse :</strong>
                   <p>{selectedApplication.address}</p>
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <strong>Cover Letter:</strong>
+                  <strong>Lettre de motivation :</strong>
                   <div style={{ background: 'white', padding: '1rem', borderRadius: '4px', marginTop: '0.5rem', whiteSpace: 'pre-wrap' }}>
                     {selectedApplication.coverLetter}
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <strong>Resume:</strong>
+                  <strong>CV :</strong>
                   <div style={{ marginTop: '0.5rem' }}>
                     <a 
                       href={selectedApplication.resume} 
@@ -1574,17 +1882,17 @@ export default function AdminPanel() {
                         borderRadius: '4px' 
                       }}
                     >
-                      📄 View/Download Resume
+                      📄 Voir/Télécharger le CV
                     </a>
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <strong>Admin Notes:</strong>
+                <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="admin-notes"><strong>Notes admin :</strong></label>
                   <textarea
+                    id="admin-notes"
                     value={adminNotes}
                     onChange={(e) => setAdminNotes(e.target.value)}
-                    placeholder="Ajouter des notes internes sur cette candidature..."
                     rows={3}
                     style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
                   />
@@ -1684,7 +1992,7 @@ export default function AdminPanel() {
                       marginLeft: 'auto'
                     }}
                   >
-                    {loading[`app_${selectedApplication.id}`] ? 'Deleting...' : '🗑 Delete'}
+                    {loading[`app_${selectedApplication.id}`] ? 'Suppression...' : '🗑 Supprimer'}
                   </button>
                 </div>
               </div>
@@ -1742,10 +2050,22 @@ export default function AdminPanel() {
             {errors.partners && <p className="entity-error">{errors.partners}</p>}
             {loading.partners && <p className="entity-loading">Chargement des partenaires…</p>}
             <div className="form-row">
-              <input placeholder="Nom du partenaire *" value={partnerForm.name||''} onChange={e=>setPartnerForm({...partnerForm, name:e.target.value})} />
-              <input placeholder="URL du logo" value={partnerForm.logo||''} onChange={e=>setPartnerForm({...partnerForm, logo:e.target.value})} />
-              <input placeholder="URL du site web" value={partnerForm.website||''} onChange={e=>setPartnerForm({...partnerForm, website:e.target.value})} />
-              <textarea placeholder="Description" rows={3} value={partnerForm.description||''} onChange={e=>setPartnerForm({...partnerForm, description:e.target.value})} />
+              <div className="form-group">
+                <label htmlFor="partner-name">Nom du partenaire <span className="required">*</span></label>
+                <input id="partner-name" placeholder="Ex: Organisation XYZ" value={partnerForm.name||''} onChange={e=>setPartnerForm({...partnerForm, name:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="partner-logo">URL du logo</label>
+                <input id="partner-logo" placeholder="https://exemple.com/logo.png" value={partnerForm.logo||''} onChange={e=>setPartnerForm({...partnerForm, logo:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="partner-website">URL du site web</label>
+                <input id="partner-website" placeholder="https://exemple.com" value={partnerForm.website||''} onChange={e=>setPartnerForm({...partnerForm, website:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="partner-description">Description</label>
+                <textarea id="partner-description" placeholder="Description du partenaire et de la collaboration..." rows={3} value={partnerForm.description||''} onChange={e=>setPartnerForm({...partnerForm, description:e.target.value})} />
+              </div>
               
               <div className="images-section">
                 <div className="section-header">
@@ -1754,11 +2074,15 @@ export default function AdminPanel() {
                 </div>
                 {(partnerForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label htmlFor={`partner-image-${idx}`}>URL de l'image {idx + 1}</label>
                     <input 
-                      placeholder={`URL de l'image ${idx + 1}`} 
+                        id={`partner-image-${idx}`}
+                        placeholder="https://exemple.com/image.jpg"
                       value={img} 
                       onChange={e => updatePartnerImage(idx, e.target.value)} 
                     />
+                    </div>
                     <button type="button" className="btn-remove" onClick={() => removePartnerImage(idx)} aria-label="Remove image">
                       <FaXmark />
                     </button>
@@ -1814,9 +2138,18 @@ export default function AdminPanel() {
             <h2>{t('newsletters')}</h2>
             {errors.newsletters && <p className="entity-error">{errors.newsletters}</p>}
             <div className="form-row">
-              <input placeholder="Titre *" value={newsletterForm.title||''} onChange={e=>setNewsletterForm({...newsletterForm, title:e.target.value})} />
-              <input type="date" placeholder="Date" value={newsletterForm.date||''} onChange={e=>setNewsletterForm({...newsletterForm, date:e.target.value})} />
-              <textarea placeholder="Contenu (HTML ou Markdown)" rows={5} value={newsletterForm.content||''} onChange={e=>setNewsletterForm({...newsletterForm, content:e.target.value})} />
+              <div className="form-group">
+                <label htmlFor="newsletter-title">Titre <span className="required">*</span></label>
+                <input id="newsletter-title" placeholder="Ex: Nouvelle initiative lancée" value={newsletterForm.title||''} onChange={e=>setNewsletterForm({...newsletterForm, title:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="newsletter-date">Date</label>
+                <input type="date" id="newsletter-date" value={newsletterForm.date||''} onChange={e=>setNewsletterForm({...newsletterForm, date:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="newsletter-content">Contenu (HTML ou Markdown)</label>
+                <textarea id="newsletter-content" placeholder="Contenu de l'actualité..." rows={5} value={newsletterForm.content||''} onChange={e=>setNewsletterForm({...newsletterForm, content:e.target.value})} />
+              </div>
               
               <div className="images-section">
                 <div className="section-header">
@@ -1825,11 +2158,15 @@ export default function AdminPanel() {
                 </div>
                 {(newsletterForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label htmlFor={`newsletter-image-${idx}`}>URL de l'image {idx + 1}</label>
                     <input 
-                      placeholder={`URL de l'image ${idx + 1}`} 
+                        id={`newsletter-image-${idx}`}
+                        placeholder="https://exemple.com/image.jpg"
                       value={img} 
                       onChange={e => updateNewsletterImage(idx, e.target.value)} 
                     />
+                    </div>
                     <button type="button" className="btn-remove" onClick={() => removeNewsletterImage(idx)} aria-label="Remove image">
                       <FaXmark />
                     </button>
@@ -1837,12 +2174,30 @@ export default function AdminPanel() {
                 ))}
               </div>
               
-              <div className="form-actions">
+              <div className="form-actions" style={{ gap: '12px' }}>
                 <label className="checkbox-label-inline">
                   <input type="checkbox" checked={!!newsletterForm.published} onChange={e=>setNewsletterForm({...newsletterForm, published:e.target.checked})} /> 
                   Publié
                   <span className="help-text">Rendre visible sur le site</span>
                 </label>
+                <div className="form-group" style={{ flex: '1 1 200px', minWidth: '200px' }}>
+                  <label htmlFor="newsletter-author">Auteur</label>
+                  <input
+                    id="newsletter-author"
+                    placeholder="Ex: IMADEL"
+                    value={(newsletterForm as any).author || 'IMADEL'}
+                    onChange={e=>setNewsletterForm({ ...newsletterForm, author: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ flex: '0 0 200px' }}>
+                  <label htmlFor="newsletter-date-action">Date</label>
+                  <input
+                    type="date"
+                    id="newsletter-date-action"
+                    value={newsletterForm.date || ''}
+                    onChange={e=>setNewsletterForm({ ...newsletterForm, date: e.target.value })}
+                  />
+                </div>
                 <button className="btn-primary" onClick={addNewsletter}>
                   {editingNewsletterId ? 'Enregistrer l’actualité' : 'Ajouter une actualité'}
                 </button>
@@ -1878,9 +2233,9 @@ export default function AdminPanel() {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                     >
-                      Edit
+                      Éditer
                     </button>
-                    <button className="btn-danger" onClick={()=>removeNewsletter(n.id)}>Remove</button>
+                    <button className="btn-danger" onClick={()=>removeNewsletter(n.id)}>Supprimer</button>
                   </div>
                 </li>
               ))}
@@ -1950,11 +2305,26 @@ export default function AdminPanel() {
           <section className="panel">
             <h2>{t('offices')}</h2>
             <div className="form-row">
-              <input placeholder="Pays" value={officeForm.country||''} onChange={e=>setOfficeForm({...officeForm, country:e.target.value})} />
-              <input placeholder="Ville" value={officeForm.city||''} onChange={e=>setOfficeForm({...officeForm, city:e.target.value})} />
-              <input placeholder="Adresse" value={officeForm.address||''} onChange={e=>setOfficeForm({...officeForm, address:e.target.value})} />
-              <input placeholder="Latitude" type="number" value={officeForm.lat||'' as any} onChange={e=>setOfficeForm({...officeForm, lat: e.target.value? parseFloat(e.target.value): undefined})} />
-              <input placeholder="Longitude" type="number" value={officeForm.lng||'' as any} onChange={e=>setOfficeForm({...officeForm, lng: e.target.value? parseFloat(e.target.value): undefined})} />
+              <div className="form-group">
+                <label htmlFor="office-country">Pays</label>
+                <input id="office-country" placeholder="Ex: Mali" value={officeForm.country||''} onChange={e=>setOfficeForm({...officeForm, country:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-city">Ville</label>
+                <input id="office-city" placeholder="Ex: Bamako" value={officeForm.city||''} onChange={e=>setOfficeForm({...officeForm, city:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-address">Adresse</label>
+                <input id="office-address" placeholder="Ex: ACI 2000, Hamdallaye" value={officeForm.address||''} onChange={e=>setOfficeForm({...officeForm, address:e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-lat">Latitude</label>
+                <input id="office-lat" type="number" placeholder="Ex: 12.65" step="any" value={officeForm.lat||'' as any} onChange={e=>setOfficeForm({...officeForm, lat: e.target.value? parseFloat(e.target.value): undefined})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-lng">Longitude</label>
+                <input id="office-lng" type="number" placeholder="Ex: -8.0" step="any" value={officeForm.lng||'' as any} onChange={e=>setOfficeForm({...officeForm, lng: e.target.value? parseFloat(e.target.value): undefined})} />
+              </div>
               <div className="form-actions"><button onClick={addOffice}>Ajouter un bureau</button></div>
             </div>
 
@@ -2065,36 +2435,35 @@ export default function AdminPanel() {
             </div>
 
             <div className="form-row">
-              <label className="section-label">{t('phoneNumber')}</label>
-              <input
-                type="text"
-                value={settings.phoneNumber}
-                onChange={(e) => updateSettings({ phoneNumber: e.target.value })}
-                placeholder="+223 XX XX XX XX"
-                style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px' }}
-              />
+              <div className="form-group">
+                <label className="section-label">{t('phoneNumber')}</label>
+                <input
+                  type="text"
+                  value={settings.phoneNumber}
+                  onChange={(e) => updateSettings({ phoneNumber: e.target.value })}
+                  style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px' }}
+                />
+              </div>
             </div>
 
             <div className="form-row">
               <label className="section-label">{t('orangeMoney')} / {t('malitel')}</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('orangeMoney')}</label>
                   <input
                     type="text"
                     value={settings.orangeMoney}
                     onChange={(e) => updateSettings({ orangeMoney: e.target.value })}
-                    placeholder="+223 XX XX XX XX"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('malitel')}</label>
                   <input
                     type="text"
                     value={settings.malitel}
                     onChange={(e) => updateSettings({ malitel: e.target.value })}
-                    placeholder="+223 XX XX XX XX"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2104,53 +2473,48 @@ export default function AdminPanel() {
             <div className="form-row">
               <label className="section-label">{t('bankMali')}</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('bankName')}</label>
                   <input
                     type="text"
                     value={settings.bankMali.bankName}
                     onChange={(e) => updateBankMali({ bankName: e.target.value })}
-                    placeholder="Nom de la banque"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('accountName')}</label>
                   <input
                     type="text"
                     value={settings.bankMali.accountName}
                     onChange={(e) => updateBankMali({ accountName: e.target.value })}
-                    placeholder="Nom du compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('accountNumber')}</label>
                   <input
                     type="text"
                     value={settings.bankMali.accountNumber}
                     onChange={(e) => updateBankMali({ accountNumber: e.target.value })}
-                    placeholder="Numéro de compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('agency')}</label>
                   <input
                     type="text"
                     value={settings.bankMali.agency}
                     onChange={(e) => updateBankMali({ agency: e.target.value })}
-                    placeholder="Agence"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('swiftCode')}</label>
                   <input
                     type="text"
                     value={settings.bankMali.swiftCode}
                     onChange={(e) => updateBankMali({ swiftCode: e.target.value })}
-                    placeholder="Code SWIFT"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
@@ -2160,53 +2524,48 @@ export default function AdminPanel() {
             <div className="form-row">
               <label className="section-label">{t('bankInternational')}</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Bank Name</label>
                   <input
                     type="text"
                     value={settings.bankInternational.bankName}
                     onChange={(e) => updateBankInternational({ bankName: e.target.value })}
-                    placeholder="Nom de la banque"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('accountName')}</label>
                   <input
                     type="text"
                     value={settings.bankInternational.accountName}
                     onChange={(e) => updateBankInternational({ accountName: e.target.value })}
-                    placeholder="Nom du compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('accountNumber')}</label>
                   <input
                     type="text"
                     value={settings.bankInternational.accountNumber}
                     onChange={(e) => updateBankInternational({ accountNumber: e.target.value })}
-                    placeholder="Numéro de compte"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('iban')}</label>
                   <input
                     type="text"
                     value={settings.bankInternational.iban}
                     onChange={(e) => updateBankInternational({ iban: e.target.value })}
-                    placeholder="IBAN"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>
-                <div>
+                <div className="form-group">
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>{t('swiftCode')}</label>
                   <input
                     type="text"
                     value={settings.bankInternational.swiftCode}
                     onChange={(e) => updateBankInternational({ swiftCode: e.target.value })}
-                    placeholder="Code SWIFT"
                     style={{ padding: '10px', border: '2px solid #e0e0e0', borderRadius: '6px', width: '100%' }}
                   />
                 </div>

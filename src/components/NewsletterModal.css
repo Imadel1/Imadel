@@ -1,0 +1,401 @@
+.newsletter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.newsletter-modal-content {
+  background: var(--bg, #ffffff);
+  border-radius: 10px;
+  max-width: 450px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.newsletter-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text-secondary, #616161);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.newsletter-modal-close:hover {
+  background: var(--bg-alt, #f8f9fa);
+  color: var(--text, #1a1a2e);
+}
+
+.newsletter-modal-close:focus {
+  outline: 3px solid var(--primary, #FF6B00);
+  outline-offset: 2px;
+}
+
+.newsletter-modal-header {
+  padding: 1.25rem 1.5rem 0.75rem;
+  text-align: center;
+}
+
+.newsletter-modal-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--primary, #FF6B00);
+  margin: 0 0 0.5rem 0;
+}
+
+.newsletter-modal-header p {
+  color: var(--text-secondary, #616161);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.newsletter-modal-form {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.newsletter-modal-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.newsletter-modal-form label {
+  display: block;
+  font-weight: 600;
+  color: var(--text, #1a1a2e);
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.newsletter-modal-form .required {
+  color: var(--primary, #FF6B00);
+}
+
+.newsletter-modal-form input[type="email"] {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  transition: border-color 0.2s ease;
+}
+
+.newsletter-modal-form input[type="email"]:focus {
+  outline: none;
+  border-color: var(--primary, #FF6B00);
+}
+
+.newsletter-modal-form input[type="email"]:disabled {
+  background: var(--bg-alt, #f8f9fa);
+  cursor: not-allowed;
+}
+
+.subscription-preferences {
+  margin-bottom: 1rem;
+}
+
+.preferences-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text, #1a1a2e);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.preferences-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 5px;
+  transition: background 0.2s ease;
+}
+
+.checkbox-option:hover {
+  background: var(--bg-alt, #f8f9fa);
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary, #FF6B00);
+  flex-shrink: 0;
+}
+
+.checkbox-option span {
+  font-size: 0.85rem;
+  color: var(--text, #1a1a2e);
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 0.6rem 0.75rem;
+  border-radius: 5px;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.6rem 0.75rem;
+  border-radius: 5px;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid #f5c6cb;
+}
+
+.modal-form-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.btn-cancel,
+.btn-subscribe {
+  flex: 1;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.btn-cancel {
+  background: var(--bg-alt, #f8f9fa);
+  color: var(--text, #1a1a2e);
+  border: 2px solid var(--border, #e0e0e0);
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: var(--border, #e0e0e0);
+}
+
+.btn-subscribe {
+  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  color: var(--text-on-primary, #ffffff);
+}
+
+.btn-subscribe:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.btn-cancel:disabled,
+.btn-subscribe:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-cancel:focus,
+.btn-subscribe:focus {
+  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .newsletter-modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .newsletter-modal-content {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 12px 12px 0 0;
+    margin-top: auto;
+  }
+
+  .newsletter-modal-header {
+    padding: 1rem 1.25rem 0.75rem;
+  }
+
+  .newsletter-modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .newsletter-modal-header p {
+    font-size: 0.8rem;
+  }
+
+  .newsletter-modal-form {
+    padding: 0 1.25rem 1.25rem;
+  }
+
+  .newsletter-modal-form .form-group {
+    margin-bottom: 0.85rem;
+  }
+
+  .preferences-checkboxes {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .modal-form-actions {
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+  }
+
+  .btn-cancel,
+  .btn-subscribe {
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .newsletter-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .newsletter-modal-content {
+    border-radius: 12px 12px 0 0;
+    max-height: 90vh;
+  }
+
+  .newsletter-modal-close {
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 24px;
+    height: 24px;
+    font-size: 1.25rem;
+  }
+
+  .newsletter-modal-header {
+    padding: 0.85rem 1rem 0.6rem;
+  }
+
+  .newsletter-modal-header h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .newsletter-modal-header p {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .newsletter-modal-form {
+    padding: 0 1rem 1rem;
+  }
+
+  .newsletter-modal-form .form-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .newsletter-modal-form label {
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .newsletter-modal-form input[type="email"] {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .subscription-preferences {
+    margin-bottom: 0.85rem;
+  }
+
+  .preferences-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .preferences-checkboxes {
+    gap: 0.35rem;
+  }
+
+  .checkbox-option {
+    padding: 0.35rem;
+  }
+
+  .checkbox-option input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+  }
+
+  .checkbox-option span {
+    font-size: 0.8rem;
+  }
+
+  .success-message,
+  .error-message {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .modal-form-actions {
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .btn-cancel,
+  .btn-subscribe {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+  }
+}
+

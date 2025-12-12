@@ -48,7 +48,7 @@
   position: relative;
   z-index: 2;
   max-width: 900px;
-  padding: 4rem 2rem;
+  padding: 2.5rem 1.5rem;
   color: white;
 }
 
@@ -70,14 +70,14 @@
 
 /* Mission and Vision */
 .mission-vision {
-  padding: 5rem 2rem;
+  padding: 2.5rem 1.5rem;
   background: var(--bg-alt, #f8f9fa);
 }
 
 .mission-vision-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 4rem;
+  gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -85,7 +85,7 @@
 .mission {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: 2rem;
   align-items: center;
 }
 
@@ -124,7 +124,7 @@
 
 .vision {
   background: var(--bg, #ffffff);
-  padding: 3rem;
+  padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
@@ -146,7 +146,7 @@
 /* Stats Section */
 .stats-section {
   background: var(--bg, #ffffff);
-  padding: 4rem 2rem;
+  padding: 2.5rem 1.5rem;
   text-align: center;
 }
 
@@ -182,7 +182,7 @@
 
 /* Activities Section */
 .activities {
-  padding: 5rem 2rem;
+  padding: 2.5rem 1.5rem;
   background: var(--bg, #ffffff);
 }
 
@@ -259,7 +259,7 @@
 /* Objectives Section */
 .objectives {
   background: var(--bg-alt, #f8f9fa);
-  padding: 5rem 2rem;
+  padding: 2.5rem 1.5rem;
 }
 
 .objectives h2 {
@@ -267,7 +267,7 @@
   font-family: var(--font-display);
   color: var(--primary, #FF6B00);
   font-size: 2.5rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
 }
 
 .objectives-list {
@@ -311,7 +311,7 @@
 
 /* CTA Section */
 .cta-section {
-  padding: 5rem 2rem;
+  padding: 2.5rem 1.5rem;
   background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
   color: var(--text-on-primary, #ffffff);
   text-align: center;

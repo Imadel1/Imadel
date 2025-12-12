@@ -1,3 +1,7 @@
+// Removed: language switcher no longer used (site fixed in French)
+export default function LanguageSwitcher() {
+  return null;
+}
 import { useTranslation } from '../utils/i18n';
 import './LanguageSwitcher.css';
 

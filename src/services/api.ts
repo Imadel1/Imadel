@@ -170,7 +170,20 @@ export const projectsApi = {
    * Create project
    * POST /api/projects
    */
-  create: async (projectData: any) => {
+  create: async (projectData: {
+    title: string;
+    description: string;
+    fullDescription?: string;
+    category?: 'current' | 'completed' | 'news';
+    areasOfIntervention?: string[];
+    images?: { url: string; caption?: string }[];
+    location?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: 'active' | 'completed' | 'upcoming' | 'archived';
+    impactStats?: { beneficiaries?: number; communities?: number; budget?: number };
+    published?: boolean;
+  }) => {
     return apiRequest('/projects', {
       method: 'POST',
       body: JSON.stringify(projectData),
@@ -181,7 +194,20 @@ export const projectsApi = {
    * Update project
    * PUT /api/projects/:id
    */
-  update: async (id: string, projectData: any) => {
+  update: async (id: string, projectData: Partial<{
+    title: string;
+    description: string;
+    fullDescription?: string;
+    category?: 'current' | 'completed' | 'news';
+    areasOfIntervention?: string[];
+    images?: { url: string; caption?: string }[];
+    location?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: 'active' | 'completed' | 'upcoming' | 'archived';
+    impactStats?: { beneficiaries?: number; communities?: number; budget?: number };
+    published?: boolean;
+  }>) => {
     return apiRequest(`/projects/${id}`, {
       method: 'PUT',
       body: JSON.stringify(projectData),
@@ -222,7 +248,21 @@ export const jobsApi = {
    * Create job
    * POST /api/jobs
    */
-  create: async (jobData: any) => {
+  create: async (jobData: {
+    title: string;
+    description: string;
+    requirements?: string[];
+    responsibilities?: string[];
+    location: string;
+    type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+    category?: string;
+    deadline: string;
+    status?: 'open' | 'closed' | 'filled';
+    salary?: { min?: number; max?: number; currency?: string };
+    images?: { url: string; caption?: string }[];
+    published?: boolean;
+    applyUrl?: string;
+  }) => {
     return apiRequest('/jobs', {
       method: 'POST',
       body: JSON.stringify(jobData),
@@ -233,7 +273,21 @@ export const jobsApi = {
    * Update job
    * PUT /api/jobs/:id
    */
-  update: async (id: string, jobData: any) => {
+  update: async (id: string, jobData: Partial<{
+    title: string;
+    description: string;
+    requirements?: string[];
+    responsibilities?: string[];
+    location: string;
+    type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
+    category?: string;
+    deadline: string;
+    status?: 'open' | 'closed' | 'filled';
+    salary?: { min?: number; max?: number; currency?: string };
+    images?: { url: string; caption?: string }[];
+    published?: boolean;
+    applyUrl?: string;
+  }>) => {
     return apiRequest(`/jobs/${id}`, {
       method: 'PUT',
       body: JSON.stringify(jobData),
@@ -274,7 +328,15 @@ export const partnersApi = {
    * Create partner
    * POST /api/partners
    */
-  create: async (partnerData: any) => {
+  create: async (partnerData: {
+    name: string;
+    logo: string;
+    description?: string;
+    website?: string;
+    category?: 'funding' | 'implementation' | 'technical' | 'government' | 'community' | 'other';
+    partnershipStartDate?: string;
+    active?: boolean;
+  }) => {
     return apiRequest('/partners', {
       method: 'POST',
       body: JSON.stringify(partnerData),
@@ -285,7 +347,15 @@ export const partnersApi = {
    * Update partner
    * PUT /api/partners/:id
    */
-  update: async (id: string, partnerData: any) => {
+  update: async (id: string, partnerData: Partial<{
+    name: string;
+    logo: string;
+    description?: string;
+    website?: string;
+    category?: 'funding' | 'implementation' | 'technical' | 'government' | 'community' | 'other';
+    partnershipStartDate?: string;
+    active?: boolean;
+  }>) => {
     return apiRequest(`/partners/${id}`, {
       method: 'PUT',
       body: JSON.stringify(partnerData),
@@ -315,10 +385,10 @@ export const donationsApi = {
     donorEmail: string;
     donorPhone?: string;
     amount: number;
-    currency: string;
+    currency: 'XOF' | 'GHS' | 'NGN' | 'USD' | 'EUR';
     message?: string;
     isAnonymous?: boolean;
-    purpose?: string;
+    purpose?: 'general' | 'education' | 'healthcare' | 'water' | 'emergency' | 'other';
   }) => {
     return apiRequest('/donations/initialize', {
       method: 'POST',
@@ -361,56 +431,27 @@ export const applicationsApi = {
    */
   create: async (applicationData: {
     jobId: string;
-    applicantName: string;
-    applicantEmail: string;
-    applicantPhone: string;
-    applicantAddress: string;
-    coverLetter?: string;
-    resume: File;
-    jobTitle?: string;
+    jobTitle: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+    coverLetter: string;
+    resumeUrl: string;
   }) => {
-    const token = getToken();
-    const formData = new FormData();
-    
-    formData.append('jobId', applicationData.jobId);
-    // Also append generic "job" field for backend variants
-    formData.append('job', applicationData.jobId);
-    if (applicationData.jobTitle) {
-      formData.append('jobTitle', applicationData.jobTitle);
-    }
-    formData.append('applicantName', applicationData.applicantName);
-    // Fallback fields some backends expect
-    formData.append('name', applicationData.applicantName);
-    formData.append('applicantEmail', applicationData.applicantEmail);
-    formData.append('email', applicationData.applicantEmail);
-    formData.append('applicantPhone', applicationData.applicantPhone);
-    formData.append('phone', applicationData.applicantPhone);
-    formData.append('applicantAddress', applicationData.applicantAddress);
-    formData.append('address', applicationData.applicantAddress);
-    if (applicationData.coverLetter) {
-      formData.append('coverLetter', applicationData.coverLetter);
-      formData.append('message', applicationData.coverLetter);
-    }
-    formData.append('resume', applicationData.resume);
-
-    const headers: HeadersInit = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/applications`, {
+    return apiRequest('/applications', {
       method: 'POST',
-      headers,
-      body: formData,
+      body: JSON.stringify({
+        jobId: applicationData.jobId, // backend expects jobId
+        jobTitle: applicationData.jobTitle,
+        fullName: applicationData.fullName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        address: applicationData.address,
+        coverLetter: applicationData.coverLetter,
+        resume: applicationData.resumeUrl,
+      }),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `API Error: ${response.statusText}`);
-    }
-
-    return data;
   },
 
   /**
@@ -527,6 +568,50 @@ export const newslettersApi = {
   },
 
   /**
+   * Create a newsletter content item (admin)
+   * POST /api/newsletters
+   */
+  createContent: async (newsletterData: {
+    title: string;
+    content?: string;
+    published?: boolean;
+    date?: string;
+    images?: string[];
+  }) => {
+    return apiRequest('/newsletters', {
+      method: 'POST',
+      body: JSON.stringify(newsletterData),
+    });
+  },
+
+  /**
+   * Update a newsletter content item (admin)
+   * PUT /api/newsletters/:id
+   */
+  updateContent: async (id: string, newsletterData: {
+    title?: string;
+    content?: string;
+    published?: boolean;
+    date?: string;
+    images?: string[];
+  }) => {
+    return apiRequest(`/newsletters/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(newsletterData),
+    });
+  },
+
+  /**
+   * Delete a newsletter content item (admin)
+   * DELETE /api/newsletters/:id
+   */
+  deleteContent: async (id: string) => {
+    return apiRequest(`/newsletters/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  /**
    * Get all subscribers (admin only)
    * GET /api/newsletters/subscribers
    */
@@ -568,6 +653,77 @@ export const newslettersApi = {
   },
 };
 
+// ==================== NEWS ====================
+
+export const newsApi = {
+  /**
+   * Get all news (optional published filter)
+   * GET /api/news?published=true
+   */
+  getAll: async (params?: { published?: boolean }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.published !== undefined) {
+      queryParams.append('published', params.published.toString());
+    }
+    const query = queryParams.toString();
+    return apiRequest(`/news${query ? `?${query}` : ''}`);
+  },
+
+  /**
+   * Get single news item
+   * GET /api/news/:id
+   */
+  getById: async (id: string) => {
+    return apiRequest(`/news/${id}`);
+  },
+
+  /**
+   * Create news item (admin)
+   * POST /api/news
+   */
+  create: async (newsData: {
+    title: string;
+    image?: string;
+    description: string;
+    author: string;
+    date?: string;
+    isPublished?: boolean;
+  }) => {
+    return apiRequest('/news', {
+      method: 'POST',
+      body: JSON.stringify(newsData),
+    });
+  },
+
+  /**
+   * Update news item (admin)
+   * PUT /api/news/:id
+   */
+  update: async (id: string, newsData: Partial<{
+    title: string;
+    image?: string;
+    description: string;
+    author: string;
+    date?: string;
+    isPublished?: boolean;
+  }>) => {
+    return apiRequest(`/news/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(newsData),
+    });
+  },
+
+  /**
+   * Delete news item (admin)
+   * DELETE /api/news/:id
+   */
+  delete: async (id: string) => {
+    return apiRequest(`/news/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 // ==================== OFFICES ====================
 
 export const officesApi = {
@@ -591,7 +747,27 @@ export const officesApi = {
    * Create office
    * POST /api/offices
    */
-  create: async (officeData: any) => {
+  create: async (officeData: {
+    name: string;
+    type?: 'headquarters' | 'regional' | 'field';
+    address?: {
+      street?: string;
+      city?: string;
+      region?: string;
+      country?: string;
+      postalCode?: string;
+    };
+    contact?: {
+      phone?: string;
+      email?: string;
+      fax?: string;
+    };
+    coordinates?: {
+      latitude?: number;
+      longitude?: number;
+    };
+    active?: boolean;
+  }) => {
     return apiRequest('/offices', {
       method: 'POST',
       body: JSON.stringify(officeData),
@@ -602,7 +778,27 @@ export const officesApi = {
    * Update office
    * PUT /api/offices/:id
    */
-  update: async (id: string, officeData: any) => {
+  update: async (id: string, officeData: Partial<{
+    name: string;
+    type?: 'headquarters' | 'regional' | 'field';
+    address?: {
+      street?: string;
+      city?: string;
+      region?: string;
+      country?: string;
+      postalCode?: string;
+    };
+    contact?: {
+      phone?: string;
+      email?: string;
+      fax?: string;
+    };
+    coordinates?: {
+      latitude?: number;
+      longitude?: number;
+    };
+    active?: boolean;
+  }>) => {
     return apiRequest(`/offices/${id}`, {
       method: 'PUT',
       body: JSON.stringify(officeData),
@@ -723,5 +919,6 @@ export default {
   uploads: uploadsApi,
   admin: adminApi,
 };
+
 
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { getSettings, subscribeToSettings } from '../utils/settings';
+import NewsletterModal from '../components/NewsletterModal';
 import './Contact.css';
 
 interface FormData {
@@ -25,6 +26,7 @@ const Contact: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
 
   // Load settings and subscribe to updates
   useEffect(() => {
@@ -107,6 +109,75 @@ const Contact: React.FC = () => {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSubscriptionChange = (preference: 'jobs' | 'projects' | 'news' | 'all') => {
+    if (preference === 'all') {
+      const newAllValue = !subscriptionPreferences.all;
+      setSubscriptionPreferences({
+        jobs: newAllValue,
+        projects: newAllValue,
+        news: newAllValue,
+        all: newAllValue,
+      });
+    } else {
+      const newPreferences = {
+        ...subscriptionPreferences,
+        [preference]: !subscriptionPreferences[preference],
+      };
+      // If all individual checkboxes are checked, check "all" too
+      if (newPreferences.jobs && newPreferences.projects && newPreferences.news) {
+        newPreferences.all = true;
+      } else {
+        newPreferences.all = false;
+      }
+      setSubscriptionPreferences(newPreferences);
+    }
+  };
+
+  const handleSubscribe = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!subscriptionEmail.trim()) {
+      setSubscriptionError('L\'email est requis');
+      setSubscriptionStatus('error');
+      return;
+    }
+
+    if (!validateEmail(subscriptionEmail)) {
+      setSubscriptionError('Veuillez entrer une adresse email valide');
+      setSubscriptionStatus('error');
+      return;
+    }
+
+    if (!subscriptionPreferences.jobs && !subscriptionPreferences.projects && !subscriptionPreferences.news && !subscriptionPreferences.all) {
+      setSubscriptionError('Veuillez sélectionner au moins un type de mise à jour');
+      setSubscriptionStatus('error');
+      return;
+    }
+
+    setIsSubscribing(true);
+    setSubscriptionStatus('idle');
+    setSubscriptionError('');
+
+    try {
+      // Subscribe to newsletter via API
+      await newslettersApi.subscribe(subscriptionEmail);
+      
+      setSubscriptionStatus('success');
+      setSubscriptionEmail('');
+      setSubscriptionPreferences({ jobs: false, projects: false, news: false, all: false });
+      
+      // Reset success message after 5 seconds
+      setTimeout(() => {
+        setSubscriptionStatus('idle');
+      }, 5000);
+    } catch (error: any) {
+      setSubscriptionStatus('error');
+      setSubscriptionError(error.message || 'Une erreur s\'est produite lors de l\'abonnement. Veuillez réessayer.');
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
@@ -252,6 +323,21 @@ const Contact: React.FC = () => {
               {isSubmitting ? 'Envoi...' : 'Envoyer le Message'}
             </button>
           </form>
+
+          {/* Newsletter Subscription Section */}
+          <div className="newsletter-subscription">
+            <h3>Restez informé</h3>
+            <p className="newsletter-description">
+              Abonnez-vous à notre newsletter pour recevoir les dernières actualités, projets et offres d'emploi.
+            </p>
+            <button
+              className="subscribe-button"
+              onClick={() => setIsNewsletterModalOpen(true)}
+              aria-label="S'abonner à la newsletter"
+            >
+              S'abonner à la newsletter
+            </button>
+          </div>
         </div>
       </div>
 
@@ -270,6 +356,11 @@ const Contact: React.FC = () => {
           aria-label="Map showing IMADEL office location in Bamako, Mali"
         />
       </div>
+      
+      <NewsletterModal 
+        isOpen={isNewsletterModalOpen} 
+        onClose={() => setIsNewsletterModalOpen(false)} 
+      />
     </div>
   );
 };

@@ -112,7 +112,7 @@ const AboutUs: React.FC = () => {
               </p>
               <p>
                 Nos activités couvrent de nombreux secteurs, notamment l'hydraulique rurale et urbaine, la décentralisation,
-                l'hygiène et l'assainissement, l'éducation, la formation, le plaidoyer et le lobbying, l'environnement, la santé et le développement local.
+                l'hygiène et l'assainissement, l'éducation, la formation, le plaidoyer et le lobbyisme, l'environnement, la santé et le développement local.
               </p>
               <Link to="/ourwork" className="btn-primary">
                 Voir Nos Projets

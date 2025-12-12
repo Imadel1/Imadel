@@ -85,11 +85,16 @@ const GetInvolved: React.FC = () => {
               link: `/job/${j._id || j.id}`,
               category: j.location || 'General',
               deadline: j.deadline,
-              listingType: j.listingType || 'job'
+              listingType: j.listingType || 'job',
+              status: j.status || 'open'
             }));
           
           // Separate jobs and proposals
-          const jobsList = publishedItems.filter((item: JobItem) => item.listingType !== 'proposal');
+          // Jobs: show active/open and filled jobs (but not closed)
+          const jobsList = publishedItems.filter((item: JobItem & { status?: string }) => 
+            item.listingType !== 'proposal' && (item.status === 'open' || item.status === 'filled' || !item.status)
+          );
+          // Proposals: show all published proposals
           const proposalsList = publishedItems.filter((item: JobItem) => item.listingType === 'proposal');
           
           setJobs(jobsList);
@@ -116,16 +121,6 @@ const GetInvolved: React.FC = () => {
 
   return (
     <div className="get-involved-page">
-      <section className="intro" aria-labelledby="intro-heading">
-        <div className="container">
-          <h1 id="intro-heading">S'impliquer</h1>
-          <p>
-            Découvrez les opportunités de travailler avec nous ou de soutenir les projets de santé et de développement communautaire en cours.
-            Rejoignez notre équipe de personnes passionnées qui font la différence à travers le Mali.
-          </p>
-        </div>
-      </section>
-
       <section className="proposals-section" aria-labelledby="proposals-heading">
         <div className="container">
           <h2 id="proposals-heading">Appels d'Offres & Appels à Propositions</h2>

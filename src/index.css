@@ -8,15 +8,15 @@
 }
 
 :root {
-  /* IMADEL Brand Colors - Primary Palette */
-  --primary: #FF6B00;           /* IMADEL Orange - Primary brand color */
-  --primary-dark: #e55a00;      /* Darker orange for hover states */
-  --primary-darker: #cc4f00;    /* Even darker for active states */
-  --primary-light: #ff8c33;     /* Lighter orange for highlights */
-  --primary-lighter: #ffb366;   /* Very light orange for backgrounds */
-  --primary-alpha: rgba(255, 107, 0, 0.1);  /* Alpha for backgrounds */
-  --primary-alpha-2: rgba(255, 107, 0, 0.2); /* Alpha for borders */
-  --primary-alpha-3: rgba(255, 107, 0, 0.3); /* Alpha for shadows */
+  /* IMADEL Brand Colors - Primary Palette (now fixed to blue) */
+  --primary: #0066CC;           /* Primary blue brand color */
+  --primary-dark: #0052A3;      /* Darker blue for hover states */
+  --primary-darker: #003D7A;    /* Even darker for active states */
+  --primary-light: #3385D6;     /* Lighter blue for highlights */
+  --primary-lighter: #66A3E0;   /* Very light blue for backgrounds */
+  --primary-alpha: rgba(0, 102, 204, 0.1);  /* Alpha for backgrounds */
+  --primary-alpha-2: rgba(0, 102, 204, 0.2); /* Alpha for borders */
+  --primary-alpha-3: rgba(0, 102, 204, 0.3); /* Alpha for shadows */
 
   /* Neutral Colors */
   --bg: #ffffff;
@@ -43,7 +43,7 @@
   /* Status Colors */
   --success: #2e8b57;
   --success-light: #4caf50;
-  --warning: #ff9800;
+  --warning: #f59e0b;
   --error: #d32f2f;
   --error-light: #f44336;
   --info: #2196f3;
@@ -54,7 +54,7 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-primary: 0 4px 15px var(--primary-alpha-3);
-  --shadow-primary-hover: 0 8px 25px var(--primary-alpha-3, rgba(255, 107, 0, 0.4));
+  --shadow-primary-hover: 0 8px 25px var(--primary-alpha-3, rgba(0, 102, 204, 0.4));
   
   /* Layout */
   --max-width: 1200px;

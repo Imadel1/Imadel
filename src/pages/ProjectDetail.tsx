@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { useTranslation } from '../utils/i18n';
 import { newsApi, projectsApi } from '../services/api';
+import ImageModal from '../components/ImageModal';
 import './ProjectDetail.css';
 
 interface ContentItem {
@@ -23,14 +24,17 @@ const ProjectDetail: React.FC = () => {
   const [content, setContent] = useState<ContentItem | null>(null);
   const [allContent, setAllContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 
   // Determine if this is a project or newsletter based on URL
-  const isNewsletter = location.includes('/news/');
+  const isNewsletter = location.includes('/actualite/');
   const storageKey = isNewsletter ? 'imadel_admin_newsletters' : 'imadel_admin_projects';
   const { t, language } = useTranslation();
-  const backLink = isNewsletter ? '/' : '/ourwork';
+  const backLink = isNewsletter ? '/' : '/nos-projets';
   const backText = isNewsletter ? t('backToHome') : t('backToProjects');
-  const contentType = isNewsletter ? 'News' : 'Project';
+  // Use French labels for content type
+  const contentType = isNewsletter ? 'Actualité' : 'Projet';
 
   // Scroll to top when component mounts or ID changes
   useEffect(() => {
@@ -171,8 +175,31 @@ const ProjectDetail: React.FC = () => {
     return (
       <div className="project-detail-page">
         <div className="container">
-          <p style={{ textAlign: 'center', padding: '2rem' }}>{t('loading')}</p>
+          <div className="loading-container" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            minHeight: '400px',
+            gap: '1rem'
+          }}>
+            <div className="spinner" style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid #f3f3f3',
+              borderTop: '4px solid var(--primary, #0066CC)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <p style={{ color: 'var(--text-secondary, #616161)', fontSize: '1.1rem' }}>{t('loading') || 'Chargement...'}</p>
+          </div>
         </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
@@ -199,7 +226,7 @@ const ProjectDetail: React.FC = () => {
 
   const handleNext = () => {
     if (nextItem) {
-      const path = isNewsletter ? `/news/${nextItem.id}` : `/project/${nextItem.id}`;
+      const path = isNewsletter ? `/actualite/${nextItem.id}` : `/projet/${nextItem.id}`;
       navigate(path);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -207,7 +234,7 @@ const ProjectDetail: React.FC = () => {
 
   const handlePrev = () => {
     if (prevItem) {
-      const path = isNewsletter ? `/news/${prevItem.id}` : `/project/${prevItem.id}`;
+      const path = isNewsletter ? `/actualite/${prevItem.id}` : `/projet/${prevItem.id}`;
       navigate(path);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -224,7 +251,7 @@ const ProjectDetail: React.FC = () => {
           <span aria-hidden="true"> / </span>
           {!isNewsletter && (
             <>
-              <Link to="/ourwork">{t('work')}</Link>
+              <Link to="/nos-projets">{t('work')}</Link>
               <span aria-hidden="true"> / </span>
             </>
           )}
@@ -242,7 +269,7 @@ const ProjectDetail: React.FC = () => {
             )}
             
             {content.country && (
-              <p className="content-location" style={{ color: 'var(--primary, #FF6B00)', marginBottom: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <p className="content-location" style={{ color: 'var(--primary, #0066CC)', marginBottom: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <FaMapMarkerAlt /> {content.country}
               </p>
             )}
@@ -253,20 +280,22 @@ const ProjectDetail: React.FC = () => {
               dangerouslySetInnerHTML={{ __html: content.content || content.description || '' }}
             />
             
-            <div className="project-navigation" role="navigation" aria-label={`${contentType} navigation`} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
+            <div
+              className="project-navigation"
+              role="navigation"
+              aria-label={`${contentType} navigation`}
+            >
               <button 
                 onClick={handlePrev} 
                 disabled={!prevItem}
                 className="navigation-buttons button"
-                aria-label={`Previous ${contentType.toLowerCase()}`}
-                style={{ flex: '1', minWidth: '150px' }}
+                aria-label={`${t('previous')} ${contentType.toLowerCase()}`}
               >
                 ← {t('previous')} {contentType}
               </button>
               <Link 
                 to={backLink} 
                 className="navigation-buttons button"
-                style={{ flex: '1', minWidth: '150px', textAlign: 'center' }}
               >
                 {backText}
               </Link>
@@ -274,8 +303,7 @@ const ProjectDetail: React.FC = () => {
                 onClick={handleNext} 
                 disabled={!nextItem}
                 className="navigation-buttons button"
-                aria-label={`Next ${contentType.toLowerCase()}`}
-                style={{ flex: '1', minWidth: '150px' }}
+                aria-label={`${t('next')} ${contentType.toLowerCase()}`}
               >
                 {t('next')} {contentType} →
               </button>
@@ -304,12 +332,16 @@ const ProjectDetail: React.FC = () => {
                       cursor: 'pointer',
                       border: '2px solid var(--border-light, #f0f0f0)'
                     }}
-                    onClick={() => window.open(image, '_blank')}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      setIsModalOpen(true);
+                    }}
                     role="button"
                     tabIndex={0}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
-                        window.open(image, '_blank');
+                        setSelectedImageIndex(index);
+                        setIsModalOpen(true);
                       }
                     }}
                     aria-label={`View ${content.title} - Image ${index + 1} in full size`}
@@ -333,6 +365,16 @@ const ProjectDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {hasImages && (
+        <ImageModal
+          images={images}
+          initialIndex={selectedImageIndex}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={content.title}
+        />
+      )}
     </div>
   );
 };

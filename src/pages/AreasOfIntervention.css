@@ -4,7 +4,7 @@
 
 /* Hero Section */
 .areas-hero {
-  background: linear-gradient(135deg, #FF6B00 0%, #e55a00 100%);
+  background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%);
   padding: 4rem 2rem;
   text-align: center;
   color: white;
@@ -50,14 +50,14 @@
 
 .area-card:hover {
   transform: translateY(-5px);
-  border-color: var(--primary, #FF6B00);
-  box-shadow: 0 10px 30px rgba(255, 107, 0, 0.2);
+  border-color: var(--primary, #0066CC);
+  box-shadow: 0 10px 30px rgba(0, 102, 204, 0.2);
 }
 
 .area-card.active {
-  border-color: var(--primary, #FF6B00);
+  border-color: var(--primary, #0066CC);
   background: #fff9f5;
-  box-shadow: 0 10px 30px rgba(255, 107, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 102, 204, 0.2);
 }
 
 .area-card.active::before {
@@ -67,7 +67,7 @@
   right: 10px;
   width: 30px;
   height: 30px;
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -119,7 +119,7 @@
 }
 
 .btn-clear {
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -130,7 +130,7 @@
 }
 
 .btn-clear:hover {
-  background: #e55a00;
+  background: #0052A3;
   transform: translateY(-2px);
 }
 
@@ -154,7 +154,7 @@
 
 .project-card:hover {
   transform: translateY(-5px);
-  border-color: var(--primary, #FF6B00);
+  border-color: var(--primary, #0066CC);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
@@ -204,7 +204,7 @@
 }
 
 .project-location {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 0.85rem;
   font-weight: 600;
   margin-top: auto;

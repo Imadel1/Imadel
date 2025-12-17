@@ -1,6 +1,8 @@
 import React, { useState, useEffect, type FormEvent } from 'react';
 import { getSettings, subscribeToSettings } from '../utils/settings';
 import NewsletterModal from '../components/NewsletterModal';
+import { officesApi } from '../services/api';
+import OfficesMap, { type OfficeMarker } from '../components/OfficesMap';
 import './Contact.css';
 
 interface FormData {
@@ -15,6 +17,15 @@ interface FormErrors {
   message?: string;
 }
 
+interface Office {
+  id: string;
+  country?: string;
+  city?: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+}
+
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -27,6 +38,7 @@ const Contact: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
+  const [offices, setOffices] = useState<Office[]>([]);
 
   // Load settings and subscribe to updates
   useEffect(() => {
@@ -35,6 +47,56 @@ const Contact: React.FC = () => {
       setSettings(newSettings);
     });
     return unsubscribe;
+  }, []);
+
+  // Load offices with coordinates from Firestore
+  useEffect(() => {
+    const loadOffices = async () => {
+      try {
+        const response = await officesApi.getAll();
+        const rawOffices =
+          (response as any).offices ||
+          (response as any).data ||
+          response;
+
+        if (response.success !== false && Array.isArray(rawOffices)) {
+          const mapped: Office[] = rawOffices.map((o: any) => {
+            const addr = o.address;
+            const normalizedAddress =
+              typeof addr === 'string'
+                ? addr
+                : addr && typeof addr === 'object'
+                ? [
+                    addr.street,
+                    addr.city,
+                    addr.region,
+                    addr.country,
+                    addr.postalCode,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')
+                : '';
+
+          const coords = o.coordinates || {};
+
+            return {
+              id: o.id || o._id,
+              country: o.address?.country || o.country,
+              city: o.address?.city || o.city || addr?.city,
+              address: normalizedAddress,
+              lat: coords.latitude ?? o.latitude ?? o.lat,
+              lng: coords.longitude ?? o.longitude ?? o.lng,
+            };
+          }).filter((o: Office) => typeof o.lat === 'number' && typeof o.lng === 'number');
+
+          setOffices(mapped);
+        }
+      } catch (error) {
+        console.error('Error loading offices for map:', error);
+      }
+    };
+
+    loadOffices();
   }, []);
 
   const validateEmail = (email: string): boolean => {
@@ -135,12 +197,15 @@ const Contact: React.FC = () => {
                 <strong>Téléphone:</strong><br />
                 <a href={`tel:${settings.phoneNumber.replace(/\s/g, '')}`}>{settings.phoneNumber}</a><br />
                 <a href={`tel:${settings.orangeMoney.replace(/\s/g, '')}`}>{settings.orangeMoney}</a><br />
-                <a href={`tel:${settings.malitel.replace(/\s/g, '')}`}>{settings.malitel}</a>
+                <a href={`tel:${settings.malitel.replace(/\s/g, '')}`}>{settings.malitel}</a><br />
+                <a href="tel:+22375221808">+223 75 22 18 08</a><br />
+                <a href="tel:+22394941313">+223 94 94 13 13</a>
               </p>
               <p>
                 <strong>Email:</strong><br />
                 <a href="mailto:imadel@imadel.net">imadel@imadel.net</a><br />
-                <a href="mailto:imadel@imadel-mali.org">imadel@imadel-mali.org</a>
+                <a href="mailto:imadel@imadel-mali.org">imadel@imadel-mali.org</a><br />
+                <a href="mailto:imadelmopti@imadel-mali.org">imadelmopti@imadel-mali.org</a>
               </p>
             </address>
           </div>
@@ -275,18 +340,11 @@ const Contact: React.FC = () => {
 
       <div className="map-container">
         <h2>Nous Trouver</h2>
-        {/* TODO: Replace static map with data from backend (lat/long + project info) */}
-        <iframe
-          title="IMADEL Office Location in Bamako, Mali"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.5!2d-8.0!3d12.65!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDM5JzAwLjAiTiA4wrAwMCcwMC4wIlc!5e0!3m2!1sen!2sus!4v1234567890"
-          width="100%"
-          height="100%"
-          style={{ border: 0, minHeight: '400px' }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          aria-label="Map showing IMADEL office location in Bamako, Mali"
-        />
+        <div className="map-inner">
+          <OfficesMap
+            offices={offices as OfficeMarker[]}
+          />
+        </div>
       </div>
       
       <NewsletterModal 

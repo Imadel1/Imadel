@@ -71,7 +71,7 @@
 }
 
 .newsletter-modal-close:focus {
-  outline: 3px solid var(--primary, #FF6B00);
+  outline: 3px solid var(--primary, #0066CC);
   outline-offset: 2px;
 }
 
@@ -83,7 +83,7 @@
 .newsletter-modal-header h2 {
   font-family: var(--font-display);
   font-size: 1.5rem;
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   margin: 0 0 0.5rem 0;
 }
 
@@ -111,7 +111,7 @@
 }
 
 .newsletter-modal-form .required {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
 }
 
 .newsletter-modal-form input[type="email"] {
@@ -126,7 +126,7 @@
 
 .newsletter-modal-form input[type="email"]:focus {
   outline: none;
-  border-color: var(--primary, #FF6B00);
+  border-color: var(--primary, #0066CC);
 }
 
 .newsletter-modal-form input[type="email"]:disabled {
@@ -170,7 +170,7 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
-  accent-color: var(--primary, #FF6B00);
+  accent-color: var(--primary, #0066CC);
   flex-shrink: 0;
 }
 
@@ -229,14 +229,14 @@
 }
 
 .btn-subscribe {
-  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%);
   color: var(--text-on-primary, #ffffff);
 }
 
 .btn-subscribe:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
+  background: linear-gradient(135deg, var(--primary-dark, #0052A3) 0%, var(--primary-darker, #003D7A) 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
 }
 
 .btn-cancel:disabled,
@@ -248,7 +248,7 @@
 
 .btn-cancel:focus,
 .btn-subscribe:focus {
-  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline: 3px solid var(--primary-alpha-2, rgba(0, 102, 204, 0.2));
   outline-offset: 2px;
 }
 

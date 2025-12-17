@@ -12,7 +12,7 @@
 }
 
 .breadcrumb a {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   text-decoration: none;
 }
 
@@ -62,11 +62,11 @@
 
 .job-location svg,
 .job-type svg {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
 }
 
 .back-button {
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   color: white !important;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -92,17 +92,17 @@
 }
 
 .back-button:hover {
-  background: var(--primary-dark, #e55a00);
+  background: var(--primary-dark, #0052A3);
   transform: translateY(-2px);
 }
 
 .back-button:focus {
-  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline: 3px solid var(--primary-alpha-2, rgba(0, 102, 204, 0.2));
   outline-offset: 2px;
 }
 
 .job-detail-content h1 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 2.2rem;
   margin: 0 0 1.5rem 0;
   font-family: var(--font-sans);
@@ -113,13 +113,13 @@
 }
 
 .job-detail-content h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 1.3rem;
   margin: 1.5rem 0 1rem 0;
   font-family: var(--font-sans);
   font-weight: 700;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary, #FF6B00);
+  border-bottom: 2px solid var(--primary, #0066CC);
   display: inline-block;
 }
 
@@ -149,13 +149,13 @@
 }
 
 .application-form h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 1.6rem;
   margin-bottom: 1.5rem;
   font-family: var(--font-sans);
   font-weight: 700;
   padding-bottom: 0.75rem;
-  border-bottom: 3px solid var(--primary, #FF6B00);
+  border-bottom: 3px solid var(--primary, #0066CC);
 }
 
 .form-group {
@@ -187,8 +187,8 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary, #FF6B00);
-  box-shadow: 0 0 0 4px var(--primary-alpha, rgba(255, 107, 0, 0.1));
+  border-color: var(--primary, #0066CC);
+  box-shadow: 0 0 0 4px var(--primary-alpha, rgba(0, 102, 204, 0.1));
 }
 
 .form-group input::placeholder,
@@ -209,7 +209,7 @@
 }
 
 .submit-button {
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -225,7 +225,7 @@
 }
 
 .submit-button:hover:not(:disabled) {
-  background: var(--primary-dark, #e55a00);
+  background: var(--primary-dark, #0052A3);
   transform: translateY(-2px);
 }
 
@@ -234,7 +234,7 @@
 }
 
 .submit-button:focus {
-  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline: 3px solid var(--primary-alpha-2, rgba(0, 102, 204, 0.2));
   outline-offset: 2px;
 }
 
@@ -311,7 +311,7 @@
 
   .application-form {
     background: #fafafa;
-    border: 2px solid var(--primary, #FF6B00);
+    border: 2px solid var(--primary, #0066CC);
   }
 
   .job-detail-content h1 {

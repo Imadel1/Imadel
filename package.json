@@ -12,6 +12,7 @@
     "tw:build": "node ./node_modules/tailwindcss/cli.mjs -i ./src/index.css -o ./dist/output.css --watch"
   },
   "dependencies": {
+    "firebase": "^12.6.0",
     "leaflet": "^1.9.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

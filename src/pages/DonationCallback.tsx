@@ -21,13 +21,15 @@ const DonationCallback: React.FC = () => {
 
       try {
         const response = await donationsApi.verify(reference);
+        const data = (response as any).data || {};
+        const paymentStatus = data.paymentStatus || data.status;
         
-        if (response.success && response.donation?.status === 'success') {
+        if (response.success && paymentStatus === 'success') {
           setStatus('success');
           setMessage('Thank you! Your donation has been successfully processed.');
         } else {
           setStatus('failed');
-          setMessage(response.message || 'Payment verification failed');
+          setMessage('Payment verification failed');
         }
       } catch (error: any) {
         setStatus('failed');
@@ -58,7 +60,7 @@ const DonationCallback: React.FC = () => {
               A confirmation email has been sent to your email address.
             </p>
             <div className="callback-actions">
-              <button onClick={() => navigate('/donate')} className="btn-primary">
+              <button onClick={() => navigate('/faire-un-don')} className="btn-primary">
                 Make Another Donation
               </button>
               <button onClick={() => navigate('/')} className="btn-secondary">
@@ -74,7 +76,7 @@ const DonationCallback: React.FC = () => {
             <h2>Payment Verification Failed</h2>
             <p className="error-message">{message}</p>
             <div className="callback-actions">
-              <button onClick={() => navigate('/donate')} className="btn-primary">
+              <button onClick={() => navigate('/faire-un-don')} className="btn-primary">
                 Try Again
               </button>
               <button onClick={() => navigate('/')} className="btn-secondary">

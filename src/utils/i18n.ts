@@ -1,11 +1,11 @@
 // Internationalization (i18n) utility
-// Supports language switching between French and English
+// French-only language support
 
 import { useState } from 'react';
 
-export type Language = 'fr' | 'en';
+export type Language = 'fr';
 
-// Language is now fixed to French across the site
+// Language is fixed to French
 const FIXED_LANGUAGE: Language = 'fr';
 
 export const getLanguage = (): Language => FIXED_LANGUAGE;
@@ -31,7 +31,7 @@ export const translations = {
     // Admin Panel
     adminPanel: 'Panneau d\'Administration',
     projects: 'Projets',
-    jobs: 'Emplois',
+    jobs: 'Opportunités',
     applications: 'Candidatures',
     newsletters: 'Actualités',
     donations: 'Dons',
@@ -86,9 +86,8 @@ export const translations = {
     
     // Settings
     theme: 'Thème',
-    orangeTheme: 'Orange',
     blueTheme: 'Bleu',
-    themeDescription: 'Choisissez le thème de couleur principal pour le site web. Les modifications seront appliquées immédiatement.',
+    themeDescription: 'Le thème de couleur principal du site web est le bleu.',
     phoneNumber: 'Numéro de téléphone',
     orangeMoney: 'Orange Money',
     malitel: 'Malitel',
@@ -309,307 +308,15 @@ export const translations = {
     objective7Title: 'Développement Durable',
     objective7Desc: 'Œuvrer pour un développement durable, équitable et participatif',
   },
-  en: {
-    // Navigation
-    home: 'Home',
-    about: 'About Us',
-    work: 'Our Work',
-    getInvolved: 'Get Involved',
-    partners: 'Partners',
-    contact: 'Contact',
-    donate: 'Donate',
-    learnMore: 'Learn More',
-    // Admin Panel
-    adminPanel: 'Admin Panel',
-    projects: 'Projects',
-    jobs: 'Jobs',
-    applications: 'Applications',
-    newsletters: 'Newsletters',
-    donations: 'Donations',
-    offices: 'Offices',
-    data: 'Data',
-    settings: 'Settings',
-    logout: 'Logout',
-    
-    // Common
-    save: 'Save',
-    cancel: 'Cancel',
-    delete: 'Delete',
-    edit: 'Edit',
-    add: 'Add',
-    search: 'Search',
-    filter: 'Filter',
-    clear: 'Clear',
-    close: 'Close',
-    loading: 'Loading...',
-    error: 'Error',
-    success: 'Success',
-    yes: 'Yes',
-    no: 'No',
-    
-    // Project/Job forms
-    title: 'Title',
-    description: 'Description',
-    content: 'Content',
-    images: 'Images',
-    published: 'Published',
-    unpublished: 'Unpublished',
-    location: 'Location',
-    deadline: 'Deadline',
-    applyUrl: 'Apply URL',
-    
-    // Applications
-    status: 'Status',
-    pending: 'Pending',
-    reviewing: 'Reviewing',
-    shortlisted: 'Shortlisted',
-    accepted: 'Accepted',
-    rejected: 'Rejected',
-    interviewed: 'Interviewed',
-    allStatuses: 'All Statuses',
-    email: 'Email',
-    phone: 'Phone',
-    address: 'Address',
-    resume: 'Resume',
-    coverLetter: 'Cover Letter',
-    adminNotes: 'Admin Notes',
-    appliedAt: 'Applied At',
-    
-    // Settings
-    theme: 'Theme',
-    orangeTheme: 'Orange',
-    blueTheme: 'Blue',
-    themeDescription: 'Choose the primary color theme for the website. Changes will be applied immediately.',
-    phoneNumber: 'Phone Number',
-    bankMali: 'Bank Account - Mali',
-    bankInternational: 'International Transfer',
-    bankName: 'Bank Name',
-    accountName: 'Account Name',
-    accountNumber: 'Account Number',
-    agency: 'Agency',
-    swiftCode: 'Swift Code',
-    iban: 'IBAN',
-    
-    // Donations
-    donorName: 'Donor Name',
-    donorEmail: 'Donor Email',
-    amount: 'Amount',
-    currency: 'Currency',
-    purpose: 'Purpose',
-    paymentStatus: 'Payment Status',
-    paymentReference: 'Payment Reference',
-    supportOurMission: 'Support Our Mission',
-    supportOurMissionDesc: 'Your contribution helps us create lasting change in communities across Mali. Every donation makes a difference in the lives of those we serve.',
-    accountNameLabel: 'Account Name',
-    afterTransferSendReceipt: 'After your transfer, send your receipt to',
-    withSubject: 'with subject',
-    provider: 'Provider',
-    phoneNumberLabel: 'Phone Number',
-    fullName: 'Full Name',
-    purposeOfDonation: 'Purpose of Donation',
-    processPayment: 'Process Payment',
-    waysToDonate: 'Ways to Donate',
-    paymentMethods: 'Payment Methods',
-    mobileMoney: 'Mobile Money',
-    bankTransfer: 'Bank Transfer',
-    cardPayment: 'Card Payment',
-    mobileMoneyTitle: 'Mobile Money',
-    option1ManualPayment: 'Option 1: Manual Payment',
-    manualPaymentDesc: 'Make a manual transfer to one of our Mobile Money numbers, then send your receipt.',
-    orangeMoney: 'Orange Money',
-    malitel: 'Malitel',
-    accountNameValue: 'IMADEL',
-    donationSubject: 'Mobile Money Donation',
-    or: 'OR',
-    option2AutomaticPayment: 'Option 2: Automatic Payment',
-    automaticPaymentDesc: 'Secure and instant online payment. Enter your information and you will be redirected to the secure payment page.',
-    phoneNumberPlaceholder: '+223 XX XX XX XX',
-    fullNamePlaceholder: 'Your full name',
-    emailPlaceholder: 'your@email.com',
-    required: '*',
-    amountLabel: 'Amount',
-    amountPlaceholder: '100',
-    currencyLabel: 'Currency',
-    processing: 'Processing...',
-    bankTransferTitle: 'Bank Transfer',
-    bankAccountMali: 'Bank Account in Mali',
-    internationalTransfer: 'International Transfer',
-    onlinePayment: 'Online Payment',
-    onlinePaymentDesc: 'You can also pay online by selecting "Bank Transfer via Gateway" in the form below.',
-    importantNote: 'Important Note',
-    bankTransferNote1: 'Please include your name and "Donation" in the transfer description for proper tracking of your contribution.',
-    bankTransferNote2: 'For donation receipts or any questions, please contact our finance team at:',
-    cardPaymentTitle: 'Card Payment',
-    cardPaymentDesc: 'Secure payment by bank card (Visa, Mastercard). Enter your information and you will be redirected to the secure payment page.',
-    taxBenefits: 'Tax Benefits',
-    taxBenefitsDesc: 'IMADEL is a registered non-governmental organization in Mali. Your donations may be tax deductible depending on your country of residence and local tax laws. Please consult a tax advisor for information specific to your situation.',
-    yourDonationMakesDifference: 'Your Donation Makes a Difference',
-    cleanWater: 'Clean Water',
-    cleanWaterDesc: 'Help provide access to clean water for communities',
-    healthcareTitle: 'Healthcare',
-    healthcareDesc: 'Support health programs and maternal care initiatives',
-    educationTitle: 'Education',
-    educationDesc: 'Fund educational programs and school rehabilitation',
-    foodSecurity: 'Food Security',
-    foodSecurityDesc: 'Contribute to food security and nutrition programs',
-    getInvolvedTitle: 'Get Involved',
-    getInvolvedDesc: 'Beyond donations, there are many ways to support our mission.',
-    minimumAmountError: 'The minimum amount is 100 XOF',
-    paymentInitError: 'Error initializing payment',
-    genericError: 'An error occurred. Please try again.',
-    generalDonation: 'General Donation',
-    education: 'Education',
-    healthcare: 'Healthcare',
-    water: 'Drinking Water',
-    emergency: 'Emergency',
-    other: 'Other',
-    showingProjects: 'Showing',
-    ofProjects: 'of',
-    previousPage: 'Previous',
-    nextPage: 'Next',
-    getInvolvedInMission: 'Get Involved in Our Mission',
-    joinUsToMakeDifference: 'Join us to make a difference in communities across Mali',
-    servingLocalDevelopment: 'Serving Local Development',
-    aboutImadelDesc: 'IMADEL (Malian Initiative for Local Development Support) is a non-governmental organization (NGO). It contributes to the economic and social development of the world by promoting and supporting actions aimed at improving the living conditions of populations (rural, urban and other disadvantaged groups).',
-    ourMission: 'Our Mission',
-    ourVision: 'Our Vision',
-    ourActivities: 'Our Activities',
-    ourObjectives: 'Our Objectives',
-    seeOurProjects: 'See Our Projects',
-    joinUsInMission: 'Join Us in Our Mission',
-    participateInJourney: 'Participate in our journey to create sustainable, equitable and participatory development across Mali.',
-    years: 'Years',
-    jobOffersAndRecruitment: 'Job Offers & Recruitment Notices',
-    alwaysLookingForProfessionals: 'We are always looking for dedicated professionals to join our team. Check out our current openings below.',
-    noJobsAvailable: 'No job openings available at the moment. Please check back later.',
-    volunteerOpportunities: 'Volunteer Opportunities',
-    volunteerDesc: 'Not looking for a full-time position? We also welcome volunteers who want to dedicate their time and skills to our mission. Whether you\'re interested in field work, administrative support, or specialized expertise, we have opportunities for you.',
-    contactUsForVolunteering: 'Contact Us for Volunteering',
-    partnershipOpportunities: 'Partnership Opportunities',
-    partnershipDesc: 'Are you an organization looking to collaborate? IMADEL values partnerships with NGOs, government agencies, and private sector organizations that share our commitment to local development.',
-    seeOurPartners: 'See Our Partners',
-    becomePartner: 'Become a Partner',
-    interestedInPartnership: 'Interested in a partnership with IMADEL? We\'d love to hear from you.',
-    contactUsForPartnerships: 'Contact Us for Partnerships',
-    discoverOpportunities: 'Discover opportunities to work with us or support ongoing health and community development projects. Join our team of passionate people making a difference across Mali.',
-    discoverImpactfulProjects: 'Discover the impactful projects that IMADEL has undertaken across Mali, focusing on sustainable development, community empowerment, and humanitarian aid.',
-    
-    // Job Detail
-    jobNotFoundTitle: 'Job Not Found',
-    jobNotFoundDesc: 'The job posting you are looking for no longer exists or has been removed.',
-    viewAllJobOpenings: 'View All Job Openings',
-    backToJobs: 'Back to Job Offers',
-    jobDescription: 'Job Description',
-    requirements: 'Requirements',
-    responsibilities: 'Responsibilities',
-    applyForPosition: 'Apply for this Position',
-    deadlinePassedTitle: 'Application Deadline Passed',
-    deadlinePassedDescPrefix: 'The application deadline for this position was',
-    deadlinePassedDescSuffix: 'Applications are no longer being accepted for this position.',
-    deadlinePassedAlert: 'Sorry, the application deadline for this position has passed.',
-    emailAddress: 'Email Address',
-    addressLabel: 'Address',
-    resumeLabel: 'Resume/CV',
-    resumeHelp: 'PDF or Word document, max 5MB',
-    coverLetterPlaceholder: 'Tell us why you\'re interested in this position...',
-    applicationSubmittedTitle: 'Application Submitted Successfully!',
-    applicationSubmittedMessagePrefix: 'Thank you for your interest in this position. A confirmation email has been sent to',
-    redirectingToJobs: 'Redirecting to job listings...',
-    applicationError: 'There was an error submitting your application. Please try again.',
-    submittingApplication: 'Submitting application',
-    submitJobApplication: 'Submit job application',
-    submitting: 'Submitting...',
-    submitApplication: 'Submit Application',
-    
-    // Filters
-    all: 'All',
-    clearFilters: 'Clear Filters',
-    
-    // Project Detail
-    backToHome: 'Back to Home',
-    backToProjects: 'Back to Projects',
-    publishedOn: 'Published',
-    previous: 'Previous',
-    next: 'Next',
-    
-    // Admin Panel specific
-    addProject: 'Add Project',
-    addJob: 'Add Job',
-    addPartner: 'Add Partner',
-    addNewsletter: 'Add Newsletter',
-    addOffice: 'Add Office',
-    editProject: 'Edit Project',
-    editJob: 'Edit Job',
-    editPartner: 'Edit Partner',
-    editNewsletter: 'Edit Newsletter',
-    allJobs: 'All Jobs',
-    totalDonations: 'Total Donations',
-    rawData: 'Raw Data',
-    projectsJson: 'Projects JSON',
-    jobsJson: 'Jobs JSON',
-    partnersJson: 'Partners JSON',
-    newslettersJson: 'Newsletters JSON',
-    officesJson: 'Offices JSON',
-    note: 'Note',
-    changesSaved: 'Changes are saved automatically. These settings will be used on the donation page.',
-    
-    // Footer
-    quickLinks: 'Quick Links',
-    followUs: 'Follow Us',
-    allRightsReserved: 'All rights reserved',
-    jobOffers: 'Job Offers',
-    
-    // Home Page
-    heroTitle: 'Small Effort',
-    heroTitleHighlight: 'Big Change',
-    heroTagline: 'We are ready to provide better service to make the world happy',
-    becomeVolunteer: 'Become a Volunteer',
-    donateNow: 'Donate Now',
-    readMore: 'READ MORE',
-    news: 'NEWS',
-    ourImpact: 'Our Impact Over the Years',
-    yearsOfService: 'Years of Service',
-    livesTouched: 'Lives Touched',
-    projectsCompleted: 'Projects Completed',
-    communitiesServed: 'Communities Served',
-    partnersCount: 'Partners',
-    latestNews: 'Latest News & Projects',
-    aboutSection: 'About IMADEL',
-    aboutDescription: 'IMADEL (Malian Initiative for Local Development Support) is a non-governmental organization (NGO) that contributes to the economic and social development of Mali.',
-    missionObjectives: 'Mission and Objectives',
-    areasOfIntervention: 'Areas of Intervention',
-    seeAllProjects: 'See All Projects',
-    seeAllPartners: 'See All Partners',
-    partnersPreview: 'Our Partners',
-    ctaTitle: 'Join Our Mission',
-    ctaDescription: 'Together, we can create lasting change in communities across Mali.',
-    
-    // Objectives
-    objective1Title: 'Support Communities',
-    objective1Desc: 'Provide technical, material and financial support to associations or human groups to improve their living conditions and self-promotion',
-    objective2Title: 'Economic and Social Development',
-    objective2Desc: 'Effectively contribute to the economic, social and cultural development of the Malian population, according to the reference frameworks adopted by Governments',
-    objective3Title: 'Capacity Building',
-    objective3Desc: 'Contribute to strengthening the capacities of development actors to accelerate the ownership and appropriation of local development',
-    objective4Title: 'Civil Society',
-    objective4Desc: 'Promote the strengthening of a civil society participating in the formulation and implementation of development policies',
-    objective5Title: 'Governance',
-    objective5Desc: 'Promote democracy, good governance and support the implementation of decentralization policy in the country',
-    objective6Title: 'Partnership',
-    objective6Desc: 'Strengthen partnerships by energizing the efforts of the State and partner NGOs and associations in support of communities',
-    objective7Title: 'Sustainable Development',
-    objective7Desc: 'Work for sustainable, equitable and participatory development',
-  },
 };
 
-// Get translation for a key
-type TranslationKeysFr = keyof typeof translations.fr;
+// Get translation for a key (French only)
+type TranslationKeys = keyof typeof translations.fr;
 
-export const t = (key: TranslationKeysFr, lang?: Language): string => {
-  const currentLang = lang || getLanguage();
-  const value = translations[currentLang][key];
+export const t = (key: TranslationKeys): string => {
+  const value = translations.fr[key];
   if (value === undefined && typeof import.meta !== 'undefined' && import.meta.env?.MODE !== 'production') {
-    console.warn(`Missing translation for key "${key}" in language "${currentLang}"`);
+    console.warn(`Missing translation for key "${key}"`);
   }
   return value ?? key;
 };
@@ -619,7 +326,7 @@ export const useTranslation = () => {
   const [language] = useState<Language>(getLanguage());
   return {
     language,
-    t: (key: keyof typeof translations.fr) => t(key, language),
+    t: (key: TranslationKeys) => t(key),
     setLanguage: (_lang: Language) => undefined,
   };
 };

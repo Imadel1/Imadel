@@ -48,7 +48,7 @@
 }
 
 .carousel-content h2 {
-    color: #FF6B00;
+    color: #0066CC;
     margin-bottom: 0.5rem;
     font-size: 2.5rem;
     font-weight: bold;
@@ -72,7 +72,7 @@
         bottom: 120px;
         left: 50%;
         transform: translateX(-50%);
-        color: #FF6B00;
+        color: #0066CC;
         background: rgba(255, 255, 255, 0.9);
         padding: 8px 16px;
         border-radius: 20px;
@@ -110,7 +110,7 @@
 }
 
 .carousel-dot.active {
-    background: #FF6B00;
+    background: #0066CC;
 }
 
 /* Responsive adjustments */

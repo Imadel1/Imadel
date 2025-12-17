@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { FaXmark, FaCheck, FaEye, FaStar } from 'react-icons/fa6';
 import './AdminPanel.css';
-import { authApi, projectsApi, jobsApi, partnersApi, officesApi, donationsApi, applicationsApi, newsApi } from '../services/api';
+import { authApi, projectsApi, jobsApi, partnersApi, officesApi, applicationsApi, newsApi, schemaApi, mediaApi, type SiteImages } from '../services/api';
 import { useTranslation } from '../utils/i18n';
 import logo from '../assets/cropped-nouveau_logo.png';
 
@@ -77,8 +77,8 @@ type Job = {
   deadline?: string;
   requirements?: string[];
   responsibilities?: string[];
-  type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
-  listingType?: 'job' | 'proposal'; // 'job' for job offers, 'proposal' for calls for proposals
+  type?: 'temps-plein' | 'temps-partiel' | 'contrat' | 'benevolat' | 'stage';
+  listingType?: 'emploi' | 'benevolat' | 'opportunite' | 'appel-offres'; // controls where it appears on the site
   status?: 'open' | 'closed' | 'filled';
   category?: string;
   salary?: { min?: number; max?: number; currency?: string };
@@ -108,16 +108,16 @@ type Newsletter = {
 };
 
 const AREAS_OF_INTERVENTION = [
-  "Hydraulique rurale et urbaine",
+  "Eaux, Hygiène et Assainissement",
   "Décentralisation",
-  "Hygiène/Assainissement",
   "Éducation",
-  "Formation",
+  "Renforcement de capacités",
   "Plaidoyer/Lobbyisme",
   "Environnement",
-  "Santé",
-  "Développement local",
-  "Actualités"
+  "Santé et Nutrition",
+  "Services Sociaux et Résilience",
+  "Protection",
+  "COOP",
 ];
 
 // TODO: Replace localStorage with API calls
@@ -133,7 +133,7 @@ const STORAGE = {
 };
 
 type Settings = {
-  theme?: 'orange' | 'blue';
+  theme?: 'blue';
   phoneNumber: string;
   orangeMoney: string;
   malitel: string;
@@ -159,17 +159,85 @@ function uid(prefix = '') {
 
 export default function AdminPanel() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<'offices'|'projects'|'jobs'|'partners'|'newsletters'|'donations'|'applications'|'data'|'settings'>('projects');
+  // Donations tab is disabled for now (kept in code for future use)
+  const [tab, setTab] = useState<'offices'|'projects'|'jobs'|'partners'|'newsletters'|'applications'|'data'|'settings'>('projects');
 
   const [authenticated, setAuthenticated] = useState<boolean>(() => {
-    // Check if token exists
+    // Single source of truth for admin auth
     return authApi.isAuthenticated();
   });
 
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  // Redirect to login if not authenticated
+  // Simple toast notifications for admin actions
+  const [toast, setToast] = useState<{ message: string; type?: 'success' | 'error' } | null>(null);
+  const toastTimeoutRef = useRef<number | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current);
+    }
+    setToast({ message, type });
+    toastTimeoutRef.current = window.setTimeout(() => setToast(null), 4000);
+  };
+
+  // Custom alert / confirm dialog
+  type DialogType = 'alert' | 'confirm';
+  const [dialog, setDialog] = useState<{
+    open: boolean;
+    type: DialogType;
+    title?: string;
+    message: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+  }>({
+    open: false,
+    type: 'alert',
+    title: undefined,
+    message: '',
+    confirmLabel: 'OK',
+    cancelLabel: 'Annuler',
+  });
+  const dialogResolveRef = useRef<((value: boolean) => void) | null>(null);
+
+  const showAlertDialog = (message: string, title = 'Information') => {
+    return new Promise<boolean>((resolve) => {
+      dialogResolveRef.current = resolve;
+      setDialog({
+        open: true,
+        type: 'alert',
+        title,
+        message,
+        confirmLabel: 'OK',
+        cancelLabel: 'Annuler',
+      });
+    });
+  };
+
+  const showConfirmDialog = (message: string, title = 'Confirmation', confirmLabel = 'Oui', cancelLabel = 'Non') => {
+    return new Promise<boolean>((resolve) => {
+      dialogResolveRef.current = resolve;
+      setDialog({
+        open: true,
+        type: 'confirm',
+        title,
+        message,
+        confirmLabel,
+        cancelLabel,
+      });
+    });
+  };
+
+  const handleDialogClose = (result: boolean) => {
+    setDialog(prev => ({ ...prev, open: false }));
+    if (dialogResolveRef.current) {
+      dialogResolveRef.current(result);
+      dialogResolveRef.current = null;
+    }
+  };
+
+  // Simple redirect: if not authenticated, send to admin login
   useEffect(() => {
     if (!authenticated) {
       window.location.href = '/admin';
@@ -305,7 +373,25 @@ export default function AdminPanel() {
           response;
 
         if (response.success !== false && Array.isArray(rawJobs)) {
-          const normalizedJobs: Job[] = rawJobs.map((j: any) => ({
+          const normalizedJobs: Job[] = rawJobs.map((j: any) => {
+            // Normalize old values: map old English to new French values
+            let rawListingType: string = j.listingType || '';
+            let listingType: Job['listingType'];
+            // Map old English values to new French values
+            if (!rawListingType || rawListingType === 'job' || rawListingType === 'employment') {
+              listingType = 'emploi';
+            } else if (rawListingType === 'volunteer') {
+              listingType = 'benevolat';
+            } else if (rawListingType === 'opportunity') {
+              listingType = 'opportunite';
+            } else if (rawListingType === 'proposal') {
+              listingType = 'appel-offres';
+            } else {
+              // Assume it's already a valid French value
+              listingType = rawListingType as Job['listingType'];
+            }
+
+            return {
             id: j.id || j._id || uid('job_'),
             title: j.title,
             description: j.description,
@@ -313,11 +399,12 @@ export default function AdminPanel() {
             applyUrl: j.applyUrl,
             published: j.published,
             deadline: j.deadline,
-            listingType: j.listingType || 'job',
+              listingType,
             images: Array.isArray(j.images)
               ? j.images.map((img: any) => (typeof img === 'string' ? img : img.url || ''))
               : [],
-          }));
+            };
+          });
 
           setJobs(normalizedJobs);
           window.dispatchEvent(new CustomEvent('imadel:jobs:updated'));
@@ -411,7 +498,8 @@ export default function AdminPanel() {
   // Settings
   const [settings, setSettings] = useState<Settings>(() => {
     const defaultSettings: Settings = {
-      theme: 'orange',
+      // Theme is now fixed to blue site-wide
+      theme: 'blue',
       phoneNumber: '+223 20 79 98 40',
       orangeMoney: '+223 71 71 85 85',
       malitel: '+223 66 78 73 85',
@@ -435,18 +523,18 @@ export default function AdminPanel() {
       const raw = localStorage.getItem(STORAGE.SETTINGS);
       if (raw) {
         const saved = JSON.parse(raw);
-        const merged = { ...defaultSettings, ...saved };
-        // Apply theme on load
+        const merged = { ...defaultSettings, ...saved, theme: 'blue' as Settings['theme'] };
+        // Apply theme on load (always blue)
         import('../utils/settings').then(({ applyTheme }) => {
-          applyTheme(merged.theme || 'orange');
+          applyTheme('blue');
         });
         return merged;
       }
     } catch {} 
     
-    // Apply default theme
+    // Apply default theme (blue)
     import('../utils/settings').then(({ applyTheme }) => {
-      applyTheme('orange');
+      applyTheme('blue');
     });
     return defaultSettings;
   });
@@ -454,7 +542,7 @@ export default function AdminPanel() {
   // Apply theme on initial load
   useEffect(() => {
     import('../utils/settings').then(({ applyTheme }) => {
-      applyTheme(settings.theme || 'orange');
+      applyTheme('blue');
     });
   }, []);
 
@@ -472,12 +560,6 @@ export default function AdminPanel() {
       // Update localStorage
       try {
         localStorage.setItem(STORAGE.SETTINGS, JSON.stringify(newSettings));
-        // Apply theme if it changed
-        if (updates.theme !== undefined) {
-          import('../utils/settings').then(({ applyTheme }) => {
-            applyTheme(updates.theme || 'orange');
-          });
-        }
         // Dispatch event to notify other components
         window.dispatchEvent(new CustomEvent('imadel:settings:updated'));
       } catch (error) {
@@ -502,60 +584,145 @@ export default function AdminPanel() {
     }));
   };
 
-  // Donations
-  type Donation = {
-    id: string;
-    donorName: string;
-    donorEmail: string;
-    donorPhone?: string;
-    amount: number;
-    currency: string;
-    paymentStatus: 'pending' | 'success' | 'failed' | 'abandoned';
-    paymentReference: string;
-    purpose?: string;
-    message?: string;
-    isAnonymous: boolean;
-    paidAt?: string;
-    createdAt?: string;
+  // One-click Firestore schema/collection initialization
+  const [schemaStatus, setSchemaStatus] = useState<string | null>(null);
+  const [schemaLoading, setSchemaLoading] = useState(false);
+
+  const initializeFirestoreSchema = async () => {
+    setSchemaStatus(null);
+    setSchemaLoading(true);
+    try {
+      await schemaApi.initializeAll();
+      setSchemaStatus('Firestore collections and schema docs have been created.');
+    } catch (error: any) {
+      console.error('Schema initialization error:', error);
+      setSchemaStatus(error.message || 'Failed to initialize Firestore schema.');
+    } finally {
+      setSchemaLoading(false);
+    }
   };
 
-  const [donations, setDonations] = useState<Donation[]>([]);
+  // Site images (hero, about, etc.) managed via Firestore
+  const [siteImages, setSiteImages] = useState<SiteImages>({});
+  const [siteImagesStatus, setSiteImagesStatus] = useState<string | null>(null);
+  const [siteImagesLoading, setSiteImagesLoading] = useState(false);
+
   useEffect(() => {
-    const fetchDonations = async () => {
-      setLoading(prev => ({ ...prev, donations: true }));
-      setErrors(prev => ({ ...prev, donations: '' }));
+    const loadSiteImages = async () => {
       try {
-        const response = await donationsApi.getAll();
-        if (response.success !== false) {
-          const rawDonations = (response as any).donations || (response as any).data || [];
-          if (Array.isArray(rawDonations)) {
-            const normalizedDonations: Donation[] = rawDonations.map((d: any) => ({
-              id: d.id || d._id || uid('donation_'),
-              donorName: d.donorName,
-              donorEmail: d.donorEmail,
-              donorPhone: d.donorPhone,
-              amount: d.amount,
-              currency: d.currency || 'XOF',
-              paymentStatus: d.paymentStatus || 'pending',
-              paymentReference: d.paymentReference,
-              purpose: d.purpose,
-              message: d.message,
-              isAnonymous: d.isAnonymous || false,
-              paidAt: d.paidAt,
-              createdAt: d.createdAt,
-            }));
-            setDonations(normalizedDonations);
-          }
-        }
-      } catch (err: any) {
-        console.error('Error fetching donations:', err);
-        setErrors(prev => ({ ...prev, donations: err.message || 'Failed to load donations' }));
-      } finally {
-        setLoading(prev => ({ ...prev, donations: false }));
+        const images = await mediaApi.getSiteImages();
+        setSiteImages(images);
+      } catch (error) {
+        console.error('Error loading site images:', error);
       }
     };
-    if (authenticated) fetchDonations();
+    if (authenticated) {
+      loadSiteImages();
+    }
   }, [authenticated]);
+
+  const saveSiteImages = async () => {
+    setSiteImagesStatus(null);
+    setSiteImagesLoading(true);
+    try {
+      const updated = await mediaApi.updateSiteImages(siteImages);
+      setSiteImages(updated);
+      setSiteImagesStatus('Site images saved successfully.');
+    } catch (error: any) {
+      console.error('Error saving site images:', error);
+      setSiteImagesStatus(error.message || 'Failed to save site images.');
+    } finally {
+      setSiteImagesLoading(false);
+    }
+  };
+
+  const handleSiteImageUpload = async (key: keyof SiteImages, file?: File | null) => {
+    if (!file) return;
+    setSiteImagesStatus(null);
+    setSiteImagesLoading(true);
+    try {
+      const updated = await mediaApi.uploadSiteImage(key, file);
+      setSiteImages(updated);
+      setSiteImagesStatus('Image uploaded and saved successfully.');
+    } catch (error: any) {
+      console.error('Error uploading site image:', error);
+      setSiteImagesStatus(error.message || 'Failed to upload image.');
+    } finally {
+      setSiteImagesLoading(false);
+    }
+  };
+
+  // Inactivity timeout (5 minutes) with 1-minute warning modal
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const [inactivityCountdown, setInactivityCountdown] = useState(60);
+  const inactivityTimerRef = useRef<number | null>(null);
+  const countdownTimerRef = useRef<number | null>(null);
+
+  const clearInactivityTimers = () => {
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+    if (countdownTimerRef.current !== null) {
+      window.clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+  };
+
+  const scheduleInactivityWarning = () => {
+    clearInactivityTimers();
+    // 5 minutes (300000 ms) of inactivity before showing warning
+    inactivityTimerRef.current = window.setTimeout(() => {
+      setShowInactivityWarning(true);
+      setInactivityCountdown(60);
+
+      // Start 60s countdown
+      countdownTimerRef.current = window.setInterval(() => {
+        setInactivityCountdown(prev => {
+          if (prev <= 1) {
+            // Auto-logout when countdown ends
+            clearInactivityTimers();
+            setShowInactivityWarning(false);
+            logout();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }, 5 * 60 * 1000);
+  };
+
+  const handleUserActivity = () => {
+    // Any activity resets timers and hides warning
+    setShowInactivityWarning(false);
+    setInactivityCountdown(60);
+    scheduleInactivityWarning();
+  };
+
+  useEffect(() => {
+    if (!authenticated) return;
+
+    // Start initial inactivity timer when admin panel is active
+    scheduleInactivityWarning();
+
+    const events = ['mousemove', 'keydown', 'click', 'touchstart'];
+    events.forEach(evt => window.addEventListener(evt, handleUserActivity));
+
+    return () => {
+      clearInactivityTimers();
+      events.forEach(evt => window.removeEventListener(evt, handleUserActivity));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated]);
+
+  const handleStayLoggedIn = () => {
+    setShowInactivityWarning(false);
+    setInactivityCountdown(60);
+    scheduleInactivityWarning();
+  };
+
+  // Donations logic intentionally removed from UI for now.
+  // Existing donation APIs and types are kept in the backend/service layer for future use.
 
   // Applications
   type Application = {
@@ -650,20 +817,24 @@ export default function AdminPanel() {
         }
         setSelectedApplication(null);
         setAdminNotes('');
-        alert(`Application ${newStatus === 'accepted' ? 'accepted' : newStatus === 'rejected' ? 'rejected' : 'updated'} successfully. Email sent to applicant.`);
+        showToast(
+          `Candidature ${newStatus === 'accepted' ? 'acceptée' : newStatus === 'rejected' ? 'rejetée' : 'mise à jour'} avec succès. Email envoyé au candidat.`,
+          'success'
+        );
       } else {
-        alert('Failed to update application status');
+        showToast('Échec de la mise à jour du statut de la candidature.', 'error');
       }
     } catch (err: any) {
       console.error('Error updating application:', err);
-      alert(err.message || 'Failed to update application status');
+      showToast(err.message || 'Échec de la mise à jour du statut de la candidature.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [`app_${applicationId}`]: false }));
     }
   };
 
   const deleteApplication = async (applicationId: string) => {
-    if (!confirm('Are you sure you want to delete this application?')) return;
+    const confirmed = await showConfirmDialog('Supprimer cette candidature ?', 'Confirmation');
+    if (!confirmed) return;
     
     try {
       setLoading(prev => ({ ...prev, [`app_${applicationId}`]: true }));
@@ -674,13 +845,13 @@ export default function AdminPanel() {
         if (selectedApplication?.id === applicationId) {
           setSelectedApplication(null);
         }
-        alert('Application deleted successfully');
+        showToast('Candidature supprimée avec succès.', 'success');
       } else {
-        alert('Failed to delete application');
+        showToast('Échec de la suppression de la candidature.', 'error');
       }
     } catch (err: any) {
       console.error('Error deleting application:', err);
-      alert(err.message || 'Failed to delete application');
+      showToast(err.message || 'Échec de la suppression de la candidature.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [`app_${applicationId}`]: false }));
     }
@@ -689,13 +860,13 @@ export default function AdminPanel() {
   // Forms state
   const [officeForm, setOfficeForm] = useState<Partial<Office>>({ active: true });
   const [projectForm, setProjectForm] = useState<Partial<Project>>({ published: false, areasOfIntervention: [] });
-  const [jobForm, setJobForm] = useState<Partial<Job>>({ published: false, listingType: 'job' });
+  const [jobForm, setJobForm] = useState<Partial<Job>>({ published: false, listingType: 'emploi' });
   const [partnerForm, setPartnerForm] = useState<Partial<Partner>>({ active: true, images: [] });
   const [newsletterForm, setNewsletterForm] = useState<Partial<Newsletter>>({ published: false, author: 'IMADEL' });
 
   const addOffice = async () => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!officeForm.country) { alert('Country is required'); return; }
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    if (!officeForm.country) { showToast('Le pays est requis.', 'error'); return; }
     
     setLoading(prev => ({ ...prev, office: true }));
     try {
@@ -757,17 +928,19 @@ export default function AdminPanel() {
         setOffices([...offices, newOffice]);
         setOfficeForm({ active: true });
         window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
+        showToast('Bureau créé avec succès');
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to add office');
+      showToast(error.message || 'Échec de l’enregistrement du bureau.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, office: false }));
     }
   };
   
   const removeOffice = async (id: string) => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!confirm('Are you sure you want to delete this office?')) return;
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    const confirmed = await showConfirmDialog('Supprimer ce bureau ?', 'Confirmation');
+    if (!confirmed) return;
     
     setLoading(prev => ({ ...prev, [`office_${id}`]: true }));
     try {
@@ -775,18 +948,19 @@ export default function AdminPanel() {
       if (response.success) {
         setOffices(offices.filter(o => o.id !== id));
         window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
+        showToast('Bureau supprimé avec succès');
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to delete office');
+      showToast(error.message || 'Échec de la suppression du bureau.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [`office_${id}`]: false }));
     }
   };
 
   const addProject = async () => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!projectForm.title) { alert('Titre requis'); return; }
-    if (!projectForm.summary && !projectForm.content) { alert('Description requise'); return; }
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    if (!projectForm.title) { showToast('Le titre du projet est requis.', 'error'); return; }
+    if (!projectForm.summary && !projectForm.content) { showToast('La description du projet est requise.', 'error'); return; }
     
     setLoading(prev => ({ ...prev, project: true }));
     try {
@@ -843,35 +1017,37 @@ export default function AdminPanel() {
       if (editingProjectId) {
         // Update existing project - ensure areasOfIntervention is sent
         response = await projectsApi.update(editingProjectId, projectData);
-      if (response.success && response.project) {
+      if (response.success && response.data) {
           // Ensure areasOfIntervention is preserved in the updated project
-          const updatedProject = { 
-            ...response.project, 
+          const updatedProject: Project = { 
+            ...(response.data as Project), 
             areasOfIntervention: projectForm.areasOfIntervention || [] 
           };
           setProjects(projects.map(p => p.id === editingProjectId ? updatedProject : p));
           setEditingProjectId(null);
           setProjectForm({ published: false, areasOfIntervention: [] });
           window.dispatchEvent(new CustomEvent('imadel:projects:updated'));
-          console.log('Project updated. Backend response areasOfIntervention:', response.project.areasOfIntervention);
+          showToast('Projet mis à jour avec succès');
+          console.log('Project updated. Backend response areasOfIntervention:', (response.data as any).areasOfIntervention);
         }
       } else {
         // Create new project - ensure areasOfIntervention is sent
         response = await projectsApi.create(projectData);
-        if (response.success && response.project) {
+        if (response.success && response.data) {
           // Ensure areasOfIntervention is included in the saved project
-          const newProject = { 
-            ...response.project, 
+          const newProject: Project = { 
+            ...(response.data as Project), 
             areasOfIntervention: projectForm.areasOfIntervention || [] 
           };
         setProjects([...projects, newProject]);
         setProjectForm({ published: false, areasOfIntervention: [] });
         window.dispatchEvent(new CustomEvent('imadel:projects:updated'));
-          console.log('Project created. Backend response areasOfIntervention:', response.project.areasOfIntervention);
+          showToast('Projet créé avec succès');
+          console.log('Project created. Backend response areasOfIntervention:', (response.data as any).areasOfIntervention);
         }
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to add project');
+      showToast(error.message || 'Échec de l’enregistrement du projet.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, project: false }));
     }
@@ -894,8 +1070,9 @@ export default function AdminPanel() {
     setProjectForm({ ...projectForm, images });
   };
   const removeProject = async (id: string) => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    const confirmed = await showConfirmDialog('Supprimer ce projet ?', 'Confirmation');
+    if (!confirmed) return;
     
     setLoading(prev => ({ ...prev, [`project_${id}`]: true }));
     try {
@@ -907,24 +1084,25 @@ export default function AdminPanel() {
           setProjectForm({ published: false, areasOfIntervention: [] });
         }
         window.dispatchEvent(new CustomEvent('imadel:projects:updated'));
+        showToast('Projet supprimé avec succès');
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to delete project');
+      showToast(error.message || 'Échec de la suppression du projet.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [`project_${id}`]: false }));
     }
   };
 
   const addJob = async () => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!jobForm.title) { alert('Job title required'); return; }
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    if (!jobForm.title) { showToast('Le titre de l’opportunité est requis.', 'error'); return; }
     
     setLoading(prev => ({ ...prev, job: true }));
     try {
       const images = (jobForm.images || []).filter(img => img.trim()).map(url => ({ url }));
       
       if (!jobForm.deadline) {
-        alert('La date limite est requise');
+        await showAlertDialog('La date limite est requise.', 'Validation');
         setLoading(prev => ({ ...prev, job: false }));
         return;
       }
@@ -935,8 +1113,8 @@ export default function AdminPanel() {
         requirements?: string[];
         responsibilities?: string[];
         location: string;
-        type?: 'full-time' | 'part-time' | 'contract' | 'volunteer' | 'internship';
-        listingType?: 'job' | 'proposal';
+        type?: 'temps-plein' | 'temps-partiel' | 'contrat' | 'benevolat' | 'stage';
+        listingType?: 'emploi' | 'benevolat' | 'opportunite' | 'appel-offres';
         category?: string;
         deadline: string;
         status?: 'open' | 'closed' | 'filled';
@@ -951,8 +1129,8 @@ export default function AdminPanel() {
         published: !!jobForm.published,
         images: images,
         deadline: new Date(jobForm.deadline).toISOString(),
-        type: (jobForm as any).type || 'full-time',
-        listingType: jobForm.listingType || 'job',
+        type: (jobForm as any).type || 'temps-plein',
+        listingType: jobForm.listingType || 'emploi',
         category: (jobForm as any).category,
         status: (jobForm as any).status || 'open',
         requirements: (jobForm as any).requirements || [],
@@ -964,7 +1142,7 @@ export default function AdminPanel() {
       // If editing, update existing job; otherwise create new
       if (editingJobId) {
         // Auto-generate apply URL if not already set
-        const applyUrl = jobForm.applyUrl || `${window.location.origin}/job/${editingJobId}/apply`;
+        const applyUrl = jobForm.applyUrl || `${window.location.origin}/opportunite/${editingJobId}/apply`;
         const jobDataWithUrl = {
           ...jobData,
           applyUrl: applyUrl,
@@ -993,8 +1171,9 @@ export default function AdminPanel() {
 
           setJobs(jobs.map(j => (j.id === editingJobId ? updatedJob : j)));
           setEditingJobId(null);
-          setJobForm({ published: false, listingType: 'job' });
+          setJobForm({ published: false, listingType: 'emploi' });
           window.dispatchEvent(new CustomEvent('imadel:jobs:updated'));
+          showToast("Opportunité mise à jour avec succès");
         }
       } else {
         const response = await jobsApi.create(jobData);
@@ -1005,7 +1184,7 @@ export default function AdminPanel() {
             response;
 
           const jobId = created.id || created._id || uid('job_');
-          const autoGeneratedApplyUrl = `${window.location.origin}/job/${jobId}/apply`;
+          const autoGeneratedApplyUrl = `${window.location.origin}/opportunite/${jobId}/apply`;
           
           // Update the job with auto-generated apply URL
           try {
@@ -1032,10 +1211,11 @@ export default function AdminPanel() {
           setJobs([...jobs, newJob]);
           setJobForm({ published: false });
           window.dispatchEvent(new CustomEvent('imadel:jobs:updated'));
+          showToast("Opportunité créée avec succès");
         }
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to add job');
+      showToast(error.message || 'Échec de l’enregistrement de l’opportunité.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, job: false }));
     }
@@ -1058,8 +1238,9 @@ export default function AdminPanel() {
     setJobForm({ ...jobForm, images });
   };
   const removeJob = async (id: string) => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!confirm('Are you sure you want to delete this job?')) return;
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    const confirmed = await showConfirmDialog('Supprimer cette opportunité ?', 'Confirmation');
+    if (!confirmed) return;
     
     setLoading(prev => ({ ...prev, [`job_${id}`]: true }));
     try {
@@ -1071,17 +1252,18 @@ export default function AdminPanel() {
     setJobForm({ published: false });
         }
         window.dispatchEvent(new CustomEvent('imadel:jobs:updated'));
+        showToast("Opportunité supprimée avec succès");
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to delete job');
+      showToast(error.message || 'Échec de la suppression de l’opportunité.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [`job_${id}`]: false }));
     }
   };
 
   const addPartner = async () => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!partnerForm.name) { alert('Partner name required'); return; }
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    if (!partnerForm.name) { showToast('Le nom du partenaire est requis.', 'error'); return; }
     
     setLoading(prev => ({ ...prev, partner: true }));
     try {
@@ -1131,6 +1313,7 @@ export default function AdminPanel() {
           setEditingPartnerId(null);
           setPartnerForm({ active: true });
           window.dispatchEvent(new CustomEvent('imadel:partners:updated'));
+          showToast('Partenaire mis à jour avec succès');
         }
       } else {
         const response = await partnersApi.create(partnerData);
@@ -1157,10 +1340,11 @@ export default function AdminPanel() {
           setPartners([...partners, newPartner]);
         setPartnerForm({ active: true, images: [] });
           window.dispatchEvent(new CustomEvent('imadel:partners:updated'));
+          showToast('Partenaire créé avec succès');
         }
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to add partner');
+      showToast(error.message || 'Échec de l’enregistrement du partenaire.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, partner: false }));
     }
@@ -1183,8 +1367,9 @@ export default function AdminPanel() {
     setPartnerForm({ ...partnerForm, images });
   };
   const removePartner = async (id: string) => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!confirm('Are you sure you want to delete this partner?')) return;
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    const confirmed = await showConfirmDialog('Supprimer ce partenaire ?', 'Confirmation');
+    if (!confirmed) return;
     
     setLoading(prev => ({ ...prev, [`partner_${id}`]: true }));
     try {
@@ -1196,17 +1381,18 @@ export default function AdminPanel() {
     setPartnerForm({});
         }
         window.dispatchEvent(new CustomEvent('imadel:partners:updated'));
+        showToast('Partenaire supprimé avec succès');
       }
     } catch (error: any) {
-      alert(error.message || 'Failed to delete partner');
+      showToast(error.message || 'Échec de la suppression du partenaire.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [`partner_${id}`]: false }));
     }
   };
 
   const addNewsletter = async () => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!newsletterForm.title) { alert('Titre requis'); return; }
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    if (!newsletterForm.title) { showToast('Le titre de l’actualité est requis.', 'error'); return; }
 
     const payload = {
       title: newsletterForm.title!,
@@ -1269,7 +1455,7 @@ export default function AdminPanel() {
     } catch (error: any) {
       console.error('Error saving newsletter:', error);
       setErrors(prev => ({ ...prev, newsletters: error.message || 'Failed to save newsletter' }));
-      alert(error.message || 'Failed to save newsletter');
+      showToast(error.message || 'Échec de l’enregistrement de l’actualité.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
@@ -1292,8 +1478,9 @@ export default function AdminPanel() {
     setNewsletterForm({ ...newsletterForm, images });
   };
   const removeNewsletter = async (id: string) => {
-    if (!authenticated) { alert('Please log in'); return; }
-    if (!confirm('Supprimer cette actualité ?')) return;
+    if (!authenticated) { await showAlertDialog('Veuillez vous connecter.', 'Authentification requise'); return; }
+    const confirmed = await showConfirmDialog('Supprimer cette actualité ?', 'Confirmation');
+    if (!confirmed) return;
     const loadingKey = `newsletter_delete_${id}`;
     setLoading(prev => ({ ...prev, [loadingKey]: true }));
     setErrors(prev => ({ ...prev, newsletters: '' }));
@@ -1308,7 +1495,7 @@ export default function AdminPanel() {
     } catch (error: any) {
       console.error('Error deleting newsletter:', error);
       setErrors(prev => ({ ...prev, newsletters: error.message || 'Failed to delete newsletter' }));
-      alert(error.message || 'Failed to delete newsletter');
+      showToast(error.message || 'Échec de la suppression de l’actualité.', 'error');
     } finally {
       setLoading(prev => ({ ...prev, [loadingKey]: false }));
     }
@@ -1336,8 +1523,8 @@ export default function AdminPanel() {
         if (Array.isArray(obj.jobs)) setJobs(obj.jobs);
         if (Array.isArray(obj.partners)) setPartners(obj.partners);
         if (Array.isArray(obj.newsletters)) setNewsletters(obj.newsletters);
-        alert('Import complete');
-      } catch (e) { alert('Invalid JSON'); }
+        showToast('Import JSON terminé');
+      } catch (e) { showToast('JSON invalide', 'error'); }
     };
     reader.readAsText(file);
   };
@@ -1350,12 +1537,14 @@ export default function AdminPanel() {
           <h1>{t('adminPanel')}</h1>
         </div>
         <div className="admin-controls">
-          <button onClick={logout}>{t('logout')}</button>
-          <button onClick={exportAll}>Export JSON</button>
+          <div className="admin-controls-main">
+            <button onClick={exportAll}>Exporter JSON</button>
           <label className="import-label">
-            Import JSON
+              Importer JSON
             <input type="file" accept="application/json" onChange={e=>importJson(e.target.files?.[0]||null)} />
           </label>
+          </div>
+          <button className="admin-logout" onClick={logout}>{t('logout')}</button>
         </div>
       </header>
 
@@ -1365,7 +1554,6 @@ export default function AdminPanel() {
         <button className={tab==='applications'?'active':''} onClick={()=>setTab('applications')}>{t('applications')}</button>
         <button className={tab==='partners'?'active':''} onClick={()=>setTab('partners')}>{t('partners')}</button>
         <button className={tab==='newsletters'?'active':''} onClick={()=>setTab('newsletters')}>Actualités</button>
-        <button className={tab==='donations'?'active':''} onClick={()=>setTab('donations')}>{t('donations')}</button>
         <button className={tab==='offices'?'active':''} onClick={()=>setTab('offices')}>{t('offices')}</button>
         <button className={tab==='data'?'active':''} onClick={()=>setTab('data')}>{t('data')}</button>
         <button className={tab==='settings'?'active':''} onClick={()=>setTab('settings')}>{t('settings')}</button>
@@ -1491,8 +1679,14 @@ export default function AdminPanel() {
                   Publié
                   <span className="help-text">Rendre visible sur le site</span>
                 </label>
-                <button className="btn-primary" onClick={addProject}>
-                  {editingProjectId ? t('save') : t('addProject')}
+                <button
+                  className="btn-primary"
+                  onClick={addProject}
+                  disabled={!!loading.project}
+                >
+                  {loading.project
+                    ? 'Enregistrement...'
+                    : (editingProjectId ? t('save') : t('addProject'))}
                 </button>
               </div>
             </div>
@@ -1545,24 +1739,37 @@ export default function AdminPanel() {
 
         {tab==='jobs' && (
           <section className="panel">
-            <h2>{t('jobs')}</h2>
+            <h2>Opportunités</h2>
             {errors.jobs && <p className="entity-error">{errors.jobs}</p>}
             {loading.jobs && <p className="entity-loading">Chargement des emplois…</p>}
             <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="job-listing-type">Type <span className="required">*</span></label>
+                    <label htmlFor="job-listing-type">Type d'opportunité <span className="required">*</span></label>
                     <select 
                       id="job-listing-type"
-                      value={jobForm.listingType || 'job'} 
-                      onChange={e=>setJobForm({...jobForm, listingType: e.target.value as 'job' | 'proposal'})}
+                      value={jobForm.listingType || 'emploi'} 
+                      onChange={e=>setJobForm({...jobForm, listingType: e.target.value as Job['listingType']})}
                     >
-                      <option value="job">Offre d'emploi</option>
-                      <option value="proposal">Appel d'offres / Appel à propositions</option>
+                      <option value="emploi">Emploi / Recrutement</option>
+                      <option value="benevolat">Bénévolat</option>
+                      <option value="opportunite">Autre opportunité (stage, consultance, etc.)</option>
+                      <option value="appel-offres">Appel d'offres / Appel à propositions</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label htmlFor="job-title">Titre {jobForm.listingType === 'proposal' ? "de l'appel" : 'du poste'} <span className="required">*</span></label>
-                    <input id="job-title" value={jobForm.title||''} onChange={e=>setJobForm({...jobForm, title:e.target.value})} placeholder={jobForm.listingType === 'proposal' ? "Ex: Appel d'offres pour projet d'eau potable" : "Ex: Coordinateur de projet"} />
+                    <label htmlFor="job-title">
+                      Titre {jobForm.listingType === 'appel-offres' ? "de l'appel" : 'de l\'opportunité'} <span className="required">*</span>
+                    </label>
+                    <input
+                      id="job-title"
+                      value={jobForm.title||''}
+                      onChange={e=>setJobForm({...jobForm, title:e.target.value})}
+                      placeholder={
+                        jobForm.listingType === 'appel-offres'
+                          ? "Ex: Appel d'offres pour projet d'eau potable"
+                          : "Ex: Coordinateur de projet, Bénévole WASH, Consultant, etc."
+                      }
+                    />
                   </div>
                   <div className="form-group">
                     <label htmlFor="job-location">Lieu</label>
@@ -1587,7 +1794,7 @@ export default function AdminPanel() {
               
               {/* Auto-generated Apply URL Section */}
               <div style={{ padding: '1rem', background: '#fff9f5', borderRadius: '6px', border: '2px solid #FFE5D6' }}>
-                  <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--primary, #FF6B00)' }}>
+                  <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--primary, #0066CC)' }}>
                   URL de candidature (auto-générée)
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -1596,7 +1803,7 @@ export default function AdminPanel() {
                       readOnly
                       value={
                       editingJobId 
-                        ? (jobForm.applyUrl || `${window.location.origin}/job/${editingJobId}/apply`)
+                        ? (jobForm.applyUrl || `${window.location.origin}/opportunite/${editingJobId}/apply`)
                         : (jobForm.applyUrl || 'Sera générée lors de l’enregistrement du poste')
                       }
                     style={{ 
@@ -1614,13 +1821,13 @@ export default function AdminPanel() {
                     <button
                       type="button"
                       onClick={() => {
-                        const url = jobForm.applyUrl || `${window.location.origin}/job/${editingJobId}/apply`;
+                        const url = jobForm.applyUrl || `${window.location.origin}/opportunite/${editingJobId}/apply`;
                         navigator.clipboard.writeText(url);
-                        alert('URL de candidature copiée dans le presse-papiers !');
+                        showToast('URL de candidature copiée dans le presse-papiers !');
                       }}
                       style={{
                         padding: '0.5rem 1rem',
-                        background: 'var(--primary, #FF6B00)',
+                        background: 'var(--primary, #0066CC)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
@@ -1640,7 +1847,7 @@ export default function AdminPanel() {
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>Image URLs</label>
+                  <label>Images (URL ou téléchargement)</label>
                   <button type="button" className="btn-add-image" onClick={addImageToJob}>+ Add Image</button>
                 </div>
                 {(jobForm.images || []).map((img, idx) => (
@@ -1652,6 +1859,26 @@ export default function AdminPanel() {
                         placeholder="https://exemple.com/image.jpg"
                       value={img} 
                       onChange={e => updateJobImage(idx, e.target.value)} 
+                    />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Ou sélectionner un fichier</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const updated = await mediaApi.uploadSiteImage('aboutActivitiesUrl', file);
+                            // Reuse the uploaded URL for this job image slot
+                            const url = Object.values(updated).pop() as string;
+                            updateJobImage(idx, url);
+                          } catch (error) {
+                            console.error('Error uploading job image:', error);
+                            showToast('Échec du téléchargement de l’image.', 'error');
+                          }
+                        }}
                     />
                     </div>
                     <button type="button" className="btn-remove" onClick={() => removeJobImage(idx)} aria-label="Remove image">
@@ -1667,8 +1894,14 @@ export default function AdminPanel() {
                   Published
                   <span className="help-text">Make visible on website</span>
                 </label>
-                <button className="btn-primary" onClick={addJob}>
-                  {editingJobId ? t('save') : t('addJob')}
+                <button
+                  className="btn-primary"
+                  onClick={addJob}
+                  disabled={!!loading.job}
+                >
+                  {loading.job
+                    ? 'Enregistrement...'
+                    : (editingJobId ? t('save') : t('addJob'))}
                 </button>
               </div>
             </div>
@@ -1678,7 +1911,15 @@ export default function AdminPanel() {
                 <li key={j.id}>
                   <div className="entity-head">
                     <strong>{j.title}</strong> 
-                    <span className="badge">{j.listingType === 'proposal' ? 'Appel d\'offres' : 'Emploi'}</span>
+                    <span className="badge">
+                      {j.listingType === 'appel-offres'
+                        ? "Appel d'offres"
+                        : j.listingType === 'benevolat'
+                        ? 'Bénévolat'
+                        : j.listingType === 'opportunite'
+                        ? 'Autre opportunité'
+                        : 'Emploi'}
+                    </span>
                     {j.location && <span className="badge">{j.location}</span>}
                     {j.published && <span className="badge badge-success">Published</span>}
                   </div>
@@ -1700,7 +1941,7 @@ export default function AdminPanel() {
                           applyUrl: j.applyUrl,
                           published: j.published,
                           images: j.images,
-                          listingType: j.listingType || 'job',
+                          listingType: j.listingType || 'emploi',
                           deadline: j.deadline,
                         });
                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1755,20 +1996,20 @@ export default function AdminPanel() {
                 style={{ 
                   padding: '0.5rem 1rem', 
                   borderRadius: '4px', 
-                  border: '1px solid var(--primary, #FF6B00)', 
+                  border: '1px solid var(--primary, #0066CC)', 
                   background: 'white', 
-                  color: 'var(--primary, #FF6B00)',
+                  color: 'var(--primary, #0066CC)',
                   cursor: 'pointer',
                   fontWeight: '500',
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--primary, #FF6B00)';
+                  e.currentTarget.style.background = 'var(--primary, #0066CC)';
                   e.currentTarget.style.color = 'white';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'white';
-                  e.currentTarget.style.color = 'var(--primary, #FF6B00)';
+                  e.currentTarget.style.color = 'var(--primary, #0066CC)';
                 }}
               >
                 Clear Filters
@@ -1793,22 +2034,22 @@ export default function AdminPanel() {
                 padding: '2rem', 
                 borderRadius: '8px', 
                 marginBottom: '2rem',
-                border: '2px solid var(--primary, #FF6B00)'
+                border: '2px solid var(--primary, #0066CC)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1.5rem' }}>
-                  <h3 style={{ margin: 0, color: 'var(--primary, #FF6B00)' }}>Détails de la candidature</h3>
+                  <h3 style={{ margin: 0, color: 'var(--primary, #0066CC)' }}>Détails de la candidature</h3>
                   <button 
                     onClick={() => { setSelectedApplication(null); setAdminNotes(''); }} 
                     style={{ 
                       background: 'white', 
-                      border: '2px solid var(--primary, #FF6B00)', 
+                      border: '2px solid var(--primary, #0066CC)', 
                       borderRadius: '50%',
                       width: '32px',
                       height: '32px',
                       fontSize: '1.5rem',
                       lineHeight: '1',
                       cursor: 'pointer',
-                      color: 'var(--primary, #FF6B00)',
+                      color: 'var(--primary, #0066CC)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1816,12 +2057,12 @@ export default function AdminPanel() {
                       transition: 'all 0.2s'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--primary, #FF6B00)';
+                      e.currentTarget.style.background = 'var(--primary, #0066CC)';
                       e.currentTarget.style.color = 'white';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'white';
-                      e.currentTarget.style.color = 'var(--primary, #FF6B00)';
+                      e.currentTarget.style.color = 'var(--primary, #0066CC)';
                     }}
                   >
                     <FaXmark />
@@ -1849,12 +2090,12 @@ export default function AdminPanel() {
                     <strong>URL de candidature :</strong>
                     <p style={{ wordBreak: 'break-all', fontSize: '0.9rem' }}>
                       <a 
-                        href={selectedApplication.jobId ? `${window.location.origin}/job/${selectedApplication.jobId}/apply` : '#'} 
+                        href={selectedApplication.jobId ? `${window.location.origin}/opportunite/${selectedApplication.jobId}/apply` : '#'} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        style={{ color: 'var(--primary, #FF6B00)', textDecoration: 'underline' }}
+                        style={{ color: 'var(--primary, #0066CC)', textDecoration: 'underline' }}
                       >
-                        {selectedApplication.jobId ? `${window.location.origin}/job/${selectedApplication.jobId}/apply` : 'N/A'}
+                        {selectedApplication.jobId ? `${window.location.origin}/opportunite/${selectedApplication.jobId}/apply` : 'N/A'}
                       </a>
                     </p>
                   </div>
@@ -1894,7 +2135,7 @@ export default function AdminPanel() {
                       style={{ 
                         display: 'inline-block', 
                         padding: '0.5rem 1rem', 
-                        background: 'var(--primary, #FF6B00)', 
+                        background: 'var(--primary, #0066CC)', 
                         color: 'white', 
                         textDecoration: 'none', 
                         borderRadius: '4px' 
@@ -1916,19 +2157,11 @@ export default function AdminPanel() {
                   />
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <div className="application-status-actions">
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication.id, 'accepted')}
                     disabled={loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'accepted'}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      background: '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'accepted' ? 'not-allowed' : 'pointer',
-                      opacity: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'accepted' ? 0.6 : 1
-                    }}
+                    className="app-status-btn app-status-accepted"
                   >
                     {loading[`app_${selectedApplication.id}`] ? t('loading') : (
                       <>
@@ -1940,15 +2173,7 @@ export default function AdminPanel() {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication.id, 'rejected')}
                     disabled={loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'rejected'}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      background: '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'rejected' ? 'not-allowed' : 'pointer',
-                      opacity: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'rejected' ? 0.6 : 1
-                    }}
+                    className="app-status-btn app-status-rejected"
                   >
                     {loading[`app_${selectedApplication.id}`] ? t('loading') : (
                       <>
@@ -1960,15 +2185,7 @@ export default function AdminPanel() {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication.id, 'reviewing')}
                     disabled={loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'reviewing'}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      background: '#ffc107',
-                      color: '#000',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'reviewing' ? 'not-allowed' : 'pointer',
-                      opacity: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'reviewing' ? 0.6 : 1
-                    }}
+                    className="app-status-btn app-status-reviewing"
                   >
                     {loading[`app_${selectedApplication.id}`] ? t('loading') : (
                       <>
@@ -1980,15 +2197,7 @@ export default function AdminPanel() {
                   <button
                     onClick={() => updateApplicationStatus(selectedApplication.id, 'shortlisted')}
                     disabled={loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'shortlisted'}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      background: '#17a2b8',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'shortlisted' ? 'not-allowed' : 'pointer',
-                      opacity: loading[`app_${selectedApplication.id}`] || selectedApplication.status === 'shortlisted' ? 0.6 : 1
-                    }}
+                    className="app-status-btn app-status-shortlisted"
                   >
                     {loading[`app_${selectedApplication.id}`] ? t('loading') : (
                       <>
@@ -2000,15 +2209,7 @@ export default function AdminPanel() {
                   <button
                     onClick={() => deleteApplication(selectedApplication.id)}
                     disabled={loading[`app_${selectedApplication.id}`]}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      background: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading[`app_${selectedApplication.id}`] ? 'not-allowed' : 'pointer',
-                      marginLeft: 'auto'
-                    }}
+                    className="app-status-btn app-status-delete"
                   >
                     {loading[`app_${selectedApplication.id}`] ? 'Suppression...' : '🗑 Supprimer'}
                   </button>
@@ -2087,7 +2288,7 @@ export default function AdminPanel() {
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>Autres URLs d'images</label>
+                  <label>Autres images (URL ou téléchargement)</label>
                   <button type="button" className="btn-add-image" onClick={addImageToPartner}>+ Ajouter une image</button>
                 </div>
                 {(partnerForm.images || []).map((img, idx) => (
@@ -2101,6 +2302,25 @@ export default function AdminPanel() {
                       onChange={e => updatePartnerImage(idx, e.target.value)} 
                     />
                     </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Ou sélectionner un fichier</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const updated = await mediaApi.uploadSiteImage('aboutActivitiesUrl', file);
+                            const url = Object.values(updated).pop() as string;
+                            updatePartnerImage(idx, url);
+                          } catch (error) {
+                            console.error('Error uploading partner image:', error);
+                            showToast('Échec du téléchargement de l’image.', 'error');
+                          }
+                        }}
+                    />
+                    </div>
                     <button type="button" className="btn-remove" onClick={() => removePartnerImage(idx)} aria-label="Remove image">
                       <FaXmark />
                     </button>
@@ -2109,8 +2329,14 @@ export default function AdminPanel() {
               </div>
               
               <div className="form-actions">
-                <button className="btn-primary" onClick={addPartner}>
-                  {editingPartnerId ? 'Enregistrer le partenaire' : 'Ajouter un partenaire'}
+                <button
+                  className="btn-primary"
+                  onClick={addPartner}
+                  disabled={!!loading.partner}
+                >
+                  {loading.partner
+                    ? 'Enregistrement...'
+                    : (editingPartnerId ? 'Enregistrer le partenaire' : 'Ajouter un partenaire')}
                 </button>
               </div>
             </div>
@@ -2171,7 +2397,7 @@ export default function AdminPanel() {
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>URLs d'images</label>
+                  <label>Images d'actualité (URL ou téléchargement)</label>
                   <button type="button" className="btn-add-image" onClick={addImageToNewsletter}>+ Ajouter une image</button>
                 </div>
                 {(newsletterForm.images || []).map((img, idx) => (
@@ -2183,6 +2409,25 @@ export default function AdminPanel() {
                         placeholder="https://exemple.com/image.jpg"
                       value={img} 
                       onChange={e => updateNewsletterImage(idx, e.target.value)} 
+                    />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Ou sélectionner un fichier</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const updated = await mediaApi.uploadSiteImage('aboutActivitiesUrl', file);
+                            const url = Object.values(updated).pop() as string;
+                            updateNewsletterImage(idx, url);
+                          } catch (error) {
+                            console.error('Error uploading news image:', error);
+                            showToast('Échec du téléchargement de l’image.', 'error');
+                          }
+                        }}
                     />
                     </div>
                     <button type="button" className="btn-remove" onClick={() => removeNewsletterImage(idx)} aria-label="Remove image">
@@ -2216,8 +2461,14 @@ export default function AdminPanel() {
                     onChange={e=>setNewsletterForm({ ...newsletterForm, date: e.target.value })}
                   />
                 </div>
-                <button className="btn-primary" onClick={addNewsletter}>
-                  {editingNewsletterId ? 'Enregistrer l’actualité' : 'Ajouter une actualité'}
+                <button
+                  className="btn-primary"
+                  onClick={addNewsletter}
+                  disabled={!!loading.newsletter}
+                >
+                  {loading.newsletter
+                    ? 'Enregistrement...'
+                    : (editingNewsletterId ? 'Enregistrer l’actualité' : 'Ajouter une actualité')}
                 </button>
               </div>
             </div>
@@ -2261,63 +2512,7 @@ export default function AdminPanel() {
           </section>
         )}
 
-        {tab==='donations' && (
-          <section className="panel">
-            <h2>{t('donations')}</h2>
-            {errors.donations && <p className="entity-error">{errors.donations}</p>}
-            {loading.donations && <p className="entity-loading">Chargement des dons…</p>}
-
-            <div className="donations-stats" style={{ marginBottom: '2rem', padding: '1rem', background: '#f8f9fa', borderRadius: '8px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <div>
-                  <strong>{t('totalDonations')}:</strong> {donations.length}
-                </div>
-                <div>
-                  <strong>Réussis :</strong> {donations.filter(d => d.paymentStatus === 'success').length}
-                </div>
-                <div>
-                  <strong>Montant total :</strong> {
-                    donations
-                      .filter(d => d.paymentStatus === 'success')
-                      .reduce((sum, d) => sum + d.amount, 0)
-                      .toLocaleString()
-                  } {donations[0]?.currency || 'XOF'}
-                </div>
-                <div>
-                  <strong>En attente :</strong> {donations.filter(d => d.paymentStatus === 'pending').length}
-                </div>
-              </div>
-            </div>
-
-            <ul className="entity-list">
-              {donations.map(d => (
-                <li key={d.id}>
-                  <div className="entity-head">
-                    <strong>{d.isAnonymous ? 'Anonyme' : d.donorName}</strong>
-                    <span className={`badge ${d.paymentStatus === 'success' ? 'badge-success' : d.paymentStatus === 'failed' ? 'badge-danger' : 'badge-warning'}`}>
-                      {d.paymentStatus}
-                    </span>
-                  </div>
-                  <div className="entity-meta">
-                    <div><strong>Montant :</strong> {d.amount.toLocaleString()} {d.currency}</div>
-                    <div><strong>Email :</strong> {d.donorEmail}</div>
-                    {d.donorPhone && <div><strong>Téléphone :</strong> {d.donorPhone}</div>}
-                    {d.purpose && <div><strong>Objectif :</strong> {d.purpose}</div>}
-                    {d.message && <div><strong>Message :</strong> {d.message}</div>}
-                    <div><strong>Référence :</strong> {d.paymentReference}</div>
-                    {d.paidAt && <div><strong>Payé le :</strong> {new Date(d.paidAt).toLocaleString()}</div>}
-                    {d.createdAt && <div><strong>Créé le :</strong> {new Date(d.createdAt).toLocaleString()}</div>}
-                  </div>
-                </li>
-              ))}
-              {donations.length === 0 && !loading.donations && (
-                <li style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-                  Aucun don pour le moment
-                </li>
-              )}
-            </ul>
-          </section>
-        )}
+        {/* Donations panel intentionally disabled for now (kept for future use) */}
 
         {tab==='offices' && (
           <section className="panel">
@@ -2343,7 +2538,15 @@ export default function AdminPanel() {
                 <label htmlFor="office-lng">Longitude</label>
                 <input id="office-lng" type="number" placeholder="Ex: -8.0" step="any" value={officeForm.lng||'' as any} onChange={e=>setOfficeForm({...officeForm, lng: e.target.value? parseFloat(e.target.value): undefined})} />
               </div>
-              <div className="form-actions"><button onClick={addOffice}>Ajouter un bureau</button></div>
+              <div className="form-actions">
+                <button
+                  onClick={addOffice}
+                  disabled={!!loading.office}
+                  className="btn-primary"
+                >
+                  {loading.office ? 'Enregistrement...' : 'Ajouter un bureau'}
+                </button>
+              </div>
             </div>
 
             <ul className="entity-list">
@@ -2391,66 +2594,7 @@ export default function AdminPanel() {
             <h2>{t('settings')}</h2>
             {errors.settings && <div className="error-message">{errors.settings}</div>}
             
-            <div className="form-row">
-              <label className="section-label">{t('theme') || 'Theme'}</label>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  cursor: 'pointer', 
-                  padding: '12px 16px', 
-                  border: `2px solid ${(settings.theme === 'orange' || !settings.theme) ? 'var(--primary, #FF6B00)' : '#e0e0e0'}`, 
-                  borderRadius: '6px', 
-                  background: (settings.theme === 'orange' || !settings.theme) ? '#fff9f5' : 'white',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <input
-                    type="radio"
-                    name="theme"
-                    value="orange"
-                    checked={settings.theme === 'orange' || !settings.theme}
-                    onChange={() => {
-                      updateSettings({ theme: 'orange' });
-                    }}
-                    style={{ margin: 0, cursor: 'pointer' }}
-                  />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '4px', background: '#FF6B00', border: '1px solid #ddd' }}></div>
-                    <span style={{ fontWeight: 600 }}>{t('orangeTheme') || 'Orange'}</span>
-                  </div>
-                </label>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  cursor: 'pointer', 
-                  padding: '12px 16px', 
-                  border: `2px solid ${settings.theme === 'blue' ? 'var(--primary, #0066CC)' : '#e0e0e0'}`, 
-                  borderRadius: '6px', 
-                  background: settings.theme === 'blue' ? '#f0f7ff' : 'white',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <input
-                    type="radio"
-                    name="theme"
-                    value="blue"
-                    checked={settings.theme === 'blue'}
-                    onChange={() => {
-                      updateSettings({ theme: 'blue' });
-                    }}
-                    style={{ margin: 0, cursor: 'pointer' }}
-                  />
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '4px', background: '#0066CC', border: '1px solid #ddd' }}></div>
-                    <span style={{ fontWeight: 600 }}>{t('blueTheme') || 'Blue'}</span>
-                  </div>
-                </label>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '8px' }}>
-                {t('themeDescription') || 'Choose the primary color theme for the website. Changes will be applied immediately.'}
-              </p>
-            </div>
+            {/* Theme is now fixed to blue for all visitors; no admin toggle needed */}
 
             <div className="form-row">
               <div className="form-group">
@@ -2590,14 +2734,261 @@ export default function AdminPanel() {
               </div>
             </div>
 
-            <div style={{ marginTop: '20px', padding: '12px', background: '#f0f9ff', borderRadius: '6px', border: '2px solid var(--primary, #FF6B00)' }}>
-              <p style={{ margin: 0, color: '#1a1a2e', fontSize: '0.9rem' }}>
+            {/* Site images configuration (hero / about) */}
+            <div className="form-row" style={{ marginTop: '24px' }}>
+              <label className="section-label">Images du site (hero & à propos)</label>
+              <div className="form-group">
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                  Image hero de la page d'accueil
+                </label>
+                {siteImages.heroHomeUrl && (
+                  <div style={{ marginBottom: '4px', fontSize: '0.8rem', color: '#555' }}>
+                    <span>Current:</span>{' '}
+                    <a href={siteImages.heroHomeUrl} target="_blank" rel="noreferrer">
+                      {siteImages.heroHomeUrl}
+                    </a>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSiteImageUpload('heroHomeUrl', e.target.files?.[0])}
+                  style={{ marginBottom: '8px' }}
+                />
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                  Image à propos de la page d'accueil
+                </label>
+                {siteImages.aboutHomeUrl && (
+                  <div style={{ marginBottom: '4px', fontSize: '0.8rem', color: '#555' }}>
+                    <span>Current:</span>{' '}
+                    <a href={siteImages.aboutHomeUrl} target="_blank" rel="noreferrer">
+                      {siteImages.aboutHomeUrl}
+                    </a>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSiteImageUpload('aboutHomeUrl', e.target.files?.[0])}
+                  style={{ marginBottom: '8px' }}
+                />
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                  Image hero de la page à propos
+                </label>
+                {siteImages.aboutHeroUrl && (
+                  <div style={{ marginBottom: '4px', fontSize: '0.8rem', color: '#555' }}>
+                    <span>Current:</span>{' '}
+                    <a href={siteImages.aboutHeroUrl} target="_blank" rel="noreferrer">
+                      {siteImages.aboutHeroUrl}
+                    </a>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSiteImageUpload('aboutHeroUrl', e.target.files?.[0])}
+                  style={{ marginBottom: '8px' }}
+                />
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                  Image mission de la page à propos
+                </label>
+                {siteImages.aboutMissionUrl && (
+                  <div style={{ marginBottom: '4px', fontSize: '0.8rem', color: '#555' }}>
+                    <span>Current:</span>{' '}
+                    <a href={siteImages.aboutMissionUrl} target="_blank" rel="noreferrer">
+                      {siteImages.aboutMissionUrl}
+                    </a>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSiteImageUpload('aboutMissionUrl', e.target.files?.[0])}
+                  style={{ marginBottom: '8px' }}
+                />
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 600 }}>
+                  Image activités de la page à propos
+                </label>
+                {siteImages.aboutActivitiesUrl && (
+                  <div style={{ marginBottom: '4px', fontSize: '0.8rem', color: '#555' }}>
+                    <span>Current:</span>{' '}
+                    <a href={siteImages.aboutActivitiesUrl} target="_blank" rel="noreferrer">
+                      {siteImages.aboutActivitiesUrl}
+                    </a>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSiteImageUpload('aboutActivitiesUrl', e.target.files?.[0])}
+                  style={{ marginBottom: '8px' }}
+                />
+                <button
+                  type="button"
+                  onClick={saveSiteImages}
+                  disabled={siteImagesLoading}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    background: 'var(--primary, #0066CC)',
+                    color: '#fff',
+                    cursor: siteImagesLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    marginTop: '8px',
+                  }}
+                >
+                  {siteImagesLoading ? 'Enregistrement...' : 'Enregistrer les images du site'}
+                </button>
+                {siteImagesStatus && (
+                  <p style={{ marginTop: '8px', fontSize: '0.85rem', color: '#333' }}>
+                    {siteImagesStatus}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '20px', padding: '12px', background: '#f0f9ff', borderRadius: '6px', border: '2px solid var(--primary, #0066CC)' }}>
+              <p style={{ margin: 0, color: '#1a1a2e', fontSize: '0.9rem', marginBottom: '8px' }}>
                 <strong>{t('note')}:</strong> {t('changesSaved')}
               </p>
+              <button
+                type="button"
+                onClick={initializeFirestoreSchema}
+                disabled={schemaLoading}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: 'var(--primary, #0066CC)',
+                  color: '#fff',
+                  cursor: schemaLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                }}
+              >
+                {schemaLoading ? 'Initialisation des collections Firestore...' : 'Initialiser les collections Firestore à partir des modèles'}
+              </button>
+              {schemaStatus && (
+                <p style={{ marginTop: '8px', fontSize: '0.85rem', color: '#333' }}>
+                  {schemaStatus}
+                </p>
+              )}
             </div>
           </section>
         )}
       </main>
+
+      {toast && (
+        <div
+          className={`admin-toast ${toast.type === 'error' ? 'admin-toast-error' : 'admin-toast-success'}`}
+          role="status"
+          aria-live="polite"
+        >
+          {toast.message}
+        </div>
+      )}
+
+      {/* Custom alert / confirmation dialog */}
+      {dialog.open && (
+        <div className="admin-dialog-backdrop" role="dialog" aria-modal="true">
+          <div className="admin-dialog">
+            {dialog.title && <h3 className="admin-dialog-title">{dialog.title}</h3>}
+            <p className="admin-dialog-message">{dialog.message}</p>
+            <div className="admin-dialog-actions">
+              {dialog.type === 'confirm' && (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => handleDialogClose(false)}
+                >
+                  {dialog.cancelLabel || 'Annuler'}
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => handleDialogClose(true)}
+              >
+                {dialog.confirmLabel || 'OK'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInactivityWarning && (
+        <div
+          className="inactivity-modal-backdrop"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            className="inactivity-modal"
+            style={{
+              background: '#fff',
+              padding: '1.5rem 2rem',
+              borderRadius: '8px',
+              maxWidth: '420px',
+              width: '100%',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+            }}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: '0.75rem', color: '#1a1a2e' }}>
+              Session inactive
+            </h3>
+            <p style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#444' }}>
+              Vous êtes inactif depuis un moment. Vous serez déconnecté automatiquement dans{' '}
+              <strong>{inactivityCountdown}</strong> seconde{inactivityCountdown > 1 ? 's' : ''}.
+            </p>
+            <p style={{ marginBottom: '1rem', fontSize: '0.85rem', color: '#666' }}>
+              Cliquez sur « Rester connecté » pour prolonger votre session ou sur « Se déconnecter » pour quitter maintenant.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={logout}
+                style={{
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: '#e74c3c',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+              >
+                Se déconnecter
+              </button>
+              <button
+                type="button"
+                onClick={handleStayLoggedIn}
+                style={{
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: 'var(--primary, #0066CC)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+              >
+                Rester connecté
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

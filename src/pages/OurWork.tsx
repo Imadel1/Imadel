@@ -1,106 +1,61 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './OurWork.css';
 import { Link, useSearchParams } from "react-router-dom";
 import { projectsApi } from '../services/api';
-
-// Lazy Image Component with Intersection Observer
-interface LazyImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-  width?: number;
-  height?: number;
-}
-
-const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className, width = 300, height = 200 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: "50px" }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div className="lazy-image-wrapper" ref={containerRef}>
-      {!isLoaded && <div className="image-placeholder" aria-hidden="true" />}
-      {isInView && (
-        <img
-          src={src}
-          alt={alt}
-          className={className}
-          width={width}
-          height={height}
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setIsLoaded(true)}
-          onError={(e) => {
-            // Hide broken images
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-          style={{ opacity: isLoaded ? 1 : 0 }}
-        />
-      )}
-    </div>
-  );
-};
+import ResponsiveImage from '../components/ResponsiveImage';
 
 const AREAS_OF_INTERVENTION = [
-  "Hydraulique rurale et urbaine",
+  "Eaux, Hygiène et Assainissement",
   "Décentralisation",
-  "Hygiène/Assainissement",
   "Éducation",
-  "Formation",
+  "Renforcement de capacités",
   "Plaidoyer/Lobbyisme",
   "Environnement",
-  "Santé",
-  "Développement local",
-  "Actualités"
+  "Santé et Nutrition",
+  "Services Sociaux et Résilience",
+  "Protection",
+  "COOP",
 ];
 
 // Mapping between different possible area name formats
 const AREA_NAME_MAPPINGS: Record<string, string> = {
-  // French variations
-  'décentralisation': 'Décentralisation',
+  // French / English variations for new standard labels
+  'eaux, hygiene et assainissement': 'Eaux, Hygiène et Assainissement',
+  'hydraulique rurale et urbaine': 'Eaux, Hygiène et Assainissement',
+  'rural and urban hydraulics': 'Eaux, Hygiène et Assainissement',
+  'hygiene/sanitation': 'Eaux, Hygiène et Assainissement',
+  'hygiène/assainissement': 'Eaux, Hygiène et Assainissement',
+
   'decentralisation': 'Décentralisation',
-  'Décentralisation': 'Décentralisation',
-  'Decentralisation': 'Décentralisation',
-  // English variations
+  'décentralisation': 'Décentralisation',
   'decentralization': 'Décentralisation',
-  'Decentralization': 'Décentralisation',
-  // Other areas
-  'hydraulique rurale et urbaine': 'Hydraulique rurale et urbaine',
-  'rural and urban hydraulics': 'Hydraulique rurale et urbaine',
-  'hygiène/assainissement': 'Hygiène/Assainissement',
-  'hygiene/sanitation': 'Hygiène/Assainissement',
-  'éducation': 'Éducation',
+
   'education': 'Éducation',
-  'formation': 'Formation',
-  'training': 'Formation',
+  'éducation': 'Éducation',
+
+  'formation': 'Renforcement de capacités',
+  'training': 'Renforcement de capacités',
+  'renforcement de capacites': 'Renforcement de capacités',
+
   'plaidoyer/lobbyisme': 'Plaidoyer/Lobbyisme',
   'advocacy/lobbying': 'Plaidoyer/Lobbyisme',
+
   'environnement': 'Environnement',
   'environment': 'Environnement',
-  'santé': 'Santé',
-  'health': 'Santé',
-  'développement local': 'Développement local',
-  'local development': 'Développement local',
-  'actualités': 'Actualités',
-  'news': 'Actualités',
+
+  'sante': 'Santé et Nutrition',
+  'santé': 'Santé et Nutrition',
+  'health': 'Santé et Nutrition',
+  'nutrition': 'Santé et Nutrition',
+
+  'developpement local': 'Services Sociaux et Résilience',
+  'développement local': 'Services Sociaux et Résilience',
+  'local development': 'Services Sociaux et Résilience',
+  'services sociaux et resilience': 'Services Sociaux et Résilience',
+
+  'protection': 'Protection',
+
+  'coop': 'COOP',
 };
 
 // Normalize area name (remove accents, lowercase, trim)
@@ -113,7 +68,7 @@ const normalizeAreaName = (name: string): string => {
 };
 
 type SortOption = 'newest' | 'oldest' | 'a-z' | 'z-a';
-type StatusFilter = 'all' | 'current' | 'completed' | 'news';
+type StatusFilter = 'all' | 'current' | 'completed';
 
 // Helper function to extract areas from a project
 const getProjectAreas = (project: any): string[] => {
@@ -192,7 +147,7 @@ const OurWork: React.FC = () => {
       setCurrentPage(1);
     }
     
-    if (statusParam && ['all', 'current', 'completed', 'news'].includes(statusParam)) {
+    if (statusParam && ['all', 'current', 'completed'].includes(statusParam)) {
       setSelectedStatus(statusParam);
       setCurrentPage(1);
     } else if (!statusParam) {
@@ -497,7 +452,6 @@ const OurWork: React.FC = () => {
                 <option value="all">Tous les statuts</option>
                 <option value="current">En cours</option>
                 <option value="completed">Terminés</option>
-                <option value="news">Actualités</option>
               </select>
 
               <select
@@ -540,26 +494,28 @@ const OurWork: React.FC = () => {
             {currentProjects.map((project) => (
               <article key={project.id} className="project-card-wrapper" role="listitem">
                 <Link 
-                  to={`/project/${project.id}`} 
+                  to={`/projet/${project.id}`} 
                   className="project-card-link"
                   aria-label={`Voir les détails pour ${project.title}`}
                 >
                   <div className="project-card">
                     <div className="project-image-container">
-                      <LazyImage
+                      <ResponsiveImage
                         src={project.images[0] || '/placeholder-image.jpg'}
                         alt={project.title}
                         className="project-image"
-                        width={350}
-                        height={250}
+                        aspectRatio="wide"
+                        size="medium"
+                        loading="lazy"
+                        objectFit="cover"
                       />
-                    </div>
-                    <div className="project-content">
-                      <h3>{project.title}</h3>
-                      <p>{project.description.split('Read more')[0].trim()}</p>
-                      <span className="read-more" aria-hidden="true">
-                        LIRE PLUS →
-                      </span>
+                      <div className="project-image-overlay"></div>
+                      <div className="project-image-content">
+                        <h3>{project.title}</h3>
+                        <span className="read-more" aria-hidden="true">
+                          LIRE PLUS →
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -618,7 +574,7 @@ const OurWork: React.FC = () => {
         <div className="container">
           <h2 id="cta-heading">Impliquez-vous dans notre mission</h2>
           <p>Rejoignez-nous pour faire la différence dans les communautés à travers le Mali</p>
-          <Link to="/getinvolved" className="cta-button">
+          <Link to="/s-engager" className="cta-button">
             S'impliquer
           </Link>
         </div>

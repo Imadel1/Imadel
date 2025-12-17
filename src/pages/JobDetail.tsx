@@ -39,6 +39,7 @@ const JobDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<JobItem | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -62,6 +63,7 @@ const JobDetail: React.FC = () => {
     if (!id) return;
 
     const loadJob = async () => {
+      setLoading(true);
       try {
         const response = await jobsApi.getById(id);
 
@@ -76,6 +78,7 @@ const JobDetail: React.FC = () => {
           // If expired or not published, don't show the job
           if (isExpired || !jobData.published) {
             setJob(null);
+            setLoading(false);
             return;
           }
           
@@ -96,11 +99,46 @@ const JobDetail: React.FC = () => {
       } catch (error) {
         console.error('Error loading job from API:', error);
         setJob(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadJob();
   }, [id]);
+
+  if (loading) {
+    return (
+      <div className="job-detail-page">
+        <div className="container">
+          <div className="loading-container" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            minHeight: '400px',
+            gap: '1rem'
+          }}>
+            <div className="spinner" style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid #f3f3f3',
+              borderTop: '4px solid var(--primary, #0066CC)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <p style={{ color: 'var(--text-secondary, #616161)', fontSize: '1.1rem' }}>{t('loading') || 'Chargement...'}</p>
+          </div>
+        </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   if (!job) {
     return (
@@ -109,7 +147,7 @@ const JobDetail: React.FC = () => {
           <div className="error-message">
             <h1>{t('jobNotFoundTitle')}</h1>
             <p>{t('jobNotFoundDesc')}</p>
-            <Link to="/getinvolved" className="btn-primary">
+            <Link to="/s-engager" className="btn-primary">
               {t('viewAllJobOpenings')}
             </Link>
           </div>
@@ -221,7 +259,6 @@ const JobDetail: React.FC = () => {
       const deadline = new Date(job.deadline);
       if (deadline < new Date()) {
         setSubmitStatus('error');
-        alert(t('deadlinePassedAlert'));
         return;
       }
     }
@@ -264,16 +301,14 @@ const JobDetail: React.FC = () => {
         
         // Show success message and redirect after a delay
         setTimeout(() => {
-          navigate('/getinvolved');
+          navigate('/s-engager');
         }, 3000);
       } else {
-        throw new Error(response.message || 'Failed to submit application');
+        throw new Error('Failed to submit application');
       }
     } catch (error: any) {
       console.error('Error submitting application:', error);
       setSubmitStatus('error');
-      // Show error message to user
-      alert(error.message || 'There was an error submitting your application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -285,14 +320,14 @@ const JobDetail: React.FC = () => {
         <nav className="breadcrumb" aria-label="Breadcrumb">
           <Link to="/">{t('home')}</Link>
           <span aria-hidden="true"> / </span>
-          <Link to="/getinvolved">{t('getInvolved')}</Link>
+          <Link to="/s-engager">{t('getInvolved')}</Link>
           <span aria-hidden="true"> / </span>
           <span aria-current="page">{job.title}</span>
         </nav>
 
         <div className="job-detail-container">
           <div className="job-detail-content">
-            <Link to="/getinvolved" className="back-button" aria-label={t('backToJobs')}>
+            <Link to="/s-engager" className="back-button" aria-label={t('backToJobs')}>
               {t('backToJobs')}
             </Link>
 

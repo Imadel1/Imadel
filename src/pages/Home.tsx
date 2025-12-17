@@ -3,7 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { FaBullseye, FaGlobeAmericas, FaDumbbell, FaHandshake, FaLandmark, FaSeedling } from "react-icons/fa";
 import { useTranslation } from "../utils/i18n";
 import "./Home.css";
-import { projectsApi, newslettersApi } from "../services/api";
+import { projectsApi, newsApi } from "../services/api";
+import ResponsiveImage from "../components/ResponsiveImage";
 
 // Types
 interface NewsItem {
@@ -28,21 +29,23 @@ interface Objective {
 // Constants
 import heroImage from '../assets/imadel 1.jpg';
 import aboutImage from '../assets/imadel-2.jpg';
+import { mediaApi, type SiteImages } from '../services/api';
 
-const HERO_IMAGE = heroImage;
-const ABOUT_IMAGE = aboutImage;
+const FALLBACK_HERO_IMAGE = heroImage;
+const FALLBACK_ABOUT_IMAGE = aboutImage;
 
 // These will be generated dynamically based on language
 const getAreasOfIntervention = (language: string) => [
-  language === 'fr' ? "Hydraulique rurale et urbaine" : "Rural and urban hydraulics",
+  language === 'fr' ? "Eaux, Hygiène et Assainissement" : "Water, Hygiene & Sanitation",
   language === 'fr' ? "Décentralisation" : "Decentralization",
-  language === 'fr' ? "Hygiène/ Assainissement" : "Hygiene/Sanitation",
   language === 'fr' ? "Éducation" : "Education",
-  language === 'fr' ? "Formation" : "Training",
+  language === 'fr' ? "Renforcement de capacités" : "Capacity building",
   language === 'fr' ? "Plaidoyer / Lobbyisme" : "Advocacy / Lobbying",
   language === 'fr' ? "Environnement" : "Environment",
-  language === 'fr' ? "Santé" : "Health",
-  language === 'fr' ? "Développement local" : "Local development"
+  language === 'fr' ? "Santé et Nutrition" : "Health & Nutrition",
+  language === 'fr' ? "Services Sociaux et Résilience" : "Social services & resilience",
+  language === 'fr' ? "Protection" : "Protection",
+  language === 'fr' ? "COOP" : "Cooperation (COOP)",
 ];
 
 const getObjectives = (t: any): Objective[] => [
@@ -92,7 +95,7 @@ const getObjectives = (t: any): Objective[] => [
 
 // Icon mapping function
 const getObjectiveIcon = (iconName: string) => {
-  const iconProps = { size: 48, color: 'var(--primary, #FF6B00)' };
+  const iconProps = { size: 48, color: 'var(--primary, #0066CC)' };
   switch (iconName) {
     case 'target': return <FaBullseye {...iconProps} />;
     case 'globe': return <FaGlobeAmericas {...iconProps} />;
@@ -187,25 +190,28 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   const targetLink =
     news.link ||
     (news.badge === t('news')
-      ? `/news/${news.id}`
-      : `/project/${news.id}`);
+      ? `/actualite/${news.id}`
+      : `/projet/${news.id}`);
   return (
     <Link to={targetLink} className="news-card-link" aria-label={language === 'fr' ? `Voir les détails de ${news.title}` : `View details of ${news.title}`}>
       <article className="news-card">
         <div className="news-image">
-          <LazyImage
+          <ResponsiveImage
             src={news.image || aboutImage}
             alt={news.title}
-            width={350}
-            height={200}
+            aspectRatio="wide"
+            size="large"
+            loading="lazy"
+            objectFit="cover"
             className="news-img"
           />
-        </div>
-        <div className="news-content">
-          <h3>{news.title}</h3>
-          <span className="read-more">
-            {t('readMore')}
-          </span>
+          <div className="news-overlay"></div>
+          <div className="news-content-overlay">
+            <h3>{news.title}</h3>
+            <span className="read-more">
+              {t('readMore')} →
+            </span>
+          </div>
         </div>
       </article>
     </Link>
@@ -310,94 +316,63 @@ const Home: React.FC = () => {
   const { t, language } = useTranslation();
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [projects, setProjects] = useState<NewsItem[]>([]);
+  const [siteImages, setSiteImages] = useState<SiteImages>({});
   
   const AREAS_OF_INTERVENTION = getAreasOfIntervention(language);
   const OBJECTIVES = getObjectives(t);
 
-  // Load newsletters from backend API
+  // Load site images (hero, about) from Firestore
   useEffect(() => {
-    const loadNewsletters = async () => {
+    const loadSiteImages = async () => {
+      const images = await mediaApi.getSiteImages();
+      setSiteImages(images);
+    };
+    loadSiteImages();
+  }, []);
+
+  // Load news from backend API
+  useEffect(() => {
+    const loadNews = async () => {
       try {
-        // Try backend "news" via projects with category=news
-        try {
-          const projectsResponse = await projectsApi.getAll({ category: 'news', published: true });
-          const rawProjects =
-            (projectsResponse as any).projects ||
-            (projectsResponse as any).data ||
-            projectsResponse;
+        // Fetch news (actualités) collection - limit to a few items for performance
+        const response = await newsApi.getAll({ published: true, limit: 4 });
 
-          if (projectsResponse.success !== false && Array.isArray(rawProjects) && rawProjects.length > 0) {
-            const newsFromProjects = rawProjects
-              .slice(0, 2)
-              .map((p: any) => ({
-                id: p._id || p.id,
-                title: p.title,
-                description: p.description
-                  ? p.description.substring(0, 150) + '...'
-                  : p.fullDescription
-                  ? p.fullDescription.substring(0, 150) + '...'
-                  : '',
-                image:
-                  p.images && p.images.length > 0 && p.images[0].url
-                    ? p.images[0].url
-                    : p.images && p.images[0]
-                    ? p.images[0]
-                    : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop',
-                badge: t('news'),
-                link: `/project/${p._id || p.id}`,
-                date: p.date || p.createdAt,
-              }));
-
-            setNewsItems(newsFromProjects);
-            return;
-          }
-        } catch (err) {
-          console.warn('News via projects (category=news) not available, falling back to newsletters.');
-        }
-
-        // Fallback: newsletters (public endpoints)
-        const response = await newslettersApi.getAll({ published: true });
-
-        const rawNewsletters =
-          (response as any)?.newsletters ||
+        const rawNews =
+          (response as any)?.news ||
           (response as any)?.data ||
           response ||
           [];
 
-        const list = Array.isArray(rawNewsletters) ? rawNewsletters : [];
+        const list = Array.isArray(rawNews) ? rawNews : [];
 
         const publishedNews = list
           .slice(0, 2) // Show up to 2 news items
           .map((n: any) => ({
             id: n._id || n.id,
             title: n.title,
-            description: n.content
-              ? n.content.substring(0, 150) + '...'
-              : n.description
+            description: n.description
               ? n.description.substring(0, 150) + '...'
               : '',
             image:
-              n.images && n.images.length > 0 && n.images[0].url
-                ? n.images[0].url
-                : n.images && n.images[0]
-                ? n.images[0]
-                : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop',
+              n.image ||
+              (n.images && n.images.length > 0 && (n.images[0].url || n.images[0])) ||
+              'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=800&auto=format&fit=crop',
             badge: t('news'),
-            link: `/news/${n._id || n.id}`,
+            link: `/actualite/${n._id || n.id}`,
             date: n.date || n.createdAt,
           }));
 
         setNewsItems(publishedNews);
       } catch (error) {
-        console.error('Error loading newsletters from API:', error);
+        console.error('Error loading news from API:', error);
         setNewsItems([]); // Graceful fallback: show no news instead of error
       }
     };
 
-    loadNewsletters();
+    loadNews();
 
     // Listen for updates from admin panel
-    const handleUpdate = () => loadNewsletters();
+    const handleUpdate = () => loadNews();
     window.addEventListener('imadel:newsletters:updated', handleUpdate);
 
     return () => {
@@ -409,7 +384,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        const response = await projectsApi.getAll({ published: true });
+        // Limit to a few latest projects for homepage
+        const response = await projectsApi.getAll({ published: true, limit: 8 });
 
         const rawProjects =
           (response as any).projects ||
@@ -427,7 +403,7 @@ const Home: React.FC = () => {
                 ? p.images[0].url 
                 : 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
               badge: p.location || t('projects'),
-              link: `/project/${p._id || p.id}`,
+              link: `/projet/${p._id || p.id}`,
             }));
           
           setProjects(mappedProjects);
@@ -456,7 +432,7 @@ const Home: React.FC = () => {
         <section className="hero-section" aria-label="Hero section">
           <div 
             className="hero-background" 
-            style={{ backgroundImage: `url(${HERO_IMAGE})` }}
+            style={{ backgroundImage: `url(${siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE})` }}
             aria-hidden="true"
           />
           <div className="hero-overlay" aria-hidden="true" />
@@ -469,10 +445,10 @@ const Home: React.FC = () => {
                 {t('heroTagline')}
               </p>
               <div className="hero-actions">
-                <Link to="/getinvolved" className="btn-outline-hero" aria-label={t('becomeVolunteer')}>
+                <Link to="/s-engager" className="btn-outline-hero" aria-label={t('becomeVolunteer')}>
                   {t('becomeVolunteer')}
                 </Link>
-                <Link to="/donate" className="btn-primary-hero" aria-label={t('donateNow')}>
+                <Link to="/faire-un-don" className="btn-primary-hero" aria-label={t('donateNow')}>
                   {t('donateNow')}
                 </Link>
               </div>
@@ -571,7 +547,7 @@ const Home: React.FC = () => {
               </div>
               <div className="about-image">
                 <LazyImage
-                  src={ABOUT_IMAGE}
+                  src={siteImages.aboutHomeUrl || FALLBACK_ABOUT_IMAGE}
                   alt="Membres de l'équipe IMADEL travaillant sur des projets de développement local au Mali"
                   width={600}
                   height={400}
@@ -601,7 +577,7 @@ const Home: React.FC = () => {
               {AREAS_OF_INTERVENTION.map((area, index) => (
                 <Link
                   key={index}
-                  to={`/ourwork?area=${encodeURIComponent(area)}`}
+                  to={`/nos-projets?area=${encodeURIComponent(area)}`}
                   className="area-item"
                   role="listitem"
                 >
@@ -618,7 +594,7 @@ const Home: React.FC = () => {
           <div className="container">
             <h2 id="partners-heading">{t('partnersPreview')}</h2>
             <p className="partners-subtitle">{language === 'fr' ? "Travailler ensemble pour le développement local" : "Working together for local development"}</p>
-            <Link to="/partners" className="btn-outline" aria-label={language === 'fr' ? "Voir tous les partenaires" : "See all partners"}>
+            <Link to="/partenaires" className="btn-outline" aria-label={language === 'fr' ? "Voir tous les partenaires" : "See all partners"}>
               {t('seeAllPartners')}
             </Link>
           </div>
@@ -630,10 +606,10 @@ const Home: React.FC = () => {
             <h2 id="cta-heading">{t('ctaTitle')}</h2>
             <p>{t('ctaDescription')}</p>
             <div className="cta-buttons">
-              <Link to="/getinvolved" className="btn-primary" aria-label={t('getInvolved')}>
+              <Link to="/s-engager" className="btn-primary" aria-label={t('getInvolved')}>
                 {t('getInvolved')}
               </Link>
-              <Link to="/donate" className="btn-secondary" aria-label={t('donate')}>
+              <Link to="/faire-un-don" className="btn-secondary" aria-label={t('donate')}>
                 {t('donate')}
               </Link>
             </div>

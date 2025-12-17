@@ -1,0 +1,133 @@
+import React, { useState, useRef, useEffect } from 'react';
+
+interface ResponsiveImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+  aspectRatio?: 'landscape' | 'portrait' | 'square' | 'wide';
+  size?: 'small' | 'medium' | 'large' | 'full';
+  loading?: 'lazy' | 'eager';
+  objectFit?: 'cover' | 'contain' | 'fill';
+}
+
+const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
+  src,
+  alt,
+  className = '',
+  aspectRatio = 'landscape',
+  size = 'medium',
+  loading = 'lazy',
+  objectFit = 'cover',
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Aspect ratio mappings
+  const aspectRatios = {
+    landscape: '16/9',
+    wide: '21/9',
+    portrait: '9/16',
+    square: '1/1',
+  };
+
+  // Size-based height mappings (for landscape)
+  const sizeHeights = {
+    small: { base: '150px', tablet: '140px', mobile: '130px' },
+    medium: { base: '250px', tablet: '200px', mobile: '180px' },
+    large: { base: '300px', tablet: '260px', mobile: '220px' },
+    full: { base: '400px', tablet: '320px', mobile: '280px' },
+  };
+
+  useEffect(() => {
+    if (loading === 'eager') {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading]);
+
+  const currentHeight = sizeHeights[size];
+
+  return (
+    <div
+      ref={containerRef}
+      className={`responsive-image-wrapper ${className}`}
+      style={{
+        width: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        aspectRatio: aspectRatios[aspectRatio],
+        minHeight: currentHeight.base,
+        backgroundColor: 'var(--panel, #f9fafc)',
+      }}
+    >
+      {!isLoaded && (
+        <div
+          className="image-placeholder"
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'var(--panel, #f9fafc)',
+          }}
+        />
+      )}
+      {isInView && (
+        <img
+          src={src}
+          alt={alt}
+          loading={loading}
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: objectFit,
+            opacity: isLoaded ? 1 : 0,
+            transition: 'opacity 0.3s ease',
+          }}
+        />
+      )}
+      <style>{`
+        @media (max-width: 768px) {
+          .responsive-image-wrapper {
+            min-height: ${currentHeight.tablet} !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .responsive-image-wrapper {
+            min-height: ${currentHeight.mobile} !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default ResponsiveImage;
+

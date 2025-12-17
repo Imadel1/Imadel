@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './AboutUs.css';
 import aboutHeroImage from '../assets/imadel-5.jpg';
 import missionImage from '../assets/imadel-7.jpg';
 import activitiesImage from '../assets/p2imadel 3.jpg';
+import { mediaApi, type SiteImages } from '../services/api';
 
-// Images from assets
-const ABOUT_HERO_IMAGE = aboutHeroImage;
-const MISSION_IMAGE = missionImage;
-const ACTIVITIES_IMAGE = activitiesImage;
+// Fallback images from assets
+const FALLBACK_ABOUT_HERO_IMAGE = aboutHeroImage;
+const FALLBACK_MISSION_IMAGE = missionImage;
+const FALLBACK_ACTIVITIES_IMAGE = activitiesImage;
 
 const OBJECTIVES = [
   "Contribuer au renforcement des capacités des acteurs de développement en vue d'accélérer la prise en main et l'appropriation du développement local",
@@ -19,13 +20,23 @@ const OBJECTIVES = [
 ];
 
 const AboutUs: React.FC = () => {
+  const [siteImages, setSiteImages] = useState<SiteImages>({});
+
+  useEffect(() => {
+    const loadSiteImages = async () => {
+      const images = await mediaApi.getSiteImages();
+      setSiteImages(images);
+    };
+    loadSiteImages();
+  }, []);
+
   return (
     <div className="about-us">
       {/* Hero Section */}
       <section className="about-hero" aria-labelledby="about-hero-heading">
         <div 
           className="hero-background" 
-          style={{ backgroundImage: `url(${ABOUT_HERO_IMAGE})` }}
+          style={{ backgroundImage: `url(${siteImages.aboutHeroUrl || FALLBACK_ABOUT_HERO_IMAGE})` }}
           aria-hidden="true"
         />
         <div className="hero-overlay" aria-hidden="true" />
@@ -46,7 +57,7 @@ const AboutUs: React.FC = () => {
             <div className="mission">
               <div className="mission-image">
                 <img 
-                  src={MISSION_IMAGE} 
+                  src={siteImages.aboutMissionUrl || FALLBACK_MISSION_IMAGE} 
                   alt="Équipe IMADEL travaillant sur des projets de développement communautaire"
                   loading="lazy"
                   width={600}
@@ -114,13 +125,13 @@ const AboutUs: React.FC = () => {
                 Nos activités couvrent de nombreux secteurs, notamment l'hydraulique rurale et urbaine, la décentralisation,
                 l'hygiène et l'assainissement, l'éducation, la formation, le plaidoyer et le lobbyisme, l'environnement, la santé et le développement local.
               </p>
-              <Link to="/ourwork" className="btn-primary">
+            <Link to="/nos-projets" className="btn-primary">
                 Voir Nos Projets
               </Link>
             </div>
             <div className="activities-image">
               <img 
-                src={ACTIVITIES_IMAGE} 
+                src={siteImages.aboutActivitiesUrl || FALLBACK_ACTIVITIES_IMAGE} 
                 alt="Activités et projets IMADEL dans les communautés à travers le Mali"
                 loading="lazy"
                 width={600}
@@ -152,10 +163,10 @@ const AboutUs: React.FC = () => {
           <h2 id="cta-heading">Rejoignez-nous dans notre mission</h2>
           <p>Participez à notre voyage pour créer un développement durable, équitable et participatif à travers le Mali.</p>
           <div className="cta-buttons">
-            <Link to="/getinvolved" className="btn-primary">
+            <Link to="/s-engager" className="btn-primary">
               S'impliquer
             </Link>
-            <Link to="/donate" className="btn-secondary">
+            <Link to="/faire-un-don" className="btn-secondary">
               Faire un Don
             </Link>
           </div>

@@ -82,7 +82,7 @@ const Carousel = () => {
     };
 
     const handleImageClick = () => {
-        navigate('/ourwork');
+        navigate('/nos-projets');
     };
 
     return (

@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaFacebookF, FaLinkedinIn, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { FaWhatsapp } from "react-icons/fa";
 import { useTranslation } from "../utils/i18n";
+import { getSettings, subscribeToSettings } from "../utils/settings";
 import NewsletterModal from "./NewsletterModal";
 import "./footer.css";
 import logo from "../assets/cropped-nouveau_logo.png";
@@ -10,6 +12,16 @@ import logo from "../assets/cropped-nouveau_logo.png";
 const Footer: React.FC = () => {
   const { t, language } = useTranslation();
   const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
+  const [settings, setSettings] = useState(getSettings());
+
+  // Load settings and subscribe to updates
+  useEffect(() => {
+    setSettings(getSettings());
+    const unsubscribe = subscribeToSettings((newSettings) => {
+      setSettings(newSettings);
+    });
+    return unsubscribe;
+  }, []);
   
   return (
     <>
@@ -27,10 +39,11 @@ const Footer: React.FC = () => {
         <div className="footer-section quick-links-section">
           <h4>{t('quickLinks')}</h4>
           <nav className="footer-nav" role="navigation" aria-label="Navigation pied de page">
-            <Link to="/aboutus">{t('about')}</Link>
-            <Link to="/ourwork">{t('work')}</Link>
-            <Link to="/getinvolved">{t('jobOffers')}</Link>
-            <Link to="/partners">{t('partners')}</Link>
+            <Link to="/a-propos">{t('about')}</Link>
+            <Link to="/nos-projets">{t('work')}</Link>
+            <Link to="/actualites">Actualités</Link>
+            <Link to="/s-engager">{t('jobOffers')}</Link>
+            <Link to="/partenaires">{t('partners')}</Link>
             <Link to="/contact">{t('contact')}</Link>
           </nav>
         </div>
@@ -41,7 +54,13 @@ const Footer: React.FC = () => {
           <p className="footer-contact">
             Bamako-Hamdallaye ACI 2000<br />
             <a href="mailto:imadel@imadel.net">imadel@imadel.net</a><br />
-            <a href="tel:+22320799840">+223 20 79 98 40</a>
+            <a href="mailto:imadel@imadel-mali.org">imadel@imadel-mali.org</a><br />
+            <a href="mailto:imadelmopti@imadel-mali.org">imadelmopti@imadel-mali.org</a><br />
+            <a href={`tel:${settings.phoneNumber.replace(/\s/g, '')}`}>{settings.phoneNumber}</a><br />
+            <a href={`tel:${settings.orangeMoney.replace(/\s/g, '')}`}>{settings.orangeMoney}</a><br />
+            <a href={`tel:${settings.malitel.replace(/\s/g, '')}`}>{settings.malitel}</a><br />
+            <a href="tel:+22375221808">+223 75 22 18 08</a><br />
+            <a href="tel:+22394941313">+223 94 94 13 13</a>
           </p>
         </div>
 
@@ -57,6 +76,9 @@ const Footer: React.FC = () => {
             </a>
             <a href="https://x.com/ONGImadel" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
               <FaXTwitter />
+            </a>
+            <a href="https://wa.me/22375221808" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
+              <FaWhatsapp />
             </a>
             <a href="#" aria-label="TikTok">
               <FaTiktok />

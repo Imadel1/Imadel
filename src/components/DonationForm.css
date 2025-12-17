@@ -10,7 +10,7 @@
 .donation-form h3 {
   margin-top: 0;
   margin-bottom: 1.5rem;
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 1.5rem;
 }
 
@@ -32,7 +32,7 @@
 }
 
 .donation-form-success h3 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   margin-bottom: 1rem;
 }
 
@@ -71,7 +71,7 @@
 .form-group textarea:focus {
   outline: none;
   border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 .form-group textarea {
@@ -116,7 +116,7 @@
 .btn-donate {
   width: 100%;
   padding: 1rem;
-  background-color: var(--primary, #FF6B00);
+  background-color: var(--primary, #0066CC);
   color: white;
   border: none;
   border-radius: 6px;
@@ -128,7 +128,7 @@
 }
 
 .btn-donate:hover:not(:disabled) {
-  background-color: #e55a00;
+  background-color: #0052A3;
   transform: translateY(-1px);
 }
 

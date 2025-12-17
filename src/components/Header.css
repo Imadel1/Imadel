@@ -60,7 +60,7 @@ header {
 .logo-text {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   letter-spacing: 0.5px;
   font-family: var(--font-display, 'Space Grotesk', sans-serif);
   font-display: optional;
@@ -83,7 +83,7 @@ nav {
 
 .donate-button {
   display: inline-block;
-  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%);
   color: var(--text-on-primary, #ffffff);
   padding: 0.6rem 1.5rem;
   border-radius: 50px;
@@ -95,7 +95,7 @@ nav {
 }
 
 .donate-button:hover {
-  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
+  background: linear-gradient(135deg, var(--primary-dark, #0052A3) 0%, var(--primary-darker, #003D7A) 100%);
   transform: translateY(-2px);
   box-shadow: none;
   color: var(--text-on-primary, #ffffff);
@@ -124,13 +124,13 @@ nav a::after {
   height: 2px;
   left: 0;
   bottom: -3px;
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   transition: width 0.3s ease;
 }
 
 .nav-link:hover,
 nav a:hover {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
 }
 
 .nav-link:hover::after,
@@ -146,7 +146,7 @@ nav a:focus {
 /* Active link state (desktop) */
 nav a.active,
 .nav-link.active {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-weight: 600;
 }
 
@@ -155,12 +155,77 @@ nav a.active::after,
   width: 100%;
 }
 
+/* Dropdown Menu */
+.nav-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  padding: 0.5rem 0;
+  z-index: 1001;
+  animation: dropdownFadeIn 0.2s ease forwards;
+  pointer-events: auto;
+}
+
+/* Create invisible bridge between nav link and dropdown to prevent gap */
+.nav-dropdown::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+  background: transparent;
+  pointer-events: auto;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.75rem 1.25rem;
+  color: var(--text, #1a1a2e);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans, 'Poppins', sans-serif);
+}
+
+.dropdown-item:hover {
+  background-color: rgba(0, 102, 204, 0.1);
+  color: var(--primary, #0066CC);
+  padding-left: 1.5rem;
+}
+
+.dropdown-item:focus {
+  outline: none;
+  background-color: rgba(0, 102, 204, 0.1);
+}
+
 /* Responsive Menu (Mobile) */
 .menu-toggle {
   display: none;
   font-size: 1.8rem;
   cursor: pointer;
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   z-index: 1002;
   background: transparent;
   border: none;
@@ -173,7 +238,7 @@ nav a.active::after,
 }
 
 .menu-toggle:hover {
-  color: var(--primary-dark, #e55a00);
+  color: var(--primary-dark, #0052A3);
 }
 
 .menu-toggle:focus {
@@ -241,8 +306,8 @@ nav a.active::after,
 
   nav a:hover,
   .nav-link:hover {
-    background-color: rgba(255, 107, 0, 0.12);
-    color: var(--primary, #FF6B00);
+    background-color: rgba(0, 102, 204, 0.12);
+    color: var(--primary, #0066CC);
     transform: translateX(2px);
   }
 
@@ -253,7 +318,31 @@ nav a.active::after,
 
   nav a:active,
   .nav-link:active {
-    background-color: rgba(255, 107, 0, 0.25);
+    background-color: rgba(0, 102, 204, 0.25);
+  }
+
+  /* Mobile dropdown - show inline */
+  .nav-dropdown {
+    width: 100%;
+  }
+
+  .dropdown-menu {
+    position: static;
+    margin-top: 0.25rem;
+    margin-left: 1rem;
+    box-shadow: none;
+    background: rgba(0, 102, 204, 0.05);
+    border-radius: 6px;
+    animation: none;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .dropdown-item:hover {
+    padding-left: 1.25rem;
   }
 
   /* Force menu button to show */
@@ -480,24 +569,24 @@ header:not(.scrolled) .donate-button:hover {
 
   header:not(.scrolled) .logo-text,
   header .logo-text {
-    color: var(--primary, #FF6B00) !important;
+    color: var(--primary, #0066CC) !important;
   }
 
   header:not(.scrolled) .menu-toggle,
   header .menu-toggle {
-    color: var(--primary, #FF6B00) !important;
+    color: var(--primary, #0066CC) !important;
   }
 
   header:not(.scrolled) .donate-button,
   header .donate-button {
-    background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%) !important;
+    background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%) !important;
     color: var(--text-on-primary, #ffffff) !important;
     border: none !important;
   }
 
   header:not(.scrolled) .donate-button:hover,
   header .donate-button:hover {
-    background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%) !important;
+    background: linear-gradient(135deg, var(--primary-dark, #0052A3) 0%, var(--primary-darker, #003D7A) 100%) !important;
     color: var(--text-on-primary, #ffffff) !important;
     border: none !important;
   }

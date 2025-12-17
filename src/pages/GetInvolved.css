@@ -21,7 +21,7 @@
 
 .intro h1 {
   font-family: var(--font-display);
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 2.5rem;
   margin-bottom: 2rem;
 }
@@ -42,7 +42,7 @@
 .proposals-section h2 {
   text-align: center;
   font-family: var(--font-display);
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
@@ -55,7 +55,7 @@
 .job-offers h2 {
   text-align: center;
   font-family: var(--font-display);
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
@@ -72,7 +72,9 @@
 
 .job-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  /* On large screens, show multiple reasonably sized cards, centered */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
+  justify-content: center;
   gap: 2rem;
   list-style: none;
   padding: 0;
@@ -82,10 +84,19 @@
 .job-card {
   background-color: var(--bg, #ffffff);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  overflow: hidden;
+}
+
+.job-card-link {
+  display: block;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .job-card:hover {
@@ -100,8 +111,8 @@
 
 .job-category {
   display: inline-block;
-  background: var(--primary-alpha, rgba(255, 107, 0, 0.1));
-  color: var(--primary, #FF6B00);
+  background: var(--primary-alpha, rgba(0, 102, 204, 0.1));
+  color: var(--primary, #0066CC);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -126,20 +137,17 @@
 }
 
 .read-more {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   text-decoration: none;
   font-weight: 600;
   display: inline-block;
   transition: color 0.3s ease;
+  pointer-events: none; /* Prevent separate click on read-more since whole card is clickable */
 }
 
-.read-more:hover {
-  color: var(--primary-dark, #e55a00);
+.job-card:hover .read-more {
+  color: var(--primary-dark, #0052A3);
   text-decoration: underline;
-}
-
-.read-more:focus {
-  outline: none;
 }
 
 .volunteer-section,
@@ -152,7 +160,7 @@
 .volunteer-section h2,
 .partnership-section h2 {
   font-family: var(--font-display);
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-size: 2.5rem;
   text-align: center;
   margin-bottom: 1.5rem;
@@ -185,28 +193,28 @@
 
 .btn-secondary {
   background: transparent;
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   border: 2px solid transparent;
 }
 
 .btn-secondary:hover {
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   color: var(--text-on-primary, #ffffff);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   border: 2px solid transparent;
 }
 
 .btn-outline:hover {
-  background: var(--primary, #FF6B00);
+  background: var(--primary, #0066CC);
   color: var(--text-on-primary, #ffffff);
 }
 
 .cta {
-  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%);
   color: var(--text-on-primary, #ffffff);
   text-align: center;
   padding: 4rem 2rem;
@@ -245,7 +253,7 @@
 
 .cta-button {
   background: var(--bg, #ffffff);
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   border: none;
   padding: 1rem 2rem;
   font-size: 1.1rem;

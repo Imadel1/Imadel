@@ -15,27 +15,29 @@ interface Project {
 }
 
 const AREAS_OF_INTERVENTION = [
-  "Rural and urban hydraulics",
-  "Decentralization",
-  "Hygiene/sanitation",
-  "Education",
-  "Formation",
-  "Advocacy/lobbying",
-  "Environment",
-  "Health",
-  "Local development"
+  "Eaux, Hygiène et Assainissement",
+  "Décentralisation",
+  "Éducation",
+  "Renforcement de capacités",
+  "Plaidoyer/Lobbyisme",
+  "Environnement",
+  "Santé et Nutrition",
+  "Services Sociaux et Résilience",
+  "Protection",
+  "COOP",
 ];
 
 const AREA_ICONS: { [key: string]: string } = {
-  "Rural and urban hydraulics": "💧",
-  "Decentralization": "🏛️",
-  "Hygiene/sanitation": "🧼",
-  "Education": "📚",
-  "Formation": "🎓",
-  "Advocacy/lobbying": "📢",
-  "Environment": "🌱",
-  "Health": "⚕️",
-  "Local development": "🏘️"
+  "Eaux, Hygiène et Assainissement": "🚿",
+  "Décentralisation": "🏛️",
+  "Éducation": "📚",
+  "Renforcement de capacités": "🎓",
+  "Plaidoyer/Lobbyisme": "📢",
+  "Environnement": "🌱",
+  "Santé et Nutrition": "⚕️",
+  "Services Sociaux et Résilience": "🤝",
+  "Protection": "🛡️",
+  "COOP": "🤝",
 };
 
 export default function AreasOfIntervention() {
@@ -147,7 +149,7 @@ export default function AreasOfIntervention() {
               <div className="projects-grid">
                 {filteredProjects.map(project => (
                   <Link 
-                    to={`/project/${project.id}`} 
+                    to={`/projet/${project.id}`} 
                     key={project.id}
                     className="project-card"
                   >

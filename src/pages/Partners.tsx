@@ -1,23 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Partners.css';
+import { partnersApi } from '../services/api';
 
 // Import partner logos
 import careLogo from '../assets/partners/care.svg';
-import oxfamLogo from '../assets/partners/oxfam.png';
-import saveChildrenLogo from '../assets/partners/savechildren.svg';
 import unicefLogo from '../assets/partners/unicef.png';
-import worldVisionLogo from '../assets/partners/worldvision.svg';
 import actionAidLogo from '../assets/partners/actionaid.png';
 import planLogo from '../assets/partners/plan.png';
 import redCrossLogo from '../assets/partners/redcross.svg';
-import veoliaLogo from '../assets/partners/logo-veolia.png.webp';
 import andorraLogo from '../assets/partners/andorra.avif';
 import sossahelLogo from '../assets/partners/sossahel.webp';
+import ioumLogo from '../assets/partners/ioum.webp';
+import unescoLogo from '../assets/partners/unesco.jpg';
+import snvLogo from '../assets/partners/snv.jpg';
+import prapsLogo from '../assets/partners/Praps.jpeg';
 import fhi360Logo from '../assets/partners/fhi360.svg';
-import wfpLogo from '../assets/partners/wfp.svg';
+import wfpLogo from '../assets/partners/wfp.jpg';
 import undpLogo from '../assets/partners/undp.svg';
 import ircLogo from '../assets/partners/international-rescue-committee-seeklogo.svg';
 import drcLogo from '../assets/partners/drc-300x300.jpg';
+import minusmaLogo from '../assets/partners/MINUSMA.png';
+import usaidLogo from '../assets/partners/USAID (1).png';
+import dhappLogo from '../assets/partners/DHAPP.jpg';
+import croixRougeMaliLogo from '../assets/partners/60-ANS-CROIX-ROUGE-MALI.png';
 
 interface Partner {
   name: string;
@@ -112,181 +117,164 @@ const Partners: React.FC = () => {
       name: 'Care International',
       image: careLogo || 'https://www.care-international.org/themes/custom/care/logo.svg',
       link: 'https://www.care-international.org',
-      description: 'Global humanitarian organization fighting poverty and social injustice'
-    },
-    {
-      name: 'Oxfam',
-      image: oxfamLogo || 'https://www.oxfam.org/themes/custom/oxfam/logo.svg',
-      link: 'https://www.oxfam.org',
-      description: 'International confederation working to end poverty and injustice'
-    },
-    {
-      name: 'Save the Children',
-      image: saveChildrenLogo || 'https://www.savethechildren.org/content/dam/usa/logos/save-the-children-logo.svg',
-      link: 'https://www.savethechildren.org',
-      description: 'Leading independent organization creating lasting change for children'
+      description: 'Organisation humanitaire mondiale luttant contre la pauvreté et l’injustice sociale'
     },
     {
       name: 'UNICEF',
       image: unicefLogo || 'https://www.unicef.org/themes/custom/unicef/images/logo.svg',
       link: 'https://www.unicef.org',
-      description: 'UN agency working for children\'s rights and well-being worldwide'
-    },
-    {
-      name: 'World Vision',
-      image: worldVisionLogo || 'https://www.worldvision.org/wp-content/themes/world-vision/images/wvi-logo.svg',
-      link: 'https://www.worldvision.org',
-      description: 'Christian humanitarian organization working to create lasting change'
+      description: 'Agence des Nations Unies œuvrant pour les droits et le bien-être des enfants dans le monde'
     },
     {
       name: 'ActionAid',
       image: actionAidLogo || 'https://www.actionaid.org/sites/default/files/actionaid_logo.svg',
       link: 'https://www.actionaid.org',
-      description: 'International anti-poverty agency working to eradicate poverty'
+      description: 'Agence internationale de lutte contre la pauvreté œuvrant à son éradication'
     },
     {
       name: 'Plan International',
       image: planLogo || 'https://plan-international.org/themes/custom/plan/logo.svg',
       link: 'https://plan-international.org',
-      description: 'Development and humanitarian organization working for children\'s rights'
+      description: 'Organisation de développement et humanitaire œuvrant pour les droits des enfants'
     },
     {
       name: 'Red Cross',
       image: redCrossLogo || 'https://www.icrc.org/themes/custom/icrc/logo.svg',
       link: 'https://www.icrc.org',
-      description: 'International humanitarian organization providing assistance in conflicts'
+      description: 'Organisation humanitaire internationale apportant une assistance en temps de conflit'
     },
     {
       name: 'IOM – UN Migration',
-      image: 'https://www.iom.int/profiles/iom_cms/themes/iom/logo.svg',
+      image: ioumLogo || 'https://www.iom.int/profiles/iom_cms/themes/iom/logo.svg',
       link: 'https://www.iom.int',
-      description: 'International Organization for Migration'
-    },
-    {
-      name: 'Fondation Prince Albert II de Monaco',
-      image: 'https://www.fpa2.org/app/themes/fpa2/dist/images/logo.svg',
-      link: 'https://www.fpa2.org',
-      description: 'Foundation dedicated to environmental protection and sustainable development'
+      description: 'Organisation internationale pour les migrations'
     },
     {
       name: 'SNV (Netherlands Development Organisation)',
-      image: 'https://www.snv.org/themes/custom/snv/logo.svg',
+      image: snvLogo || 'https://www.snv.org/themes/custom/snv/logo.svg',
       link: 'https://www.snv.org',
-      description: 'Netherlands Development Organisation'
+      description: 'Organisation néerlandaise de développement'
+    },
+    {
+      name: 'PRAPS – Projet Régional d’Appui au Pastoralisme au Sahel',
+      image: prapsLogo,
+      link: 'https://www.praps-sahel.org/',
+      description: 'Projet régional d’appui au pastoralisme au Sahel'
     },
     {
       name: 'UNESCO',
-      image: 'https://en.unesco.org/themes/education-21st-century/unesco-logo-en.svg',
+      image: unescoLogo || 'https://en.unesco.org/themes/education-21st-century/unesco-logo-en.svg',
       link: 'https://www.unesco.org',
-      description: 'United Nations Educational, Scientific and Cultural Organization'
-    },
-    {
-      name: 'Veolia Eau',
-      image: veoliaLogo || 'https://www.veolia.com/themes/custom/veolia/logo.svg',
-      link: 'https://www.veolia.com',
-      description: 'Global leader in optimized resource management'
+      description: 'Organisation des Nations Unies pour l’éducation, la science et la culture'
     },
     {
       name: 'Visit Andorra',
       image: andorraLogo,
       link: 'https://visitandorra.com/en/',
-      description: 'Official tourism website of Andorra'
+      description: 'Site officiel du tourisme en Andorre'
     },
     {
       name: 'Croix-Rouge Malienne',
-      image: 'https://media.ifrc.org/ifrc/wp-content/uploads/sites/5/2018/03/red-cross-red-crescent.png',
+      image: croixRougeMaliLogo || 'https://media.ifrc.org/ifrc/wp-content/uploads/sites/5/2018/03/red-cross-red-crescent.png',
       link: 'https://croix-rouge.ml',
-      description: 'Malian Red Cross'
+      description: 'Croix-Rouge malienne'
     },
     {
       name: 'MINUSMA',
-      image: 'https://minusma.unmissions.org/themes/custom/unnew/logo.svg',
+      image: minusmaLogo || 'https://minusma.unmissions.org/themes/custom/unnew/logo.svg',
       link: 'https://minusma.unmissions.org',
-      description: 'UN mission in Mali'
+      description: 'Mission multidimensionnelle intégrée des Nations Unies pour la stabilisation au Mali'
     },
     {
       name: 'SOS Sahel',
       image: sossahelLogo,
       link: 'https://www.sossahel.org',
-      description: 'Organization fighting desertification in Sahel'
+      description: 'Organisation luttant contre la désertification au Sahel'
     },
     {
       name: 'U.S. Department of Defense',
-      image: 'https://www.defense.gov/themes/defense2020/images/logo.svg',
+      image: dhappLogo || 'https://www.defense.gov/themes/defense2020/images/logo.svg',
       link: 'https://www.defense.gov',
-      description: 'US DoD HIV/AIDS prevention'
+      description: 'Programme du Département de la Défense des États‑Unis pour la prévention du VIH/sida'
     },
     {
       name: 'FHI 360',
       image: fhi360Logo || 'https://www.fhi360.org/themes/custom/fhi360/logo.svg',
       link: 'https://www.fhi360.org',
-      description: 'Non-profit human development organization'
+      description: 'Organisation à but non lucratif dédiée au développement humain'
     },
     {
       name: 'USAID',
-      image: 'https://www.usaid.gov/themes/custom/usaid_uswds/logo.svg',
+      image: usaidLogo || 'https://www.usaid.gov/themes/custom/usaid_uswds/logo.svg',
       link: 'https://www.usaid.gov',
-      description: 'US Agency for International Development'
+      description: 'Agence des États‑Unis pour le développement international'
     },
     {
       name: 'WFP (World Food Programme)',
       image: wfpLogo || 'https://www.wfp.org/themes/custom/wfp/assets/img/logos/wfp-logo-standard-blue-en.svg',
       link: 'https://www.wfp.org',
-      description: 'World Food Programme'
+      description: 'Programme alimentaire mondial des Nations Unies'
     },
     {
       name: 'UNDP',
       image: undpLogo || 'https://www.undp.org/themes/custom/undp/logo.svg',
       link: 'https://www.undp.org',
-      description: 'United Nations Development Programme'
+      description: 'Programme des Nations Unies pour le développement'
     },
     {
       name: 'International Rescue Committee',
       image: ircLogo || 'https://www.rescue.org/themes/custom/rescue/logo.svg',
       link: 'https://www.rescue.org',
-      description: 'Humanitarian aid organization'
+      description: 'Organisation d’aide humanitaire'
     },
     {
       name: 'Danish Red Cross',
       image: drcLogo || 'https://www.rodekors.dk/themes/custom/redcross/logo.svg',
       link: 'https://www.rodekors.dk',
-      description: 'Danish Red Cross'
+      description: 'Croix-Rouge danoise'
     }
   ];
 
-  // Load partners from admin panel
+  // Load partners from Firestore (admin panel), merged with default hard-coded partners
   useEffect(() => {
-    const loadPartners = () => {
+    const loadPartners = async () => {
       try {
-        const stored = localStorage.getItem('imadel_admin_partners');
-        if (stored) {
-          const adminPartners = JSON.parse(stored);
-          const formattedPartners = adminPartners.map((p: any) => ({
-            name: p.name,
-            image: p.logo || null,
+        const response = await partnersApi.getAll();
+
+        const raw =
+          (response as any).partners ||
+          (response as any).data ||
+          response;
+
+        let dynamicPartners: Partner[] = [];
+
+        if (response.success !== false && Array.isArray(raw)) {
+          dynamicPartners = raw.map((p: any) => ({
+            name: p.name || 'Partenaire',
+            image:
+              p.logo ||
+              (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null) ||
+              null,
             link: p.website || '#',
-            description: p.description || ''
+            description: p.description || '',
           }));
-          
-          // Use admin partners if available, otherwise use defaults
-          if (formattedPartners.length > 0) {
-            setPartnersData(formattedPartners);
-          } else {
-            setPartnersData(defaultPartners);
-          }
-        } else {
-          setPartnersData(defaultPartners);
         }
+
+        // Always show hard-coded partners first, then dynamic Firestore partners
+        setPartnersData([...defaultPartners, ...dynamicPartners]);
       } catch (error) {
-        console.error('Error loading partners:', error);
+        console.error('Error loading partners from Firestore:', error);
+        // Fallback to hard-coded partners only
         setPartnersData(defaultPartners);
       }
     };
 
-    loadPartners();
+    void loadPartners();
 
-    // Listen for updates from admin panel
-    const handleUpdate = () => loadPartners();
+    // Listen for updates from admin panel to refresh the list
+    const handleUpdate = () => {
+      void loadPartners();
+    };
     window.addEventListener('imadel:partners:updated', handleUpdate);
 
     return () => {

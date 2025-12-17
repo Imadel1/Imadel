@@ -18,7 +18,7 @@
 
 .contact-info h1,
 .contact-info h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-family: var(--font-display);
   font-size: 2.5rem;
   margin-bottom: 2rem;
@@ -36,7 +36,7 @@
 }
 
 .contact-details h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-family: var(--font-display);
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
@@ -58,18 +58,18 @@
 }
 
 .contact-details a {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .contact-details a:hover {
-  color: var(--primary-dark, #e55a00);
+  color: var(--primary-dark, #0052A3);
   text-decoration: underline;
 }
 
 .contact-details a:focus {
-  outline: 2px solid var(--primary, #FF6B00);
+  outline: 2px solid var(--primary, #0066CC);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -79,7 +79,7 @@
 }
 
 .country-offices h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-family: var(--font-display);
   font-size: 1.8rem;
   margin-bottom: 1rem;
@@ -115,7 +115,7 @@
 }
 
 .contact-form-container h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-family: var(--font-display);
   font-size: 2rem;
   margin-bottom: 1.5rem;
@@ -158,8 +158,8 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--primary, #FF6B00);
-  box-shadow: 0 0 0 4px var(--primary-alpha, rgba(255, 107, 0, 0.1));
+  border-color: var(--primary, #0066CC);
+  box-shadow: 0 0 0 4px var(--primary-alpha, rgba(0, 102, 204, 0.1));
 }
 
 .form-group input::placeholder,
@@ -186,7 +186,7 @@
 
 .submit-button {
   padding: 14px 24px;
-  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%);
   color: var(--text-on-primary, #ffffff);
   border: none;
   border-radius: 10px;
@@ -199,7 +199,7 @@
 }
 
 .submit-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
+  background: linear-gradient(135deg, var(--primary-dark, #0052A3) 0%, var(--primary-darker, #003D7A) 100%);
   transform: translateY(-2px);
   box-shadow: none;
 }
@@ -209,7 +209,7 @@
 }
 
 .submit-button:focus {
-  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline: 3px solid var(--primary-alpha-2, rgba(0, 102, 204, 0.2));
   outline-offset: 2px;
 }
 
@@ -230,13 +230,19 @@
 }
 
 .map-container h2 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-family: var(--font-display);
   font-size: 2rem;
   margin-bottom: 1rem;
   padding: 1.5rem;
   background: var(--bg-alt, #f8f9fa);
   border-bottom: 2px solid var(--border, #e0e0e0);
+}
+
+.map-inner {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -285,7 +291,7 @@
 }
 
 .newsletter-subscription h3 {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-family: var(--font-display);
   font-size: 1.75rem;
   margin-bottom: 0.75rem;
@@ -339,14 +345,14 @@
 }
 
 .checkbox-option:hover {
-  background: rgba(255, 107, 0, 0.05);
+  background: rgba(0, 102, 204, 0.05);
 }
 
 .checkbox-option input[type="checkbox"] {
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: var(--primary, #FF6B00);
+  accent-color: var(--primary, #0066CC);
   flex-shrink: 0;
 }
 
@@ -357,17 +363,17 @@
 }
 
 .checkbox-option:has(input:checked) {
-  background: rgba(255, 107, 0, 0.1);
+  background: rgba(0, 102, 204, 0.1);
 }
 
 .checkbox-option:has(input:checked) span {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   font-weight: 600;
 }
 
 .subscribe-button {
   padding: 14px 24px;
-  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%);
   color: var(--text-on-primary, #ffffff);
   border: none;
   border-radius: 10px;
@@ -381,9 +387,9 @@
 }
 
 .subscribe-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
+  background: linear-gradient(135deg, var(--primary-dark, #0052A3) 0%, var(--primary-darker, #003D7A) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
 }
 
 .subscribe-button:active:not(:disabled) {
@@ -391,7 +397,7 @@
 }
 
 .subscribe-button:focus {
-  outline: 3px solid var(--primary-alpha-2, rgba(255, 107, 0, 0.2));
+  outline: 3px solid var(--primary-alpha-2, rgba(0, 102, 204, 0.2));
   outline-offset: 2px;
 }
 

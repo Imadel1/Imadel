@@ -23,12 +23,12 @@
   padding: 1.5em;
   transition: all 300ms ease;
   will-change: filter, transform;
-  filter: drop-shadow(0 0 0.5em var(--primary-alpha-2, rgba(255, 107, 0, 0.2)));
+  filter: drop-shadow(0 0 0.5em var(--primary-alpha-2, rgba(0, 102, 204, 0.2)));
 }
 
 .logo:hover {
   transform: scale(1.05);
-  filter: drop-shadow(0 0 1.5em var(--primary-alpha-3, rgba(255, 107, 0, 0.45)));
+  filter: drop-shadow(0 0 1.5em var(--primary-alpha-3, rgba(0, 102, 204, 0.45)));
 }
 
 /* Optional logo spin animation */
@@ -61,7 +61,7 @@
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.08));
-  border-color: var(--primary, #FF6B00);
+  border-color: var(--primary, #0066CC);
 }
 
 /* Text for small info or link section */
@@ -73,24 +73,24 @@
 
 /* Link accents (IMADEL color scheme) */
 a {
-  color: var(--primary, #FF6B00);
+  color: var(--primary, #0066CC);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: var(--primary-dark, #e55a00);
+  color: var(--primary-dark, #0052A3);
 }
 
 a:focus {
-  outline: 2px solid var(--primary, #FF6B00);
+  outline: 2px solid var(--primary, #0066CC);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 /* Buttons if used within App */
 button {
-  background: linear-gradient(135deg, var(--primary, #FF6B00) 0%, var(--primary-dark, #e55a00) 100%);
+  background: linear-gradient(135deg, var(--primary, #0066CC) 0%, var(--primary-dark, #0052A3) 100%);
   color: var(--text-on-primary, #ffffff);
   font-weight: 600;
   border: none;
@@ -103,7 +103,7 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(135deg, var(--primary-dark, #e55a00) 0%, var(--primary-darker, #cc4f00) 100%);
+  background: linear-gradient(135deg, var(--primary-dark, #0052A3) 0%, var(--primary-darker, #003D7A) 100%);
   transform: translateY(-2px);
   box-shadow: none;
 }
@@ -113,7 +113,7 @@ button:active {
 }
 
 button:focus {
-  outline: 3px solid rgba(255, 107, 0, 0.3);
+  outline: 3px solid rgba(0, 102, 204, 0.3);
   outline-offset: 2px;
 }
 

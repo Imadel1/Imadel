@@ -7,6 +7,7 @@ import logo from "../assets/cropped-nouveau_logo.png";
 const Header = () => {
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProjectsDropdownOpen, setIsProjectsDropdownOpen] = useState(false);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -47,28 +48,76 @@ const Header = () => {
           {t('home')}
         </NavLink>
         <NavLink
-          to="/aboutus"
+          to="/a-propos"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
           {t('about')}
         </NavLink>
-        <NavLink
-          to="/ourwork"
+        <div 
+          className="nav-dropdown"
+          onMouseEnter={() => {
+            // Desktop: open dropdown on hover
+            if (window.innerWidth > 1024) {
+              setIsProjectsDropdownOpen(true);
+            }
+          }}
+          onMouseLeave={() => {
+            // Desktop: close dropdown when mouse leaves
+            if (window.innerWidth > 1024) {
+              setIsProjectsDropdownOpen(false);
+            }
+          }}
+        >
+          <NavLink
+            to="/nos-projets"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-          onClick={() => setIsMenuOpen(false)}
+            onClick={(e) => {
+              // On mobile/tablet, toggle dropdown instead of navigating
+              if (window.innerWidth <= 1024) {
+                e.preventDefault();
+                setIsProjectsDropdownOpen(!isProjectsDropdownOpen);
+              } else {
+                setIsMenuOpen(false);
+              }
+            }}
         >
           {t('work')}
         </NavLink>
+          {isProjectsDropdownOpen && (
+            <div className="dropdown-menu">
+              <Link 
+                to="/nos-projets" 
+                className="dropdown-item"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsProjectsDropdownOpen(false);
+                }}
+              >
+                Projets
+              </Link>
+              <Link 
+                to="/actualites" 
+                className="dropdown-item"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsProjectsDropdownOpen(false);
+                }}
+              >
+                Actualités
+              </Link>
+            </div>
+          )}
+        </div>
         <NavLink
-          to="/getinvolved"
+          to="/s-engager"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
           {t('getInvolved')}
         </NavLink>
         <NavLink
-          to="/partners"
+          to="/partenaires"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           onClick={() => setIsMenuOpen(false)}
         >
@@ -84,7 +133,7 @@ const Header = () => {
       </nav>
 
       <div className="header-right">
-        <Link to="/donate" className="donate-button">{t('donate')}</Link>
+        <Link to="/faire-un-don" className="donate-button">{t('donate')}</Link>
         <div className="menu-toggle" onClick={toggleMenu}>
           {isMenuOpen ? "✕" : "☰"}
         </div>

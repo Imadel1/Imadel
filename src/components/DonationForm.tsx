@@ -81,7 +81,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
           ? `${formData.message} | Méthode: ${methodLabel}`
           : `Méthode de paiement choisie: ${methodLabel}`;
 
-      // Initialize donation - let TypeScript infer the response type
+      // Enregistrer le don dans Firebase (sans passerelle Paystack)
       const response = await donationsApi.initialize({
         donorName: formData.donorName,
         donorEmail: formData.donorEmail,
@@ -93,17 +93,22 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
         purpose: formData.purpose as any,
       });
 
-      // Check response and redirect
       if (response.success && response.data) {
-        // Type assertion to access authorization_url
-        const data = response.data as any;
-        if (data.authorization_url) {
-          window.location.href = data.authorization_url;
-        } else {
-          setError(response.message || 'Erreur lors de l\'initialisation du paiement');
-        }
+        setSuccess(true);
+        // Reset form
+        setFormData({
+          donorName: '',
+          donorEmail: '',
+          donorPhone: '',
+          amount: '',
+          currency: 'XOF',
+          purpose: 'general',
+          message: '',
+          isAnonymous: false,
+          paymentMethod: defaultPaymentMethod,
+        });
       } else {
-        setError(response.message || 'Erreur lors de l\'initialisation du paiement');
+        setError('Erreur lors de l\'initialisation du paiement');
       }
     } catch (err: any) {
       console.error('Donation error:', err);
@@ -133,8 +138,8 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
   if (success) {
     return (
       <div className="donation-form-success">
-        <h3>Merci pour votre générosité!</h3>
-        <p>Vous allez être redirigé vers la page de paiement...</p>
+        <h3>Merci pour votre générosité !</h3>
+        <p>Votre promesse de don a bien été enregistrée. Un membre de l'équipe IMADEL pourra vous contacter si nécessaire.</p>
       </div>
     );
   }
@@ -312,12 +317,12 @@ const DonationForm: React.FC<DonationFormProps> = ({ defaultPaymentMethod = 'car
         className="btn-donate"
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Traitement...' : 'Continuer vers le paiement'}
+        {isSubmitting ? 'Traitement...' : 'Enregistrer mon don'}
       </button>
 
       <p className="donation-form-note">
         <small>
-          Paiement sécurisé. Vous serez redirigé vers une page de paiement sécurisée.
+          Votre don sera traité par l'équipe IMADEL sur la base des informations fournies.
         </small>
       </p>
     </form>

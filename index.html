@@ -1,22 +1,106 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>imadel</title>
-    <!-- Load fonts asynchronously -->
+    <title>IMADEL - Initiative Malienne d'Appui au Développement Local</title>
+    
+    <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrFJA.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7aUUsj.ttf" as="font" type="font/ttf" crossorigin>
+    
+    <!-- Load fonts with font-display swap for better performance -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"></noscript>
-    <!-- Inline critical CSS to prevent FOIT -->
+    
+    <!-- Inline critical CSS to prevent FOIT and CLS -->
     <style>
       /* Critical above-the-fold styles */
-      body { font-family: 'Poppins', sans-serif; margin: 0; }
-      .carousel { position: relative; width: 100%; height: 500px; overflow: hidden; }
-      .carousel-slide img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 2/1; }
-      .carousel-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem; background: rgba(255,255,255,0.95); text-align: center; min-height: 120px; }
+      * { box-sizing: border-box; }
+      body { 
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+        margin: 0; 
+        padding: 0;
+        line-height: 1.6;
+      }
+      
+      /* Hero section critical styles to prevent CLS */
+      .hero-section {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+      }
+      
+      .hero-background-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        z-index: 0;
+      }
+      
+      .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.5));
+        z-index: 1;
+      }
+      
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 2rem 2rem;
+      }
+      
+      /* Prevent layout shift for carousel */
+      .carousel { 
+        position: relative; 
+        width: 100%; 
+        height: 500px; 
+        overflow: hidden; 
+      }
+      .carousel-slide img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: cover; 
+        aspect-ratio: 2/1; 
+      }
+      .carousel-content { 
+        position: absolute; 
+        bottom: 0; 
+        left: 0; 
+        right: 0; 
+        padding: 2rem; 
+        background: rgba(255,255,255,0.95); 
+        text-align: center; 
+        min-height: 120px; 
+      }
+      
+      /* Respect reduced motion preference */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>

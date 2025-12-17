@@ -425,14 +425,48 @@ const Home: React.FC = () => {
     };
   }, [t]);
 
+  // Preload hero image for better LCP - use fallback immediately, update when siteImages loads
+  useEffect(() => {
+    // Preload fallback image immediately
+    const preloadImage = (url: string) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = url;
+      link.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(link);
+      return link;
+    };
+    
+    const fallbackLink = preloadImage(FALLBACK_HERO_IMAGE);
+    
+    // If siteImages has a different URL, preload that too
+    if (siteImages.heroHomeUrl && siteImages.heroHomeUrl !== FALLBACK_HERO_IMAGE) {
+      const siteLink = preloadImage(siteImages.heroHomeUrl);
+      return () => {
+        if (document.head.contains(fallbackLink)) document.head.removeChild(fallbackLink);
+        if (document.head.contains(siteLink)) document.head.removeChild(siteLink);
+      };
+    }
+    
+    return () => {
+      if (document.head.contains(fallbackLink)) document.head.removeChild(fallbackLink);
+    };
+  }, [siteImages.heroHomeUrl]);
+
   return (
     <div className="home">
       <main>
         {/* Hero Section */}
         <section className="hero-section" aria-label="Hero section">
-          <div 
-            className="hero-background" 
-            style={{ backgroundImage: `url(${siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE})` }}
+          <img
+            src={siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE}
+            alt=""
+            className="hero-background-img"
+            fetchPriority="high"
+            loading="eager"
+            width={1920}
+            height={1080}
             aria-hidden="true"
           />
           <div className="hero-overlay" aria-hidden="true" />

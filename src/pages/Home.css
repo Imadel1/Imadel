@@ -20,25 +20,40 @@
   overflow: hidden;
   padding-top: 100px; /* Push content below fixed header */
   margin-top: 100px; /* Push section below fixed header */
+  /* Reserve space to prevent CLS - use min-height instead of aspect-ratio for flexibility */
+  width: 100%;
 }
 
-.hero-background {
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 100vh;
+    padding-top: 80px;
+    margin-top: 80px;
+  }
+}
+
+.hero-background-img {
   position: absolute;
-  top: -100px; /* Start from top of viewport, accounting for header */
+  top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  will-change: transform;
-  animation: zoomEffect 20s infinite alternate;
-  z-index: 0; /* Ensure background is behind content */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  /* Disable animation for better performance - only show if user prefers motion */
+}
+
+/* Only animate if user prefers motion */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-background-img {
+    animation: zoomEffect 20s infinite alternate;
+  }
 }
 
 @keyframes zoomEffect {
   from { transform: scale(1); }
-  to { transform: scale(1.1); }
+  to { transform: scale(1.05); }
 }
 
 .hero-overlay {
@@ -505,6 +520,9 @@
 .latest-updates-section {
   padding: 2.5rem 1.5rem 3rem;
   background: #fafafa;
+  /* Use content-visibility for better performance */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }
 
 .latest-updates-section h2 {
@@ -585,12 +603,20 @@
   height: 100%;
   cursor: pointer;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  /* Reserve space to prevent CLS */
+  min-height: 400px;
 }
 
 .news-card-link:hover .news-card {
   transform: translateY(-5px);
   border-color: var(--primary, #0066CC);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-card-link:hover .news-card {
+    transform: none;
+  }
 }
 
 .news-card-link:focus-within .news-card {
@@ -602,11 +628,15 @@
   width: 100%;
   position: relative;
   background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  /* Reserve space to prevent CLS */
+  aspect-ratio: 21/9;
+  min-height: 220px;
 }
 
 .news-image .responsive-image-wrapper {
   width: 100%;
   height: 100%;
+  min-height: 220px;
 }
 
 .news-image img,
@@ -1145,6 +1175,40 @@
   .about-image {
     min-height: 250px;
   }
+}
+
+/* Global prefers-reduced-motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .hero-background-img {
+    animation: none !important;
+  }
+  
+  .animated-counter {
+    animation: none !important;
+  }
+  
+  .stat:hover .num {
+    animation: none !important;
+  }
+}
+
+/* Content-visibility optimizations for below-fold content */
+.about-section,
+.mission-section,
+.areas-section,
+.partners-preview-section,
+.cta-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
 }
 
 /* Print Styles */

@@ -97,6 +97,8 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
           alt={alt}
           loading={loading}
           decoding="async"
+          width={aspectRatio === 'wide' ? 1920 : aspectRatio === 'portrait' ? 1080 : 1600}
+          height={aspectRatio === 'wide' ? 823 : aspectRatio === 'portrait' ? 1920 : 900}
           onLoad={() => setIsLoaded(true)}
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';

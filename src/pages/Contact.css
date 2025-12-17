@@ -1,5 +1,6 @@
 .contact-page {
   padding: 2rem;
+  padding-top: calc(2rem + 70px); /* Account for fixed header */
   max-width: 1200px;
   margin: 0 auto;
   background: var(--bg, #ffffff);

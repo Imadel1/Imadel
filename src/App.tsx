@@ -80,7 +80,7 @@ function AppContent() {
       {!isAdminRoute && <Header />}
 
       {/* Page Content */}
-      <div style={{ marginTop: isAdminRoute || isHomePage ? "0" : "100px", flex: "1 0 auto" }}>
+      <div style={{ marginTop: isAdminRoute || isHomePage ? "0" : "0", flex: "1 0 auto" }}>
         <Suspense
           fallback={
             <div style={{ 

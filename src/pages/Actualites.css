@@ -5,6 +5,7 @@
   background-color: var(--bg, #ffffff);
   color: var(--text, #333);
   padding: 0;
+  padding-top: 70px; /* Account for fixed header */
 }
 
 .actualites-page .container {

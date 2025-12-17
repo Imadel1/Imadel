@@ -1,5 +1,6 @@
 .areas-page {
   min-height: 100vh;
+  padding-top: 70px; /* Account for fixed header */
 }
 
 /* Hero Section */

@@ -1,5 +1,5 @@
 .about-us {
-  padding-top: 0;
+  padding-top: 70px; /* Account for fixed header */
   overflow-x: hidden; /* Prevent horizontal scroll on mobile (keeps header width consistent) */
 }
 

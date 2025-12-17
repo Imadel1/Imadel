@@ -1,5 +1,5 @@
 .donate-page {
-    padding-top: 0;
+    padding-top: 70px; /* Account for fixed header */
     min-height: 100vh;
     background: var(--bg, #FFFFFF);
 }

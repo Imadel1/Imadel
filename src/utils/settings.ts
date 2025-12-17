@@ -65,7 +65,7 @@ export const getSettings = (): Settings => {
 };
 
 // Apply theme to the document (always blue)
-export const applyTheme = (theme: Theme): void => {
+export const applyTheme = (_theme: Theme): void => {
   const root = document.documentElement;
   
   // Blue theme colors (only theme available)

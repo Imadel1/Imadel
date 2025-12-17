@@ -131,6 +131,22 @@ vitePluginWebp({
 - **Automatic Fallback**: Older browsers automatically get original format
 - **Zero Configuration**: Works automatically during build
 
+### Firestore Images
+
+Images loaded from Firestore (dynamic content) are automatically handled:
+
+1. **Client-Side Detection**: The `imageUtils` utility automatically tries to get WebP versions
+2. **Firebase Storage**: For Firebase Storage URLs, the system attempts to use WebP by modifying the URL
+3. **Automatic Fallback**: If WebP isn't available, the original format is used
+4. **Picture Element**: All images use the `<picture>` element for automatic format selection
+
+**Note**: For best performance with Firestore images, consider:
+- **Backend Conversion**: Convert images to WebP when uploading to Firebase Storage
+- **Store Both Versions**: Store both original and WebP versions in Firestore
+- **CDN Support**: Use a CDN that automatically converts images (e.g., Cloudinary, ImageKit)
+
+The current implementation will work with existing images and automatically use WebP when available.
+
 ## Best Practices
 
 1. **Image Optimization**: WebP conversion is automatic - just add images and build

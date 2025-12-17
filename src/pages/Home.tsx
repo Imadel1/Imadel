@@ -5,6 +5,7 @@ import { useTranslation } from "../utils/i18n";
 import "./Home.css";
 import { projectsApi, newsApi } from "../services/api";
 import ResponsiveImage from "../components/ResponsiveImage";
+import { getImageSources } from "../utils/imageUtils";
 
 // Types
 interface NewsItem {
@@ -427,30 +428,37 @@ const Home: React.FC = () => {
 
   // Preload hero image for better LCP - use fallback immediately, update when siteImages loads
   useEffect(() => {
-    // Preload fallback image immediately
-    const preloadImage = (url: string) => {
+    // Preload images (both WebP and fallback)
+    const preloadImage = (url: string, type?: string) => {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'image';
       link.href = url;
+      if (type) link.type = type;
       link.setAttribute('fetchpriority', 'high');
       document.head.appendChild(link);
       return link;
     };
     
-    const fallbackLink = preloadImage(FALLBACK_HERO_IMAGE);
+    const heroImageUrl = siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE;
+    const { webp, fallback } = getImageSources(heroImageUrl);
     
-    // If siteImages has a different URL, preload that too
-    if (siteImages.heroHomeUrl && siteImages.heroHomeUrl !== FALLBACK_HERO_IMAGE) {
-      const siteLink = preloadImage(siteImages.heroHomeUrl);
-      return () => {
-        if (document.head.contains(fallbackLink)) document.head.removeChild(fallbackLink);
-        if (document.head.contains(siteLink)) document.head.removeChild(siteLink);
-      };
+    const links: HTMLLinkElement[] = [];
+    
+    // Preload WebP if available
+    if (webp && webp !== fallback) {
+      links.push(preloadImage(webp, 'image/webp'));
     }
     
+    // Always preload fallback
+    links.push(preloadImage(fallback));
+    
     return () => {
-      if (document.head.contains(fallbackLink)) document.head.removeChild(fallbackLink);
+      links.forEach(link => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      });
     };
   }, [siteImages.heroHomeUrl]);
 
@@ -459,28 +467,33 @@ const Home: React.FC = () => {
       <main>
         {/* Hero Section */}
         <section className="hero-section" aria-label="Hero section">
-          <picture>
-            {/* Try WebP first if it's a local asset */}
-            {(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE) && 
-             !(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE).startsWith('http') && 
-             !(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE).startsWith('//') && (
-              <source
-                srcSet={(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE).replace(/\.(jpg|jpeg|png)$/i, '.webp')}
-                type="image/webp"
-              />
-            )}
-            {/* Fallback to original format */}
-            <img
-              src={siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE}
-              alt=""
-              className="hero-background-img"
-              fetchPriority="high"
-              loading="eager"
-              width={1920}
-              height={1080}
-              aria-hidden="true"
-            />
-          </picture>
+          {(() => {
+            const heroImageUrl = siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE;
+            const { webp, fallback } = getImageSources(heroImageUrl);
+            
+            return (
+              <picture>
+                {/* Try WebP first if available */}
+                {webp && webp !== fallback && (
+                  <source
+                    srcSet={webp}
+                    type="image/webp"
+                  />
+                )}
+                {/* Fallback to original format */}
+                <img
+                  src={fallback}
+                  alt=""
+                  className="hero-background-img"
+                  fetchPriority="high"
+                  loading="eager"
+                  width={1920}
+                  height={1080}
+                  aria-hidden="true"
+                />
+              </picture>
+            );
+          })()}
           <div className="hero-overlay" aria-hidden="true" />
           <div className="hero-content">
             <div className="hero-text">

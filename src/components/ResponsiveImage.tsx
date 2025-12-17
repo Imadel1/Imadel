@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getImageSources } from '../utils/imageUtils';
 
 interface ResponsiveImageProps {
   src: string;
@@ -91,40 +92,50 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
           }}
         />
       )}
-      {isInView && (
-        <picture>
-          {/* Try WebP first if it's a local asset */}
-          {src && !src.startsWith('http') && !src.startsWith('//') && (
-            <source
-              srcSet={src.replace(/\.(jpg|jpeg|png)$/i, '.webp')}
-              type="image/webp"
+      {isInView && (() => {
+        const { webp, fallback } = getImageSources(src);
+        
+        return (
+          <picture>
+            {/* Try WebP first if available */}
+            {webp && webp !== fallback && (
+              <source
+                srcSet={webp}
+                type="image/webp"
+              />
+            )}
+            {/* Fallback to original format */}
+            <img
+              src={fallback}
+              alt={alt}
+              loading={loading}
+              decoding="async"
+              width={aspectRatio === 'wide' ? 1920 : aspectRatio === 'portrait' ? 1080 : 1600}
+              height={aspectRatio === 'wide' ? 823 : aspectRatio === 'portrait' ? 1920 : 900}
+              onLoad={() => setIsLoaded(true)}
+              onError={(e) => {
+                // If WebP fails, try fallback
+                const img = e.target as HTMLImageElement;
+                if (img.src !== fallback) {
+                  img.src = fallback;
+                } else {
+                  img.style.display = 'none';
+                }
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: objectFit,
+                opacity: isLoaded ? 1 : 0,
+                transition: 'opacity 0.3s ease',
+              }}
             />
-          )}
-          {/* Fallback to original format */}
-          <img
-            src={src}
-            alt={alt}
-            loading={loading}
-            decoding="async"
-            width={aspectRatio === 'wide' ? 1920 : aspectRatio === 'portrait' ? 1080 : 1600}
-            height={aspectRatio === 'wide' ? 823 : aspectRatio === 'portrait' ? 1920 : 900}
-            onLoad={() => setIsLoaded(true)}
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: objectFit,
-              opacity: isLoaded ? 1 : 0,
-              transition: 'opacity 0.3s ease',
-            }}
-          />
-        </picture>
-      )}
+          </picture>
+        );
+      })()}
       <style>{`
         @media (max-width: 768px) {
           .responsive-image-wrapper {

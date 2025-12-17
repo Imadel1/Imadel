@@ -459,16 +459,28 @@ const Home: React.FC = () => {
       <main>
         {/* Hero Section */}
         <section className="hero-section" aria-label="Hero section">
-          <img
-            src={siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE}
-            alt=""
-            className="hero-background-img"
-            fetchPriority="high"
-            loading="eager"
-            width={1920}
-            height={1080}
-            aria-hidden="true"
-          />
+          <picture>
+            {/* Try WebP first if it's a local asset */}
+            {(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE) && 
+             !(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE).startsWith('http') && 
+             !(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE).startsWith('//') && (
+              <source
+                srcSet={(siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE).replace(/\.(jpg|jpeg|png)$/i, '.webp')}
+                type="image/webp"
+              />
+            )}
+            {/* Fallback to original format */}
+            <img
+              src={siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE}
+              alt=""
+              className="hero-background-img"
+              fetchPriority="high"
+              loading="eager"
+              width={1920}
+              height={1080}
+              aria-hidden="true"
+            />
+          </picture>
           <div className="hero-overlay" aria-hidden="true" />
           <div className="hero-content">
             <div className="hero-text">

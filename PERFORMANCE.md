@@ -91,13 +91,54 @@ You can manually clear the cache using the browser's developer tools:
 - **Initial Bundle**: ~13 KB (95% reduction)
 - **Code Splitting**: 8 separate chunks for better caching
 
+## Automatic WebP Conversion
+
+The build process automatically converts images to WebP format for better performance:
+
+### How It Works
+
+1. **Automatic Conversion**: During build, all JPG/PNG images in `src/assets` and `public` folders are automatically converted to WebP
+2. **Browser Support**: The `<picture>` element automatically serves WebP to supported browsers and falls back to original format for older browsers
+3. **Quality**: WebP images are generated at 80% quality (configurable in `vite.config.ts`)
+
+### Manual Conversion
+
+To manually convert images to WebP:
+
+```bash
+npm run convert:webp
+```
+
+This will:
+- Convert all JPG/PNG images in `src/assets` and `public` folders
+- Skip images that already have WebP versions
+- Show progress and conversion results
+
+### Configuration
+
+Edit `vite.config.ts` to adjust WebP quality:
+
+```typescript
+vitePluginWebp({
+  quality: 80, // Change to 0-100 (higher = better quality, larger file)
+})
+```
+
+### Benefits
+
+- **Smaller File Sizes**: WebP is typically 25-35% smaller than JPEG/PNG
+- **Better Performance**: Faster page loads, especially on mobile
+- **Automatic Fallback**: Older browsers automatically get original format
+- **Zero Configuration**: Works automatically during build
+
 ## Best Practices
 
-1. **Image Optimization**: Use WebP format for images when possible
+1. **Image Optimization**: WebP conversion is automatic - just add images and build
 2. **Lazy Loading**: Images below the fold are lazy-loaded automatically
 3. **Font Loading**: Critical fonts are preloaded for faster rendering
 4. **Cache Headers**: Static assets have long cache times (1 year)
 5. **Service Worker**: Automatically caches assets for repeat visits
+6. **Image Dimensions**: Always specify width/height to prevent CLS
 
 ## Monitoring
 

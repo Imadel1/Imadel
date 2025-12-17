@@ -1,9 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import { vitePluginWebp } from './vite-plugin-webp'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    vitePluginWebp({
+      quality: 80, // WebP quality (0-100)
+    }),
+  ],
   build: {
     rollupOptions: {
       output: {

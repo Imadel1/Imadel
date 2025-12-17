@@ -92,28 +92,38 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
         />
       )}
       {isInView && (
-        <img
-          src={src}
-          alt={alt}
-          loading={loading}
-          decoding="async"
-          width={aspectRatio === 'wide' ? 1920 : aspectRatio === 'portrait' ? 1080 : 1600}
-          height={aspectRatio === 'wide' ? 823 : aspectRatio === 'portrait' ? 1920 : 900}
-          onLoad={() => setIsLoaded(true)}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: objectFit,
-            opacity: isLoaded ? 1 : 0,
-            transition: 'opacity 0.3s ease',
-          }}
-        />
+        <picture>
+          {/* Try WebP first if it's a local asset */}
+          {src && !src.startsWith('http') && !src.startsWith('//') && (
+            <source
+              srcSet={src.replace(/\.(jpg|jpeg|png)$/i, '.webp')}
+              type="image/webp"
+            />
+          )}
+          {/* Fallback to original format */}
+          <img
+            src={src}
+            alt={alt}
+            loading={loading}
+            decoding="async"
+            width={aspectRatio === 'wide' ? 1920 : aspectRatio === 'portrait' ? 1080 : 1600}
+            height={aspectRatio === 'wide' ? 823 : aspectRatio === 'portrait' ? 1920 : 900}
+            onLoad={() => setIsLoaded(true)}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: objectFit,
+              opacity: isLoaded ? 1 : 0,
+              transition: 'opacity 0.3s ease',
+            }}
+          />
+        </picture>
       )}
       <style>{`
         @media (max-width: 768px) {

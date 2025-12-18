@@ -116,9 +116,20 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
               onError={(e) => {
                 // If WebP fails, try fallback
                 const img = e.target as HTMLImageElement;
-                if (img.src !== fallback) {
-                  img.src = fallback;
-                } else {
+                const picture = img.closest('picture');
+                
+                // If this is the WebP source failing, try fallback
+                if (picture && img.src !== fallback) {
+                  // Find the img element and update its src to fallback
+                  const fallbackImg = picture.querySelector('img');
+                  if (fallbackImg && fallbackImg !== img) {
+                    fallbackImg.src = fallback;
+                  } else if (fallbackImg) {
+                    // This is the fallback img, so WebP failed - use fallback
+                    img.src = fallback;
+                  }
+                } else if (img.src === fallback) {
+                  // Both WebP and fallback failed
                   img.style.display = 'none';
                 }
               }}

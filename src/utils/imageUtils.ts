@@ -36,17 +36,14 @@ export function getWebPUrl(imageUrl: string | undefined | null): string {
     return imageUrl;
   }
 
-  // Firebase Storage URLs - try to get WebP version
+  // Firebase Storage URLs - don't auto-convert unless WebP version exists
   // Firebase Storage URLs look like: https://firebasestorage.googleapis.com/...
+  // We can't assume WebP exists, so return original URL
+  // The backend should store both original and WebP versions separately
   if (imageUrl.includes('firebasestorage.googleapis.com')) {
-    // Try appending .webp or replacing extension
-    // Option 1: Replace extension
-    const webpUrl = imageUrl.replace(/\.(jpg|jpeg|png)(\?|$)/i, '.webp$2');
-    
-    // Option 2: If that doesn't work, we'll need backend to store both versions
-    // For now, return the original and let the browser handle it
-    // The backend should store both original and WebP versions
-    return webpUrl;
+    // Don't try to convert Firebase Storage URLs automatically
+    // Return original - WebP conversion should be handled by backend
+    return imageUrl;
   }
 
   // Static assets (local imports) - replace extension
@@ -100,6 +97,16 @@ export function getImageSources(imageUrl: string | undefined | null): {
   fallback: string;
 } {
   const fallback = imageUrl || '';
+  
+  // Don't try WebP for Firebase Storage URLs unless we know it exists
+  // Firebase Storage doesn't automatically convert images
+  if (fallback.includes('firebasestorage.googleapis.com')) {
+    return {
+      webp: '', // Don't try WebP for Firebase Storage
+      fallback,
+    };
+  }
+  
   const webp = getWebPUrl(imageUrl);
 
   return {

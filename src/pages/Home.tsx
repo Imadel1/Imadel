@@ -7,6 +7,7 @@ import { projectsApi, newsApi } from "../services/api";
 import ResponsiveImage from "../components/ResponsiveImage";
 import { getImageSources } from "../utils/imageUtils";
 import { apiCache } from "../utils/cache";
+import LazySection from "../components/LazySection";
 
 // Types
 interface NewsItem {
@@ -342,9 +343,13 @@ const Home: React.FC = () => {
     loadSiteImages();
   }, []);
 
-  // Load news from backend API
+  // Load news from backend API - Defer loading until needed (lazy loaded section)
+  const [shouldLoadNews, setShouldLoadNews] = useState(false);
+  
   useEffect(() => {
     const loadNews = async () => {
+      if (!shouldLoadNews) return; // Don't load until section is in view
+      
       try {
         // Check cache first
         const cacheKey = 'news-home-published-true-limit-4';
@@ -405,11 +410,15 @@ const Home: React.FC = () => {
     return () => {
       window.removeEventListener('imadel:newsletters:updated', handleUpdate);
     };
-  }, []); // Remove 't' dependency - translation doesn't change
+  }, [shouldLoadNews]); // Load when section comes into view
 
-  // Load projects from API
+  // Load projects from API - Defer loading until needed (lazy loaded section)
+  const [shouldLoadProjects, setShouldLoadProjects] = useState(false);
+  
   useEffect(() => {
     const loadProjects = async () => {
+      if (!shouldLoadProjects) return; // Don't load until section is in view
+      
       try {
         // Check cache first
         const cacheKey = 'projects-home-published-true-limit-8';
@@ -465,42 +474,45 @@ const Home: React.FC = () => {
     return () => {
       window.removeEventListener('imadel:projects:updated', handleUpdate);
     };
-  }, []); // Remove 't' dependency - translation doesn't change
+  }, [shouldLoadProjects]); // Load when section comes into view
 
-  // Preload hero image for better LCP - use fallback immediately, update when siteImages loads
+  // Preload hero image for better LCP - prioritize fallback image immediately
   useEffect(() => {
-    // Preload images (both WebP and fallback)
-    const preloadImage = (url: string, type?: string) => {
+    // Preload fallback image immediately (before Firestore image loads)
+    const preloadFallback = () => {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'image';
-      link.href = url;
-      if (type) link.type = type;
+      link.href = FALLBACK_HERO_IMAGE;
       link.setAttribute('fetchpriority', 'high');
       document.head.appendChild(link);
-      return link;
     };
     
-    const heroImageUrl = siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE;
-    const { webp, fallback } = getImageSources(heroImageUrl);
+    preloadFallback();
     
-    const links: HTMLLinkElement[] = [];
-    
-    // Preload WebP if available
-    if (webp && webp !== fallback) {
-      links.push(preloadImage(webp, 'image/webp'));
+    // If Firestore has a different image, preload that too
+    if (siteImages.heroHomeUrl && siteImages.heroHomeUrl !== FALLBACK_HERO_IMAGE) {
+      const { webp, fallback } = getImageSources(siteImages.heroHomeUrl);
+      
+      // Preload WebP if available
+      if (webp && webp !== fallback) {
+        const webpLink = document.createElement('link');
+        webpLink.rel = 'preload';
+        webpLink.as = 'image';
+        webpLink.href = webp;
+        webpLink.type = 'image/webp';
+        webpLink.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(webpLink);
+      }
+      
+      // Preload Firestore image
+      const firestoreLink = document.createElement('link');
+      firestoreLink.rel = 'preload';
+      firestoreLink.as = 'image';
+      firestoreLink.href = fallback;
+      firestoreLink.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(firestoreLink);
     }
-    
-    // Always preload fallback
-    links.push(preloadImage(fallback));
-    
-    return () => {
-      links.forEach(link => {
-        if (document.head.contains(link)) {
-          document.head.removeChild(link);
-        }
-      });
-    };
   }, [siteImages.heroHomeUrl]);
 
   return (
@@ -595,35 +607,50 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Latest Updates Section - News & Projects */}
-        <section className="latest-updates-section" aria-labelledby="updates-heading">
-          <div className="container">
-            <h2 id="updates-heading">{t('latestNews')}</h2>
-
-            {newsItems.length === 0 && projects.length === 0 ? (
-              <p
-                style={{
-                  marginTop: '1.5rem',
-                  textAlign: 'center',
-                  color: 'var(--text-secondary, #616161)',
-                }}
-              >
-                {language === 'fr' ? "Aucune actualité ou projet récent n'est disponible pour le moment. Veuillez revenir bientôt." : "No recent news or projects are available at the moment. Please check back soon."}
-              </p>
-            ) : (
-              <div className="updates-grid" role="list" aria-label="Dernières actualités et projets">
-                {/* Show up to 2 news items */}
-                {newsItems.slice(0, 2).map((news) => (
-                  <NewsCard key={news.id} news={news} />
-                ))}
-                {/* Show up to 4 projects (total 6 items) */}
-                {projects.slice(0, 4).map((project) => (
-                  <NewsCard key={project.id} news={project} />
-                ))}
+        {/* Latest Updates Section - News & Projects - Lazy Loaded */}
+        <LazySection
+          fallback={
+            <section className="latest-updates-section" aria-labelledby="updates-heading" style={{ minHeight: '400px' }}>
+              <div className="container">
+                <h2 id="updates-heading">{t('latestNews')}</h2>
               </div>
-            )}
-          </div>
-        </section>
+            </section>
+          }
+          rootMargin="300px"
+          onVisible={() => {
+            setShouldLoadNews(true);
+            setShouldLoadProjects(true);
+          }}
+        >
+          <section className="latest-updates-section" aria-labelledby="updates-heading">
+            <div className="container">
+              <h2 id="updates-heading">{t('latestNews')}</h2>
+
+              {newsItems.length === 0 && projects.length === 0 ? (
+                <p
+                  style={{
+                    marginTop: '1.5rem',
+                    textAlign: 'center',
+                    color: 'var(--text-secondary, #616161)',
+                  }}
+                >
+                  {language === 'fr' ? "Aucune actualité ou projet récent n'est disponible pour le moment. Veuillez revenir bientôt." : "No recent news or projects are available at the moment. Please check back soon."}
+                </p>
+              ) : (
+                <div className="updates-grid" role="list" aria-label="Dernières actualités et projets">
+                  {/* Show up to 2 news items */}
+                  {newsItems.slice(0, 2).map((news) => (
+                    <NewsCard key={news.id} news={news} />
+                  ))}
+                  {/* Show up to 4 projects (total 6 items) */}
+                  {projects.slice(0, 4).map((project) => (
+                    <NewsCard key={project.id} news={project} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </LazySection>
 
         {/* About IMADEL Section */}
         <section className="about-section" aria-labelledby="about-heading">

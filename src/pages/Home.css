@@ -41,7 +41,9 @@
   object-fit: cover;
   object-position: center;
   z-index: 0;
-  /* Disable animation for better performance - only show if user prefers motion */
+  /* Optimize for LCP */
+  content-visibility: auto;
+  contain-intrinsic-size: 1920px 1080px;
 }
 
 /* Only animate if user prefers motion */

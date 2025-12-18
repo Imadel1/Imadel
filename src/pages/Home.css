@@ -638,12 +638,16 @@
   aspect-ratio: 21/9;
   min-height: 220px;
   overflow: hidden;
+  padding: 0;
+  margin: 0;
 }
 
-.news-image .responsive-image-wrapper {
+.news-image .responsive-image-wrapper,
+.news-image .news-img.responsive-image-wrapper {
   width: 100% !important;
   height: 100% !important;
   min-height: 100% !important;
+  max-height: 100% !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -652,24 +656,39 @@
   aspect-ratio: unset !important;
   padding: 0 !important;
   margin: 0 !important;
+  background-color: transparent !important;
 }
 
-.news-image .responsive-image-wrapper picture {
+.news-image .responsive-image-wrapper picture,
+.news-image .news-img.responsive-image-wrapper picture {
   width: 100% !important;
   height: 100% !important;
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .news-image img,
 .news-img img,
-.news-image .responsive-image-wrapper img {
+.news-image .responsive-image-wrapper img,
+.news-image .news-img.responsive-image-wrapper img,
+.news-image picture img {
   transition: transform 0.3s ease;
   width: 100% !important;
   height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
   object-fit: cover !important;
-  position: absolute;
-  top: 0;
-  left: 0;
+  object-position: center !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: block !important;
 }
 
 .news-overlay {

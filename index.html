@@ -104,6 +104,11 @@
         }
       }
     </style>
+    
+    <!-- Preload hero image for instant LCP - static asset, no network delay -->
+    <!-- This is the fallback hero image from assets - always available -->
+    <link rel="preload" as="image" href="/src/assets/imadel%201.jpg" fetchpriority="high">
+    <link rel="preload" as="image" href="/src/assets/imadel%201.webp" fetchpriority="high" type="image/webp">
   </head>
   <body>
     <div id="root"></div>

@@ -324,21 +324,35 @@ const Home: React.FC = () => {
   const AREAS_OF_INTERVENTION = getAreasOfIntervention(language);
   const OBJECTIVES = getObjectives(t);
 
-  // Load site images (hero, about) from Firestore
+  // Load site images (hero, about) from Firestore - but use static assets for hero (better LCP)
+  // Hero image should be static asset for performance - Firestore adds network latency
   useEffect(() => {
     const loadSiteImages = async () => {
-      // Check cache first
-      const cacheKey = 'site-images';
-      const cached = apiCache.get<SiteImages>(cacheKey);
-      if (cached) {
-        setSiteImages(cached);
-        return;
-      }
+      // Only load non-critical images from Firestore (about, mission, etc.)
+      // Hero image should always use static asset for best LCP performance
+      try {
+        const cacheKey = 'site-images';
+        const cached = apiCache.get<SiteImages>(cacheKey);
+        if (cached) {
+          setSiteImages(cached);
+          return;
+        }
 
-      const images = await mediaApi.getSiteImages();
-      setSiteImages(images);
-      // Cache for 10 minutes (site images don't change often)
-      apiCache.set(cacheKey, images, 10 * 60 * 1000);
+        const images = await mediaApi.getSiteImages();
+        // Don't use Firestore hero image - it adds latency and hurts LCP
+        // Keep only non-critical images from Firestore
+        setSiteImages({
+          ...images,
+          heroHomeUrl: undefined, // Force use of static asset for hero
+        });
+        // Cache for 10 minutes
+        apiCache.set(cacheKey, images, 10 * 60 * 1000);
+      } catch (error) {
+        // Silently fail - use static assets
+        if (import.meta.env.DEV) {
+          console.error('Error loading site images:', error);
+        }
+      }
     };
     loadSiteImages();
   }, []);
@@ -476,44 +490,30 @@ const Home: React.FC = () => {
     };
   }, [shouldLoadProjects]); // Load when section comes into view
 
-  // Preload hero image for better LCP - prioritize fallback image immediately
+  // Preload hero image for better LCP - ALWAYS use static asset (no Firestore latency)
   useEffect(() => {
-    // Preload fallback image immediately (before Firestore image loads)
-    const preloadFallback = () => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = FALLBACK_HERO_IMAGE;
-      link.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(link);
-    };
+    // Always use static asset for hero - it's bundled and optimized at build time
+    const { webp, fallback } = getImageSources(FALLBACK_HERO_IMAGE);
     
-    preloadFallback();
-    
-    // If Firestore has a different image, preload that too
-    if (siteImages.heroHomeUrl && siteImages.heroHomeUrl !== FALLBACK_HERO_IMAGE) {
-      const { webp, fallback } = getImageSources(siteImages.heroHomeUrl);
-      
-      // Preload WebP if available
-      if (webp && webp !== fallback) {
-        const webpLink = document.createElement('link');
-        webpLink.rel = 'preload';
-        webpLink.as = 'image';
-        webpLink.href = webp;
-        webpLink.type = 'image/webp';
-        webpLink.setAttribute('fetchpriority', 'high');
-        document.head.appendChild(webpLink);
-      }
-      
-      // Preload Firestore image
-      const firestoreLink = document.createElement('link');
-      firestoreLink.rel = 'preload';
-      firestoreLink.as = 'image';
-      firestoreLink.href = fallback;
-      firestoreLink.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(firestoreLink);
+    // Preload WebP if available
+    if (webp && webp !== fallback) {
+      const webpLink = document.createElement('link');
+      webpLink.rel = 'preload';
+      webpLink.as = 'image';
+      webpLink.href = webp;
+      webpLink.type = 'image/webp';
+      webpLink.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(webpLink);
     }
-  }, [siteImages.heroHomeUrl]);
+    
+    // Always preload fallback (static asset)
+    const fallbackLink = document.createElement('link');
+    fallbackLink.rel = 'preload';
+    fallbackLink.as = 'image';
+    fallbackLink.href = fallback;
+    fallbackLink.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(fallbackLink);
+  }, []); // Only run once - static asset doesn't change
 
   return (
     <div className="home">
@@ -521,8 +521,9 @@ const Home: React.FC = () => {
         {/* Hero Section */}
         <section className="hero-section" aria-label="Hero section">
           {(() => {
-            const heroImageUrl = siteImages.heroHomeUrl || FALLBACK_HERO_IMAGE;
-            const { webp, fallback } = getImageSources(heroImageUrl);
+            // ALWAYS use static asset for hero - Firestore adds network latency
+            // Static assets are bundled, optimized, and load instantly
+            const { webp, fallback } = getImageSources(FALLBACK_HERO_IMAGE);
             
             return (
               <picture>
@@ -533,7 +534,7 @@ const Home: React.FC = () => {
                     type="image/webp"
                   />
                 )}
-                {/* Fallback to original format */}
+                {/* Fallback to original format - static asset, no network delay */}
                 <img
                   src={fallback}
                   alt=""

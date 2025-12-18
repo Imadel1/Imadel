@@ -41,9 +41,13 @@
   object-fit: cover;
   object-position: center;
   z-index: 0;
+  /* Ensure image is visible */
+  display: block;
   /* Optimize for LCP */
   content-visibility: auto;
   contain-intrinsic-size: 1920px 1080px;
+  /* Fallback background in case image doesn't load */
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 
 /* Only animate if user prefers motion */

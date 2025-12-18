@@ -519,34 +519,22 @@ const Home: React.FC = () => {
       <main>
         {/* Hero Section */}
         <section className="hero-section" aria-label="Hero section">
-          {(() => {
-            // ALWAYS use static asset for hero - Firestore adds network latency
-            // Static assets are bundled, optimized, and load instantly
-            // Use the imported image directly - it's already a URL from Vite
-            const heroSrc = FALLBACK_HERO_IMAGE;
-            const webpSrc = heroSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-            
-            return (
-              <picture>
-                {/* Try WebP first if available */}
-                <source
-                  srcSet={webpSrc}
-                  type="image/webp"
-                />
-                {/* Fallback to original format - static asset, no network delay */}
-                <img
-                  src={heroSrc}
-                  alt=""
-                  className="hero-background-img"
-                  fetchPriority="high"
-                  loading="eager"
-                  width={1920}
-                  height={1080}
-                  aria-hidden="true"
-                />
-              </picture>
-            );
-          })()}
+          <img
+            src={FALLBACK_HERO_IMAGE}
+            alt=""
+            className="hero-background-img"
+            fetchPriority="high"
+            loading="eager"
+            width={1920}
+            height={1080}
+            aria-hidden="true"
+            onError={() => {
+              // If image fails to load, log error for debugging
+              if (import.meta.env.DEV) {
+                console.error('Hero image failed to load:', FALLBACK_HERO_IMAGE);
+              }
+            }}
+          />
           <div className="hero-overlay" aria-hidden="true" />
           <div className="hero-content">
             <div className="hero-text">

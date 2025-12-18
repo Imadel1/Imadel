@@ -5,7 +5,6 @@ import { useTranslation } from "../utils/i18n";
 import "./Home.css";
 import { projectsApi, newsApi } from "../services/api";
 import ResponsiveImage from "../components/ResponsiveImage";
-import { getImageSources } from "../utils/imageUtils";
 import { apiCache } from "../utils/cache";
 import LazySection from "../components/LazySection";
 
@@ -493,24 +492,24 @@ const Home: React.FC = () => {
   // Preload hero image for better LCP - ALWAYS use static asset (no Firestore latency)
   useEffect(() => {
     // Always use static asset for hero - it's bundled and optimized at build time
-    const { webp, fallback } = getImageSources(FALLBACK_HERO_IMAGE);
+    // FALLBACK_HERO_IMAGE is already a URL from Vite's import
+    const heroSrc = FALLBACK_HERO_IMAGE;
+    const webpSrc = heroSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp');
     
     // Preload WebP if available
-    if (webp && webp !== fallback) {
-      const webpLink = document.createElement('link');
-      webpLink.rel = 'preload';
-      webpLink.as = 'image';
-      webpLink.href = webp;
-      webpLink.type = 'image/webp';
-      webpLink.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(webpLink);
-    }
+    const webpLink = document.createElement('link');
+    webpLink.rel = 'preload';
+    webpLink.as = 'image';
+    webpLink.href = webpSrc;
+    webpLink.type = 'image/webp';
+    webpLink.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(webpLink);
     
     // Always preload fallback (static asset)
     const fallbackLink = document.createElement('link');
     fallbackLink.rel = 'preload';
     fallbackLink.as = 'image';
-    fallbackLink.href = fallback;
+    fallbackLink.href = heroSrc;
     fallbackLink.setAttribute('fetchpriority', 'high');
     document.head.appendChild(fallbackLink);
   }, []); // Only run once - static asset doesn't change
@@ -523,20 +522,20 @@ const Home: React.FC = () => {
           {(() => {
             // ALWAYS use static asset for hero - Firestore adds network latency
             // Static assets are bundled, optimized, and load instantly
-            const { webp, fallback } = getImageSources(FALLBACK_HERO_IMAGE);
+            // Use the imported image directly - it's already a URL from Vite
+            const heroSrc = FALLBACK_HERO_IMAGE;
+            const webpSrc = heroSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp');
             
             return (
               <picture>
                 {/* Try WebP first if available */}
-                {webp && webp !== fallback && (
-                  <source
-                    srcSet={webp}
-                    type="image/webp"
-                  />
-                )}
+                <source
+                  srcSet={webpSrc}
+                  type="image/webp"
+                />
                 {/* Fallback to original format - static asset, no network delay */}
                 <img
-                  src={fallback}
+                  src={heroSrc}
                   alt=""
                   className="hero-background-img"
                   fetchPriority="high"

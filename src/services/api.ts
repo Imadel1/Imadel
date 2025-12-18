@@ -144,12 +144,12 @@ export const authApi = {
 
     if (!user.email) {
       await signOut(auth);
-      throw new Error('This account has no email associated with it.');
+      throw new Error('Ce compte n\'a pas d\'email associé.');
     }
 
     if (!isEmailAllowed(user.email)) {
       await signOut(auth);
-      throw new Error('You are not authorized to access the admin panel.');
+      throw new Error('Vous n\'êtes pas autorisé à accéder au panneau d\'administration.');
     }
 
     const admin: Admin = {

@@ -68,12 +68,12 @@ export default function AdminLogin() {
     setStatus(null);
 
     if (!email.trim() || !password) {
-      setStatus('Please enter both email and password');
+      setStatus('Veuillez saisir l\'email et le mot de passe');
       return;
     }
 
     try {
-      setStatus('Logging in...');
+      setStatus('Connexion en cours...');
       const response = await authApi.login(email.trim(), password);
 
       if (response.success && response.token) {
@@ -81,40 +81,61 @@ export default function AdminLogin() {
         // Store authentication flag for compatibility
         try { localStorage.setItem('imadel_admin_authenticated', '1'); } catch {}
         setPhase('done');
-        setStatus('Login successful! Redirecting...');
+        setStatus('Connexion réussie ! Redirection...');
         
         // Redirect to admin panel
         setTimeout(() => {
           navigate('/admin/panel');
         }, 500);
       } else {
-        setStatus('Login failed. Please check your credentials.');
+        setStatus('Échec de la connexion. Veuillez vérifier vos identifiants.');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
-      setStatus(error.message || 'Login failed. Please try again.');
+      if (import.meta.env.DEV) {
+        console.error('Erreur de connexion:', error);
+      }
+      // Translate Firebase Auth error messages
+      let errorMessage = 'Échec de la connexion. Veuillez réessayer.';
+      if (error.message) {
+        if (error.message.includes('user-not-found') || error.message.includes('wrong-password')) {
+          errorMessage = 'Email ou mot de passe incorrect.';
+        } else if (error.message.includes('invalid-email')) {
+          errorMessage = 'Adresse email invalide.';
+        } else if (error.message.includes('user-disabled')) {
+          errorMessage = 'Ce compte a été désactivé.';
+        } else if (error.message.includes('too-many-requests')) {
+          errorMessage = 'Trop de tentatives. Veuillez réessayer plus tard.';
+        } else if (error.message.includes('not authorized')) {
+          errorMessage = 'Vous n\'êtes pas autorisé à accéder au panneau d\'administration.';
+        } else if (error.message.includes('no email')) {
+          errorMessage = 'Ce compte n\'a pas d\'email associé.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      setStatus(errorMessage);
     }
   };
 
   const resendCode = () => {
     if (cooldown > 0) return;
     const c = read2fa();
-    if (!c) { setStatus('No active request — please re-enter credentials.'); setPhase('login'); return; }
+    if (!c) { setStatus('Aucune demande active — veuillez ressaisir vos identifiants.'); setPhase('login'); return; }
     const newCode = genCode();
     save2fa(newCode, 300);
     setCooldown(60);
     setAttemptsLeft(5);
-    setStatus('A new verification code has been sent.');
-    if (DEV_SHOW) { console.info('[DEV] Admin verification code (resend):', newCode); }
+    setStatus('Un nouveau code de vérification a été envoyé.');
+    if (DEV_SHOW) { console.info('[DEV] Code de vérification admin (renvoi):', newCode); }
   };
 
   const verifyAndEnter = (e?: React.FormEvent) => {
     e?.preventDefault();
     setStatus(null);
     const p = read2fa();
-    if (!p) { setStatus('No verification in progress. Please request a code.'); setPhase('login'); return; }
-    if (Date.now() > p.exp) { setStatus('Verification code expired. Please request a new code.'); setPhase('login'); return; }
-    if (p.attemptsLeft <= 0) { setStatus('Too many failed attempts. Request a new code.'); setPhase('login'); return; }
+    if (!p) { setStatus('Aucune vérification en cours. Veuillez demander un code.'); setPhase('login'); return; }
+    if (Date.now() > p.exp) { setStatus('Code de vérification expiré. Veuillez demander un nouveau code.'); setPhase('login'); return; }
+    if (p.attemptsLeft <= 0) { setStatus('Trop de tentatives échouées. Demandez un nouveau code.'); setPhase('login'); return; }
 
     if (code.trim() === p.code) {
       try { localStorage.setItem('imadel_admin_authenticated', '1'); } catch {}
@@ -126,7 +147,7 @@ export default function AdminLogin() {
       p.attemptsLeft = (p.attemptsLeft || 1) - 1;
       try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(p)); } catch {}
       setAttemptsLeft(p.attemptsLeft);
-      setStatus(`Invalid code. ${p.attemptsLeft} attempts remaining.`);
+      setStatus(`Code invalide. ${p.attemptsLeft} tentative${p.attemptsLeft > 1 ? 's' : ''} restante${p.attemptsLeft > 1 ? 's' : ''}.`);
       if (p.attemptsLeft <= 0) setPhase('login');
     }
   };
@@ -140,45 +161,45 @@ export default function AdminLogin() {
         </div>
 
         {phase === 'login' && (
-          <form onSubmit={requestVerification} className="login-form" aria-label="Admin login form">
+          <form onSubmit={requestVerification} className="login-form" aria-label="Formulaire de connexion administrateur">
             <div className="form-group">
-              <label htmlFor="email">Admin Email</label>
+              <label htmlFor="email">Email administrateur</label>
               <input id="email" type="email" inputMode="email" autoComplete="email" placeholder="admin@example.org" value={email} onChange={e=>setEmail(e.target.value)} required />
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">Mot de passe</label>
               <input id="password" type="password" autoComplete="current-password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} required />
             </div>
 
             <div className="actions">
-              <button type="submit" className="login-btn">Request code</button>
+              <button type="submit" className="login-btn">Se connecter</button>
             </div>
             <div aria-live="polite" style={{marginTop:8,color:'#555'}}>{status}</div>
           </form>
         )}
 
         {phase === 'verify' && (
-          <form onSubmit={verifyAndEnter} className="login-form" aria-label="Enter verification code">
+          <form onSubmit={verifyAndEnter} className="login-form" aria-label="Saisir le code de vérification">
             <div className="form-group">
-              <label htmlFor="code">Verification code</label>
+              <label htmlFor="code">Code de vérification</label>
               <input id="code" ref={codeInputRef} type="text" inputMode="numeric" pattern="[0-9]*" placeholder="123456" value={code} onChange={e=>setCode(e.target.value)} required />
             </div>
 
             <div className="actions">
-              <button type="submit" className="login-btn">Verify & enter</button>
-              <button type="button" className="back-btn" onClick={()=>{ setPhase('login'); setCode(''); setStatus(null); }}>Back</button>
-              <button type="button" className="back-btn" onClick={resendCode} disabled={cooldown>0}>{cooldown>0?`Resend (${cooldown}s)`:'Resend code'}</button>
+              <button type="submit" className="login-btn">Vérifier et entrer</button>
+              <button type="button" className="back-btn" onClick={()=>{ setPhase('login'); setCode(''); setStatus(null); }}>Retour</button>
+              <button type="button" className="back-btn" onClick={resendCode} disabled={cooldown>0}>{cooldown>0?`Renvoyer (${cooldown}s)`:'Renvoyer le code'}</button>
             </div>
 
             <div aria-live="polite" className="status">{status}</div>
-            {attemptsLeft != null && <div className="attempts">Attempts left: {attemptsLeft}</div>}
-            {DEV_SHOW && <div className="dev-note">Dev mode: codes are logged to console.</div>}
+            {attemptsLeft != null && <div className="attempts">Tentatives restantes : {attemptsLeft}</div>}
+            {DEV_SHOW && <div className="dev-note">Mode dev : les codes sont enregistrés dans la console.</div>}
           </form>
         )}
 
         {phase === 'done' && (
-          <div><p>Redirecting…</p></div>
+          <div><p>Redirection…</p></div>
         )}
       </div>
     </div>

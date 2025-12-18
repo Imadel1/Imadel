@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { FaXmark, FaCheck, FaEye, FaStar } from 'react-icons/fa6';
 import './AdminPanel.css';
-import { authApi, projectsApi, jobsApi, partnersApi, officesApi, applicationsApi, newsApi, schemaApi, mediaApi, type SiteImages } from '../services/api';
+import { authApi, projectsApi, jobsApi, partnersApi, officesApi, applicationsApi, newsApi, schemaApi, mediaApi, settingsApi, type SiteImages } from '../services/api';
 import { useTranslation } from '../utils/i18n';
 import logo from '../assets/cropped-nouveau_logo.png';
 
@@ -546,6 +546,40 @@ export default function AdminPanel() {
     });
   }, []);
 
+  // Load settings from Firestore on mount (if authenticated)
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const firestoreSettings = await settingsApi.get();
+        if (firestoreSettings) {
+          // Merge with current settings and update state
+          setSettings(prev => {
+            const merged = {
+              ...prev,
+              ...firestoreSettings,
+              theme: 'blue' as Settings['theme'], // Force blue theme
+              // Ensure nested objects exist
+              bankMali: { ...prev.bankMali, ...(firestoreSettings.bankMali || {}) },
+              bankInternational: { ...prev.bankInternational, ...(firestoreSettings.bankInternational || {}) },
+            };
+            // Also update localStorage for consistency
+            localStorage.setItem(STORAGE.SETTINGS, JSON.stringify(merged));
+            return merged;
+          });
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error('Error loading settings from Firestore:', error);
+        }
+        // Continue with localStorage settings if Firestore fails
+      }
+    };
+    
+    if (authenticated) {
+      loadSettings();
+    }
+  }, [authenticated]);
+
   useEffect(() => { 
     try { 
       localStorage.setItem(STORAGE.SETTINGS, JSON.stringify(settings));
@@ -554,17 +588,28 @@ export default function AdminPanel() {
     } catch {} 
   }, [settings]);
 
-  const updateSettings = (updates: Partial<Settings>) => {
+  const updateSettings = async (updates: Partial<Settings>) => {
     setSettings(prev => {
       const newSettings = { ...prev, ...updates };
-      // Update localStorage
+      // Update localStorage (for immediate UI updates)
       try {
         localStorage.setItem(STORAGE.SETTINGS, JSON.stringify(newSettings));
         // Dispatch event to notify other components
         window.dispatchEvent(new CustomEvent('imadel:settings:updated'));
       } catch (error) {
-        console.error('Error saving settings:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error saving settings to localStorage:', error);
+        }
       }
+      
+      // Save to Firestore backend (async, don't block UI)
+      settingsApi.save(newSettings).catch((error) => {
+        if (import.meta.env.DEV) {
+          console.error('Error saving settings to Firestore:', error);
+        }
+        setErrors(prev => ({ ...prev, settings: 'Failed to save to backend. Changes saved locally only.' }));
+      });
+      
       return newSettings;
     });
     setErrors(prev => ({ ...prev, settings: '' }));

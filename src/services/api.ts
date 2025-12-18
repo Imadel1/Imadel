@@ -212,6 +212,7 @@ const COLLECTIONS = {
   donations: 'dons',
   news: 'actualites',
   newsletterSubscribers: 'abonnementsNewsletter',
+  settings: 'parametres',
 } as const;
 
 export const schemaApi = {
@@ -1587,6 +1588,49 @@ export const adminApi = {
   },
 };
 
+// ==================== SETTINGS ====================
+
+export const settingsApi = {
+  // Get settings from Firestore
+  get: async (): Promise<any> => {
+    try {
+      const ref = doc(db, COLLECTIONS.settings, 'main');
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        return null;
+      }
+      return snap.data();
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Error loading settings from Firestore:', error);
+      }
+      return null;
+    }
+  },
+  // Save settings to Firestore
+  save: async (settings: any): Promise<any> => {
+    try {
+      const ref = doc(db, COLLECTIONS.settings, 'main');
+      const now = new Date().toISOString();
+      await setDoc(
+        ref,
+        {
+          ...settings,
+          updatedAt: now,
+        },
+        { merge: true }
+      );
+      const snap = await getDoc(ref);
+      return snap.data() || {};
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Error saving settings to Firestore:', error);
+      }
+      throw error;
+    }
+  },
+};
+
 // Export default API object
 export default {
   auth: authApi,
@@ -1599,6 +1643,7 @@ export default {
   offices: officesApi,
   uploads: uploadsApi,
   admin: adminApi,
+  settings: settingsApi,
 };
 
 

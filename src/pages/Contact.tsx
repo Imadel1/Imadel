@@ -77,18 +77,20 @@ const Contact: React.FC = () => {
                     .join(', ')
                 : '';
 
-          const coords = o.coordinates || {};
+            const coords = o.coordinates || {};
 
             return {
               id: o.id || o._id,
-              country: o.address?.country || o.country,
+              country: o.address?.country || o.country || o.name,
               city: o.address?.city || o.city || addr?.city,
               address: normalizedAddress,
               lat: coords.latitude ?? o.latitude ?? o.lat,
               lng: coords.longitude ?? o.longitude ?? o.lng,
             };
-          }).filter((o: Office) => typeof o.lat === 'number' && typeof o.lng === 'number');
+          });
 
+          // Store all offices for display (including those without coordinates)
+          // OfficesMap component will filter offices with coordinates automatically
           setOffices(mapped);
         }
       } catch (error) {
@@ -212,21 +214,35 @@ const Contact: React.FC = () => {
 
           <div className="country-offices">
             <h2>Bureaux Régionaux</h2>
-            <ul>
-              <li>
-                <strong>Mauritanie:</strong>{' '}
-                <span className="country-placeholder">Adresse à venir</span>
-              </li>
-              <li>
-                <strong>Sénégal:</strong>{' '}
-                <span className="country-placeholder">Adresse à venir</span>
-              </li>
-              <li>
-                <strong>Cameroun:</strong>{' '}
-                <span className="country-placeholder">Adresse à venir</span>
-              </li>
-            </ul>
-            {/* TODO: Fetch and render country data dynamically from backend (Firestore or API) */}
+            {offices.length > 0 ? (
+              <ul>
+                {offices.map((office) => (
+                  <li key={office.id}>
+                    <strong>{office.country || office.city}:</strong>{' '}
+                    {office.address ? (
+                      <span>{office.address}</span>
+                    ) : (
+                      <span className="country-placeholder">Adresse à venir</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul>
+                <li>
+                  <strong>Mauritanie:</strong>{' '}
+                  <span className="country-placeholder">Adresse à venir</span>
+                </li>
+                <li>
+                  <strong>Sénégal:</strong>{' '}
+                  <span className="country-placeholder">Adresse à venir</span>
+                </li>
+                <li>
+                  <strong>Cameroun:</strong>{' '}
+                  <span className="country-placeholder">Adresse à venir</span>
+                </li>
+              </ul>
+            )}
           </div>
         </div>
 

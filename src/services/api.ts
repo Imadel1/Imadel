@@ -276,7 +276,6 @@ export const schemaApi = {
         'Santé et Nutrition',
         'Services Sociaux et Résilience',
         'Protection',
-        'COOP',
       ],
       images: [{ url: 'string', caption: 'string' }],
       location: 'string',

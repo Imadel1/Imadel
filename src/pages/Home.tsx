@@ -47,7 +47,6 @@ const getAreasOfIntervention = (language: string) => [
   language === 'fr' ? "Santé et Nutrition" : "Health & Nutrition",
   language === 'fr' ? "Services Sociaux et Résilience" : "Social services & resilience",
   language === 'fr' ? "Protection" : "Protection",
-  language === 'fr' ? "COOP" : "Cooperation (COOP)",
 ];
 
 const getObjectives = (t: any): Objective[] => [

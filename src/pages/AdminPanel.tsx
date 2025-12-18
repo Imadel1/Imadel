@@ -117,7 +117,6 @@ const AREAS_OF_INTERVENTION = [
   "Santé et Nutrition",
   "Services Sociaux et Résilience",
   "Protection",
-  "COOP",
 ];
 
 // TODO: Replace localStorage with API calls

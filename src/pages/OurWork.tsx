@@ -15,7 +15,6 @@ const AREAS_OF_INTERVENTION = [
   "Santé et Nutrition",
   "Services Sociaux et Résilience",
   "Protection",
-  "COOP",
 ];
 
 // Mapping between different possible area name formats
@@ -55,8 +54,6 @@ const AREA_NAME_MAPPINGS: Record<string, string> = {
   'services sociaux et resilience': 'Services Sociaux et Résilience',
 
   'protection': 'Protection',
-
-  'coop': 'COOP',
 };
 
 // Normalize area name (remove accents, lowercase, trim)

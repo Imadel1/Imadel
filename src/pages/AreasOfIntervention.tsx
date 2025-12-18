@@ -24,7 +24,6 @@ const AREAS_OF_INTERVENTION = [
   "Santé et Nutrition",
   "Services Sociaux et Résilience",
   "Protection",
-  "COOP",
 ];
 
 const AREA_ICONS: { [key: string]: string } = {
@@ -37,7 +36,6 @@ const AREA_ICONS: { [key: string]: string } = {
   "Santé et Nutrition": "⚕️",
   "Services Sociaux et Résilience": "🤝",
   "Protection": "🛡️",
-  "COOP": "🤝",
 };
 
 export default function AreasOfIntervention() {

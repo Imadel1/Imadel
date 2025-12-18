@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { FaXmark, FaCheck, FaEye, FaStar } from 'react-icons/fa6';
 import './AdminPanel.css';
-import { authApi, projectsApi, jobsApi, partnersApi, officesApi, applicationsApi, newsApi, schemaApi, mediaApi, settingsApi, type SiteImages } from '../services/api';
+import { authApi, projectsApi, jobsApi, partnersApi, officesApi, applicationsApi, newsApi, schemaApi, mediaApi, settingsApi, uploadsApi, type SiteImages } from '../services/api';
 import { useTranslation } from '../utils/i18n';
 import logo from '../assets/cropped-nouveau_logo.png';
 
@@ -1697,19 +1697,43 @@ export default function AdminPanel() {
               
               <div className="images-section">
                 <div className="section-header">
-                  <label>URLs d'images</label>
+                  <label>Images du projet (URL ou téléchargement)</label>
                   <button type="button" className="btn-add-image" onClick={addImageToProject}>+ Ajouter une image</button>
                 </div>
                 {(projectForm.images || []).map((img, idx) => (
                   <div key={idx} className="image-input-row">
                     <div className="form-group" style={{ flex: 1 }}>
                       <label htmlFor={`project-image-${idx}`}>URL de l'image {idx + 1}</label>
-                    <input 
+                      <input 
                         id={`project-image-${idx}`}
                         placeholder="https://exemple.com/image.jpg"
-                      value={img} 
-                      onChange={e => updateProjectImage(idx, e.target.value)} 
-                    />
+                        value={img} 
+                        onChange={e => updateProjectImage(idx, e.target.value)} 
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Ou sélectionner un fichier</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            setLoading(prev => ({ ...prev, [`project-image-${idx}`]: true }));
+                            const url = await uploadsApi.uploadImage(file, 'projects');
+                            updateProjectImage(idx, url);
+                            showToast('Image téléchargée avec succès !');
+                          } catch (error) {
+                            if (import.meta.env.DEV) {
+                              console.error('Error uploading project image:', error);
+                            }
+                            showToast('Échec du téléchargement de l\'image.', 'error');
+                          } finally {
+                            setLoading(prev => ({ ...prev, [`project-image-${idx}`]: false }));
+                          }
+                        }}
+                      />
                     </div>
                     <button type="button" className="btn-remove" onClick={() => removeProjectImage(idx)} aria-label="Remove image">
                       <FaXmark />
@@ -1915,16 +1939,20 @@ export default function AdminPanel() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           try {
-                            const updated = await mediaApi.uploadSiteImage('aboutActivitiesUrl', file);
-                            // Reuse the uploaded URL for this job image slot
-                            const url = Object.values(updated).pop() as string;
+                            setLoading(prev => ({ ...prev, [`job-image-${idx}`]: true }));
+                            const url = await uploadsApi.uploadImage(file, 'jobs');
                             updateJobImage(idx, url);
+                            showToast('Image téléchargée avec succès !');
                           } catch (error) {
-                            console.error('Error uploading job image:', error);
-                            showToast('Échec du téléchargement de l’image.', 'error');
+                            if (import.meta.env.DEV) {
+                              console.error('Error uploading job image:', error);
+                            }
+                            showToast('Échec du téléchargement de l\'image.', 'error');
+                          } finally {
+                            setLoading(prev => ({ ...prev, [`job-image-${idx}`]: false }));
                           }
                         }}
-                    />
+                      />
                     </div>
                     <button type="button" className="btn-remove" onClick={() => removeJobImage(idx)} aria-label="Remove image">
                       <FaXmark />
@@ -2323,6 +2351,30 @@ export default function AdminPanel() {
                 <input id="partner-logo" placeholder="https://exemple.com/logo.png" value={partnerForm.logo||''} onChange={e=>setPartnerForm({...partnerForm, logo:e.target.value})} />
               </div>
               <div className="form-group">
+                <label>Ou sélectionner un fichier pour le logo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      setLoading(prev => ({ ...prev, 'partner-logo': true }));
+                      const url = await uploadsApi.uploadImage(file, 'partners/logos');
+                      setPartnerForm({ ...partnerForm, logo: url });
+                      showToast('Logo téléchargé avec succès !');
+                    } catch (error) {
+                      if (import.meta.env.DEV) {
+                        console.error('Error uploading partner logo:', error);
+                      }
+                      showToast('Échec du téléchargement du logo.', 'error');
+                    } finally {
+                      setLoading(prev => ({ ...prev, 'partner-logo': false }));
+                    }
+                  }}
+                />
+              </div>
+              <div className="form-group">
                 <label htmlFor="partner-website">URL du site web</label>
                 <input id="partner-website" placeholder="https://exemple.com" value={partnerForm.website||''} onChange={e=>setPartnerForm({...partnerForm, website:e.target.value})} />
               </div>
@@ -2356,15 +2408,20 @@ export default function AdminPanel() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           try {
-                            const updated = await mediaApi.uploadSiteImage('aboutActivitiesUrl', file);
-                            const url = Object.values(updated).pop() as string;
+                            setLoading(prev => ({ ...prev, [`partner-image-${idx}`]: true }));
+                            const url = await uploadsApi.uploadImage(file, 'partners');
                             updatePartnerImage(idx, url);
+                            showToast('Image téléchargée avec succès !');
                           } catch (error) {
-                            console.error('Error uploading partner image:', error);
-                            showToast('Échec du téléchargement de l’image.', 'error');
+                            if (import.meta.env.DEV) {
+                              console.error('Error uploading partner image:', error);
+                            }
+                            showToast('Échec du téléchargement de l\'image.', 'error');
+                          } finally {
+                            setLoading(prev => ({ ...prev, [`partner-image-${idx}`]: false }));
                           }
                         }}
-                    />
+                      />
                     </div>
                     <button type="button" className="btn-remove" onClick={() => removePartnerImage(idx)} aria-label="Remove image">
                       <FaXmark />
@@ -2465,15 +2522,20 @@ export default function AdminPanel() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           try {
-                            const updated = await mediaApi.uploadSiteImage('aboutActivitiesUrl', file);
-                            const url = Object.values(updated).pop() as string;
+                            setLoading(prev => ({ ...prev, [`newsletter-image-${idx}`]: true }));
+                            const url = await uploadsApi.uploadImage(file, 'news');
                             updateNewsletterImage(idx, url);
+                            showToast('Image téléchargée avec succès !');
                           } catch (error) {
-                            console.error('Error uploading news image:', error);
-                            showToast('Échec du téléchargement de l’image.', 'error');
+                            if (import.meta.env.DEV) {
+                              console.error('Error uploading news image:', error);
+                            }
+                            showToast('Échec du téléchargement de l\'image.', 'error');
+                          } finally {
+                            setLoading(prev => ({ ...prev, [`newsletter-image-${idx}`]: false }));
                           }
                         }}
-                    />
+                      />
                     </div>
                     <button type="button" className="btn-remove" onClick={() => removeNewsletterImage(idx)} aria-label="Remove image">
                       <FaXmark />

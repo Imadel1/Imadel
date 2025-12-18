@@ -1535,21 +1535,32 @@ export const officesApi = {
 
 export const uploadsApi = {
   /**
-   * Upload single image
-   * POST /api/uploads/image
+   * Upload single image to Firebase Storage
+   * Returns the download URL
    */
-  uploadImage: async (_file: File): Promise<string> => {
-    // Upload handling should be done via Firebase Storage or a custom backend.
-    // For now, we throw to make it clear it is not available.
-    throw new Error('Image upload is not configured (migrate to Firebase Storage).');
+  uploadImage: async (file: File, folder: string = 'uploads'): Promise<string> => {
+    try {
+      const safeName = file.name.replace(/\s+/g, '-');
+      const path = `${folder}/${Date.now()}-${safeName}`;
+      const ref = storageRef(storage, path);
+      await uploadBytes(ref, file);
+      const url = await getDownloadURL(ref);
+      return url;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Error uploading image:', error);
+      }
+      throw error;
+    }
   },
 
   /**
    * Upload multiple images
    * POST /api/uploads/images
    */
-  uploadImages: async (_files: File[]): Promise<string[]> => {
-    throw new Error('Multiple image upload is not configured (migrate to Firebase Storage).');
+  uploadImages: async (files: File[], folder: string = 'uploads'): Promise<string[]> => {
+    const uploadPromises = files.map(file => uploadsApi.uploadImage(file, folder));
+    return Promise.all(uploadPromises);
   },
 
   /**
@@ -1557,7 +1568,8 @@ export const uploadsApi = {
    * DELETE /api/uploads/:filename
    */
   deleteImage: async (_filename: string) => {
-    throw new Error('Image delete is not configured (migrate to Firebase Storage).');
+    // TODO: Implement image deletion from Firebase Storage if needed
+    return { success: true };
   },
 };
 

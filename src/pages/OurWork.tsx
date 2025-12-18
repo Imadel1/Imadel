@@ -3,6 +3,7 @@ import './OurWork.css';
 import { Link, useSearchParams } from "react-router-dom";
 import { projectsApi } from '../services/api';
 import ResponsiveImage from '../components/ResponsiveImage';
+import { apiCache } from '../utils/cache';
 
 const AREAS_OF_INTERVENTION = [
   "Eaux, Hygiène et Assainissement",
@@ -163,6 +164,14 @@ const OurWork: React.FC = () => {
   useEffect(() => {
     const loadProjects = async () => {
       try {
+        // Check cache first
+        const cacheKey = `projects-ourwork-${selectedArea || 'all'}-${selectedStatus}-${sortBy}`;
+        const cached = apiCache.get<any[]>(cacheKey);
+        if (cached) {
+          setProjects(cached);
+          return;
+        }
+
         const response = await projectsApi.getAll({ published: true });
 
         // Support multiple possible response shapes: { projects }, { data: [...] }, or direct array
@@ -172,20 +181,6 @@ const OurWork: React.FC = () => {
           response;
 
         if (response.success !== false && Array.isArray(rawProjects)) {
-          // Debug: Log raw project data structure
-          console.log('=== RAW PROJECTS DATA ===');
-          console.log('Total projects:', rawProjects.length);
-          rawProjects.forEach((p: any, index: number) => {
-            console.log(`Project ${index + 1}:`, {
-              title: p.title,
-              _id: p._id,
-              id: p.id,
-              areasOfIntervention: p.areasOfIntervention,
-              category: p.category,
-              allKeys: Object.keys(p)
-            });
-          });
-          
           // Process projects (filter and sort)
           let processedProjects = rawProjects;
           
@@ -201,51 +196,17 @@ const OurWork: React.FC = () => {
           if (selectedArea) {
             const normalizedSelectedArea = normalizeAreaName(selectedArea);
             
-            // Debug: Log all projects with their extracted areas
-            console.log('=== FILTER DEBUG ===');
-            console.log('Selected area:', selectedArea);
-            console.log('Normalized selected area:', normalizedSelectedArea);
-            console.log('Extracted areas for each project:');
-            rawProjects.forEach((p: any) => {
-              const areas = getProjectAreas(p);
-              const normalizedAreas = areas.map((a: string) => normalizeAreaName(a));
-              const willMatch = areas.some((a: string) => normalizeAreaName(a) === normalizedSelectedArea);
-              
-              console.log(`- "${p.title}":`, {
-                rawAreasOfIntervention: p.areasOfIntervention,
-                rawCategory: p.category,
-                extractedAreas: areas,
-                extractedAreasString: areas.join(', '),
-                normalizedAreas: normalizedAreas,
-                normalizedAreasString: normalizedAreas.join(', '),
-                normalizedSelectedArea: normalizedSelectedArea,
-                willMatch: willMatch,
-                matchDetails: areas.map((a: string, idx: number) => ({
-                  area: a,
-                  normalized: normalizedAreas[idx],
-                  matches: normalizedAreas[idx] === normalizedSelectedArea
-                }))
-              });
-            });
-            
             processedProjects = rawProjects.filter((p: any) => {
               const areas = getProjectAreas(p);
               
               // Normalize area names for comparison (accent-insensitive, case-insensitive)
               const matches = areas.some(area => {
                 const normalizedArea = normalizeAreaName(area);
-                const isMatch = normalizedArea === normalizedSelectedArea;
-                if (isMatch) {
-                  console.log(`✓ MATCH: "${p.title}" - area "${area}" matches "${selectedArea}"`);
-                }
-                return isMatch;
+                return normalizedArea === normalizedSelectedArea;
               });
               
               return matches;
             });
-            
-            console.log(`Filtered projects: ${processedProjects.length} out of ${rawProjects.length}`);
-            console.log('===================');
           }
 
           // Sort projects
@@ -294,7 +255,6 @@ const OurWork: React.FC = () => {
             updatedAt: p.updatedAt
           }));
 
-          console.log('Setting projects state:', mappedProjects.length, 'projects');
           setProjects(mappedProjects);
         }
       } catch (error) {
@@ -511,10 +471,10 @@ const OurWork: React.FC = () => {
                       />
                       <div className="project-image-overlay"></div>
                       <div className="project-image-content">
-                        <h3>{project.title}</h3>
-                        <span className="read-more" aria-hidden="true">
+                      <h3>{project.title}</h3>
+                      <span className="read-more" aria-hidden="true">
                           LIRE PLUS →
-                        </span>
+                      </span>
                       </div>
                     </div>
                   </div>

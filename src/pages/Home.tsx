@@ -6,6 +6,7 @@ import "./Home.css";
 import { projectsApi, newsApi } from "../services/api";
 import ResponsiveImage from "../components/ResponsiveImage";
 import { getImageSources } from "../utils/imageUtils";
+import { apiCache } from "../utils/cache";
 
 // Types
 interface NewsItem {
@@ -325,8 +326,18 @@ const Home: React.FC = () => {
   // Load site images (hero, about) from Firestore
   useEffect(() => {
     const loadSiteImages = async () => {
+      // Check cache first
+      const cacheKey = 'site-images';
+      const cached = apiCache.get<SiteImages>(cacheKey);
+      if (cached) {
+        setSiteImages(cached);
+        return;
+      }
+
       const images = await mediaApi.getSiteImages();
       setSiteImages(images);
+      // Cache for 10 minutes (site images don't change often)
+      apiCache.set(cacheKey, images, 10 * 60 * 1000);
     };
     loadSiteImages();
   }, []);
@@ -335,6 +346,14 @@ const Home: React.FC = () => {
   useEffect(() => {
     const loadNews = async () => {
       try {
+        // Check cache first
+        const cacheKey = 'news-home-published-true-limit-4';
+        const cached = apiCache.get<NewsItem[]>(cacheKey);
+        if (cached) {
+          setNewsItems(cached);
+          return;
+        }
+
         // Fetch news (actualités) collection - limit to a few items for performance
         const response = await newsApi.getAll({ published: true, limit: 4 });
 
@@ -364,8 +383,12 @@ const Home: React.FC = () => {
           }));
 
         setNewsItems(publishedNews);
+        // Cache the result
+        apiCache.set(cacheKey, publishedNews, 5 * 60 * 1000); // 5 minutes
       } catch (error) {
-        console.error('Error loading news from API:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error loading news from API:', error);
+        }
         setNewsItems([]); // Graceful fallback: show no news instead of error
       }
     };
@@ -373,18 +396,29 @@ const Home: React.FC = () => {
     loadNews();
 
     // Listen for updates from admin panel
-    const handleUpdate = () => loadNews();
+    const handleUpdate = () => {
+      apiCache.clear('news-home-published-true-limit-4');
+      loadNews();
+    };
     window.addEventListener('imadel:newsletters:updated', handleUpdate);
 
     return () => {
       window.removeEventListener('imadel:newsletters:updated', handleUpdate);
     };
-  }, [t]);
+  }, []); // Remove 't' dependency - translation doesn't change
 
   // Load projects from API
   useEffect(() => {
     const loadProjects = async () => {
       try {
+        // Check cache first
+        const cacheKey = 'projects-home-published-true-limit-8';
+        const cached = apiCache.get<NewsItem[]>(cacheKey);
+        if (cached) {
+          setProjects(cached);
+          return;
+        }
+
         // Limit to a few latest projects for homepage
         const response = await projectsApi.getAll({ published: true, limit: 8 });
 
@@ -408,9 +442,13 @@ const Home: React.FC = () => {
             }));
           
           setProjects(mappedProjects);
+          // Cache the result
+          apiCache.set(cacheKey, mappedProjects, 5 * 60 * 1000); // 5 minutes
         }
       } catch (error) {
-        console.error('Error loading projects from API:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error loading projects from API:', error);
+        }
         setProjects([]);
       }
     };
@@ -418,13 +456,16 @@ const Home: React.FC = () => {
     loadProjects();
 
     // Listen for updates from admin panel
-    const handleUpdate = () => loadProjects();
+    const handleUpdate = () => {
+      apiCache.clear('projects-home-published-true-limit-8');
+      loadProjects();
+    };
     window.addEventListener('imadel:projects:updated', handleUpdate);
 
     return () => {
       window.removeEventListener('imadel:projects:updated', handleUpdate);
     };
-  }, [t]);
+  }, []); // Remove 't' dependency - translation doesn't change
 
   // Preload hero image for better LCP - use fallback immediately, update when siteImages loads
   useEffect(() => {

@@ -4,9 +4,9 @@ import { FaBullseye, FaGlobeAmericas, FaDumbbell, FaHandshake, FaLandmark, FaSee
 import { useTranslation } from "../utils/i18n";
 import "./Home.css";
 import { projectsApi, newsApi } from "../services/api";
-import ResponsiveImage from "../components/ResponsiveImage";
 import { apiCache } from "../utils/cache";
 import LazySection from "../components/LazySection";
+import { getImageSources } from "../utils/imageUtils";
 
 // Types
 interface NewsItem {
@@ -193,19 +193,28 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
     (news.badge === t('news')
       ? `/actualite/${news.id}`
       : `/projet/${news.id}`);
+  
+  const imageSrc = news.image || aboutImage;
+  const { webp, fallback } = getImageSources(imageSrc);
+  
   return (
     <Link to={targetLink} className="news-card-link" aria-label={language === 'fr' ? `Voir les détails de ${news.title}` : `View details of ${news.title}`}>
       <article className="news-card">
         <div className="news-image">
-          <ResponsiveImage
-            src={news.image || aboutImage}
-            alt={news.title}
-            aspectRatio="wide"
-            size="large"
-            loading="lazy"
-            objectFit="cover"
-            className="news-img"
-          />
+          <picture className="news-img-wrapper">
+            {webp && webp !== fallback && (
+              <source srcSet={webp} type="image/webp" />
+            )}
+            <img
+              src={fallback}
+              alt={news.title}
+              className="news-img"
+              loading="lazy"
+              decoding="async"
+              width={1920}
+              height={823}
+            />
+          </picture>
           <div className="news-overlay"></div>
           <div className="news-content-overlay">
             <h3>{news.title}</h3>

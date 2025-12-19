@@ -136,14 +136,14 @@
   text-decoration: none;
   font-size: 1.1rem;
   transition: all 0.3s ease;
-  border: 2px solid #0066CC; /* Blue border */
-  color: #ffffff;
-  background: #0066CC; /* Solid blue like hover state */
+  border: 2px solid transparent;
+  color: var(--primary, #0066CC);
+  background: white; /* White background with blue text */
 }
 
 .btn-outline-hero:hover {
-  background: #0052A3; /* Slightly deeper on hover */
-  color: #fff;
+  background: #f0f0f0; /* Slightly darker on hover */
+  color: var(--primary, #0066CC);
   transform: translateY(-2px);
 }
 
@@ -155,14 +155,14 @@
   text-decoration: none;
   font-size: 1.1rem;
   transition: all 0.3s ease;
-  border: 2px solid white;
+  border: 2px solid rgba(255, 255, 255, 0.5); /* Light blue/white border */
   color: white;
-  background: rgba(0, 0, 0, 0.35); /* Dark translucent background to improve text contrast */
+  background: transparent; /* Transparent background on blue hero */
 }
 
 .btn-primary-hero:hover {
-  background: white;
-  color: var(--primary, #0066CC);
+  background: rgba(255, 255, 255, 0.1); /* Slight white overlay on hover */
+  border-color: rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
 }
 

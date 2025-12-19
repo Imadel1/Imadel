@@ -223,6 +223,13 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
             </span>
           </div>
         </div>
+        {/* Mobile content - shown below image on small screens */}
+        <div className="news-content-mobile">
+          <h3>{news.title}</h3>
+          <span className="read-more">
+            {t('readMore')} →
+          </span>
+        </div>
       </article>
     </Link>
   );

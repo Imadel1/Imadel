@@ -232,24 +232,35 @@
     grid-template-columns: 1fr;
     gap: 0.75rem;
     justify-items: stretch;
+    width: 100%;
   }
 
   .project-navigation button,
   .project-navigation a {
-    width: 100%;
-    min-width: unset;
-    justify-self: stretch;
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: 100% !important;
+    justify-self: stretch !important;
     text-align: center;
+    padding: 12px 16px;
+    font-size: 14px;
+    box-sizing: border-box;
   }
 
   .navigation-buttons {
     flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
   }
 
   .navigation-buttons button,
   .navigation-buttons a {
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
     text-align: center;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    font-size: 14px;
   }
 }
 

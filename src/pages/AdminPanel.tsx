@@ -45,6 +45,12 @@ type Office = {
     fax?: string;
   };
   active?: boolean;
+  // Additional fields for form handling (not in base type but used in form)
+  region?: string;
+  postalCode?: string;
+  phone?: string;
+  email?: string;
+  fax?: string;
 };
 
 type Project = {
@@ -252,6 +258,7 @@ export default function AdminPanel() {
 
   // Offices
   const [offices, setOffices] = useState<Office[]>([]);
+  const [editingOfficeId, setEditingOfficeId] = useState<string | null>(null);
   useEffect(() => {
     const fetchOffices = async () => {
       setLoading(prev => ({ ...prev, offices: true }));
@@ -279,17 +286,21 @@ export default function AdminPanel() {
                     addr.country,
                     addr.postalCode,
                   ]
-                    .filter(Boolean)
-                    .join(', ')
+                  .filter(Boolean)
+                  .join(', ')
                 : '';
 
             return {
               id: o.id || o._id,
-              country: o.country,
-              city: o.city || addr?.city,
-              address: normalizedAddress,
-              lat: o.latitude ?? o.lat,
-              lng: o.longitude ?? o.lng,
+              name: o.name,
+              country: o.address?.country || o.country,
+              city: o.address?.city || o.city || addr?.city,
+              address: o.address?.street || normalizedAddress || o.address,
+              lat: o.coordinates?.latitude ?? o.latitude ?? o.lat,
+              lng: o.coordinates?.longitude ?? o.longitude ?? o.lng,
+              type: o.type,
+              contact: o.contact,
+              active: o.active,
             };
           });
 
@@ -914,77 +925,145 @@ export default function AdminPanel() {
     
     setLoading(prev => ({ ...prev, office: true }));
     try {
-      // Helper function to remove undefined values from objects
-      const removeUndefined = (obj: any): any => {
-        if (obj === null || obj === undefined) return obj;
-        if (Array.isArray(obj)) return obj.map(removeUndefined);
-        if (typeof obj !== 'object') return obj;
-        const cleaned: any = {};
-        for (const key in obj) {
-          if (obj[key] !== undefined) {
-            cleaned[key] = removeUndefined(obj[key]);
-          }
-        }
-        return cleaned;
+      // Build address object, only including fields that have values
+      const address: any = {
+        street: officeForm.address || '',
+        city: officeForm.city || '',
+        country: officeForm.country,
       };
-
-      const officeData = removeUndefined({
-        name: officeForm.country || 'Bureau',
+      
+      // Only add region and postalCode if they have values (not undefined)
+      if ((officeForm as any).region) {
+        address.region = (officeForm as any).region;
+      }
+      if ((officeForm as any).postalCode) {
+        address.postalCode = (officeForm as any).postalCode;
+      }
+      
+      // Build contact object, only including fields that have values
+      const contact: any = {};
+      if ((officeForm as any).phone) {
+        contact.phone = (officeForm as any).phone;
+      }
+      if ((officeForm as any).email) {
+        contact.email = (officeForm as any).email;
+      }
+      if ((officeForm as any).fax) {
+        contact.fax = (officeForm as any).fax;
+      }
+      
+      // Build coordinates object, only including if both lat and lng exist
+      const coordinates: any = {};
+      if (officeForm.lat !== undefined && officeForm.lat !== null) {
+        coordinates.latitude = officeForm.lat;
+      }
+      if (officeForm.lng !== undefined && officeForm.lng !== null) {
+        coordinates.longitude = officeForm.lng;
+      }
+      
+      const officeData: any = {
+        name: (officeForm as any).name || officeForm.country || 'Bureau',
         type: (officeForm as any).type || 'field',
-        address: {
-          street: officeForm.address,
-          city: officeForm.city,
-          country: officeForm.country,
-        },
-        contact: (officeForm as any).phone || (officeForm as any).email || (officeForm as any).fax ? {
-          phone: (officeForm as any).phone,
-          email: (officeForm as any).email,
-          fax: (officeForm as any).fax,
-        } : undefined,
-        coordinates: (officeForm.lat !== undefined || officeForm.lng !== undefined) ? {
-          latitude: officeForm.lat,
-          longitude: officeForm.lng,
-        } : undefined,
+        address: address,
         active: officeForm.active ?? true,
-      });
-      const response = await officesApi.create(officeData);
-      if (response.success !== false) {
-        const created =
-          (response as any).office ||
-          (response as any).data ||
-          response;
+      };
+      
+      // Only add contact if it has at least one field
+      if (Object.keys(contact).length > 0) {
+        officeData.contact = contact;
+      }
+      
+      // Only add coordinates if it has at least one field
+      if (Object.keys(coordinates).length > 0) {
+        officeData.coordinates = coordinates;
+      }
+      
+      // If editing, update existing office; otherwise create new
+      if (editingOfficeId) {
+        const response = await officesApi.update(editingOfficeId, officeData);
+        if (response.success !== false) {
+          const updated =
+            (response as any).office ||
+            (response as any).data ||
+            response;
 
-        const addr = created.address;
-        const normalizedAddress =
-          typeof addr === 'string'
-            ? addr
-            : addr && typeof addr === 'object'
-            ? [
-                addr.street,
-                addr.city,
-                addr.region,
-                addr.country,
-                addr.postalCode,
-              ]
-                .filter(Boolean)
-                .join(', ')
-            : '';
+          const addr = updated.address;
+          const normalizedAddress =
+            typeof addr === 'string'
+              ? addr
+              : addr && typeof addr === 'object'
+              ? [
+                  addr.street,
+                  addr.city,
+                  addr.region,
+                  addr.country,
+                  addr.postalCode,
+                ]
+                  .filter(Boolean)
+                  .join(', ')
+              : '';
 
-        const newOffice: Office = {
-          id: created.id || created._id || uid('office_'),
-          country: created.address?.country || created.country,
-          city: created.address?.city || created.city || addr?.city,
-          address: created.address?.street || normalizedAddress || officeForm.address,
-          lat: created.coordinates?.latitude ?? created.latitude ?? created.lat ?? officeForm.lat,
-          lng: created.coordinates?.longitude ?? created.longitude ?? created.lng ?? officeForm.lng,
-          active: created.active,
-          type: created.type,
-        };
+          const updatedOffice: Office = {
+            id: updated.id || updated._id || editingOfficeId,
+            name: updated.name,
+            country: updated.address?.country || updated.country,
+            city: updated.address?.city || updated.city || addr?.city,
+            address: updated.address?.street || normalizedAddress || officeForm.address,
+            lat: updated.coordinates?.latitude ?? updated.latitude ?? updated.lat ?? officeForm.lat,
+            lng: updated.coordinates?.longitude ?? updated.longitude ?? updated.lng ?? officeForm.lng,
+            active: updated.active,
+            type: updated.type,
+            contact: updated.contact,
+          };
 
-        setOffices([...offices, newOffice]);
-        setOfficeForm({ active: true });
-        window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
-        showToast('Bureau créé avec succès');
+          setOffices(offices.map(o => (o.id === editingOfficeId ? updatedOffice : o)));
+          setEditingOfficeId(null);
+          setOfficeForm({ active: true });
+          window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
+          showToast('Bureau mis à jour avec succès');
+        }
+      } else {
+        const response = await officesApi.create(officeData);
+        if (response.success !== false) {
+          const created =
+            (response as any).office ||
+            (response as any).data ||
+            response;
+
+          const addr = created.address;
+          const normalizedAddress =
+            typeof addr === 'string'
+              ? addr
+              : addr && typeof addr === 'object'
+              ? [
+                  addr.street,
+                  addr.city,
+                  addr.region,
+                  addr.country,
+                  addr.postalCode,
+                ]
+                  .filter(Boolean)
+                  .join(', ')
+              : '';
+
+          const newOffice: Office = {
+            id: created.id || created._id || uid('office_'),
+            name: created.name,
+            country: created.address?.country || created.country,
+            city: created.address?.city || created.city || addr?.city,
+            address: created.address?.street || normalizedAddress || officeForm.address,
+            lat: created.coordinates?.latitude ?? created.latitude ?? created.lat ?? officeForm.lat,
+            lng: created.coordinates?.longitude ?? created.longitude ?? created.lng ?? officeForm.lng,
+            active: created.active,
+            type: created.type,
+            contact: created.contact,
+          };
+
+          setOffices([...offices, newOffice]);
+          setOfficeForm({ active: true });
+          window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
+          showToast('Bureau créé avec succès');
+        }
       }
     } catch (error: any) {
       showToast(error.message || 'Échec de l’enregistrement du bureau.', 'error');
@@ -2782,7 +2861,23 @@ export default function AdminPanel() {
             <h2>{t('offices')}</h2>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="office-country">Pays</label>
+                <label htmlFor="office-name">Nom du bureau</label>
+                <input id="office-name" placeholder="Ex: Bureau Régional de Bamako" value={(officeForm as any).name||''} onChange={e=>setOfficeForm({...officeForm, name: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-type">Type de bureau</label>
+                <select 
+                  id="office-type"
+                  value={(officeForm as any).type || 'field'} 
+                  onChange={e=>setOfficeForm({...officeForm, type: e.target.value as Office['type']})}
+                >
+                  <option value="headquarters">Siège</option>
+                  <option value="regional">Régional</option>
+                  <option value="field">Terrain</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-country">Pays <span className="required">*</span></label>
                 <input id="office-country" placeholder="Ex: Mali" value={officeForm.country||''} onChange={e=>setOfficeForm({...officeForm, country:e.target.value})} />
               </div>
               <div className="form-group">
@@ -2790,36 +2885,127 @@ export default function AdminPanel() {
                 <input id="office-city" placeholder="Ex: Bamako" value={officeForm.city||''} onChange={e=>setOfficeForm({...officeForm, city:e.target.value})} />
               </div>
               <div className="form-group">
-                <label htmlFor="office-address">Adresse</label>
+                <label htmlFor="office-address">Adresse (Rue)</label>
                 <input id="office-address" placeholder="Ex: ACI 2000, Hamdallaye" value={officeForm.address||''} onChange={e=>setOfficeForm({...officeForm, address:e.target.value})} />
               </div>
               <div className="form-group">
-                <label htmlFor="office-lat">Latitude</label>
-                <input id="office-lat" type="number" placeholder="Ex: 12.65" step="any" value={officeForm.lat||'' as any} onChange={e=>setOfficeForm({...officeForm, lat: e.target.value? parseFloat(e.target.value): undefined})} />
+                <label htmlFor="office-region">Région</label>
+                <input id="office-region" placeholder="Ex: District de Bamako" value={(officeForm as any).region||''} onChange={e=>setOfficeForm({...officeForm, region: e.target.value})} />
               </div>
               <div className="form-group">
-                <label htmlFor="office-lng">Longitude</label>
-                <input id="office-lng" type="number" placeholder="Ex: -8.0" step="any" value={officeForm.lng||'' as any} onChange={e=>setOfficeForm({...officeForm, lng: e.target.value? parseFloat(e.target.value): undefined})} />
+                <label htmlFor="office-postal-code">Code postal</label>
+                <input id="office-postal-code" placeholder="Ex: BP 1234" value={(officeForm as any).postalCode||''} onChange={e=>setOfficeForm({...officeForm, postalCode: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-phone">Téléphone</label>
+                <input id="office-phone" type="tel" placeholder="Ex: +223 20 22 33 44" value={(officeForm as any).phone||''} onChange={e=>setOfficeForm({...officeForm, phone: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-email">Email</label>
+                <input id="office-email" type="email" placeholder="Ex: bureau@imadel.org" value={(officeForm as any).email||''} onChange={e=>setOfficeForm({...officeForm, email: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label htmlFor="office-fax">Fax</label>
+                <input id="office-fax" type="tel" placeholder="Ex: +223 20 22 33 45" value={(officeForm as any).fax||''} onChange={e=>setOfficeForm({...officeForm, fax: e.target.value})} />
+              </div>
+              <div className="two-col">
+                <div className="form-group">
+                  <label htmlFor="office-lat">Latitude</label>
+                  <input id="office-lat" type="number" placeholder="Ex: 12.65" step="any" value={officeForm.lat||'' as any} onChange={e=>setOfficeForm({...officeForm, lat: e.target.value? parseFloat(e.target.value): undefined})} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="office-lng">Longitude</label>
+                  <input id="office-lng" type="number" placeholder="Ex: -8.0" step="any" value={officeForm.lng||'' as any} onChange={e=>setOfficeForm({...officeForm, lng: e.target.value? parseFloat(e.target.value): undefined})} />
+                </div>
               </div>
               <div className="form-actions">
+                <label className="checkbox-label-inline">
+                  <input type="checkbox" checked={officeForm.active ?? true} onChange={e=>setOfficeForm({...officeForm, active:e.target.checked})} /> 
+                  Actif
+                  <span className="help-text">Bureau actif et visible</span>
+                </label>
                 <button
                   onClick={addOffice}
                   disabled={!!loading.office}
                   className="btn-primary"
                 >
-                  {loading.office ? 'Enregistrement...' : 'Ajouter un bureau'}
+                  {loading.office
+                    ? 'Enregistrement...'
+                    : (editingOfficeId ? 'Enregistrer les modifications' : 'Ajouter un bureau')}
                 </button>
+                {editingOfficeId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingOfficeId(null);
+                      setOfficeForm({ active: true });
+                    }}
+                    className="btn-secondary"
+                    style={{ marginLeft: '0.5rem' }}
+                  >
+                    Annuler
+                  </button>
+                )}
               </div>
             </div>
 
             <ul className="entity-list">
-              {offices.map(o=> (
-                <li key={o.id}>
-                  <div className="entity-head"><strong>{o.country}</strong> <span>{o.city}</span></div>
-                  <div className="entity-meta">{o.address} {o.lat && o.lng ? `(${o.lat}, ${o.lng})` : ''}</div>
-                  <div className="entity-actions"><button onClick={()=>removeOffice(o.id)}>Supprimer</button></div>
-                </li>
-              ))}
+              {offices.map(o=> {
+                const officeData = o as any;
+                const addr = officeData.address || {};
+                const contact = officeData.contact || {};
+                return (
+                  <li key={o.id}>
+                    <div className="entity-head">
+                      <strong>{officeData.name || o.country}</strong>
+                      {o.type && <span className="badge">
+                        {o.type === 'headquarters' ? 'Siège' : o.type === 'regional' ? 'Régional' : 'Terrain'}
+                      </span>}
+                      {o.country && <span className="badge">{o.country}</span>}
+                      {o.city && <span className="badge">{o.city}</span>}
+                      {o.active === false && <span className="badge badge-warning">Inactif</span>}
+                    </div>
+                    <div className="entity-meta">
+                      {o.address && <div>{o.address}</div>}
+                      {addr.region && <div>Région: {addr.region}</div>}
+                      {addr.postalCode && <div>Code postal: {addr.postalCode}</div>}
+                      {contact.phone && <div>Téléphone: {contact.phone}</div>}
+                      {contact.email && <div>Email: {contact.email}</div>}
+                      {contact.fax && <div>Fax: {contact.fax}</div>}
+                      {o.lat && o.lng && <div>Coordonnées: ({o.lat}, {o.lng})</div>}
+                    </div>
+                    <div className="entity-actions">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingOfficeId(o.id);
+                          const addr = (o as any).address || {};
+                          const contact = (o as any).contact || {};
+                          setOfficeForm({
+                            name: (o as any).name,
+                            country: o.country,
+                            city: o.city,
+                            address: typeof addr === 'string' ? addr : addr.street || o.address,
+                            region: addr.region,
+                            postalCode: addr.postalCode,
+                            phone: contact.phone,
+                            email: contact.email,
+                            fax: contact.fax,
+                            lat: o.lat,
+                            lng: o.lng,
+                            type: o.type,
+                            active: o.active,
+                          });
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        Modifier
+                      </button>
+                      <button className="btn-danger" onClick={()=>removeOffice(o.id)}>Supprimer</button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         )}

@@ -942,17 +942,21 @@ export default function AdminPanel() {
           (response as any).data ||
           response;
 
-        const addr = created.address;
+        // Handle both French and English field names from Firestore
+        const rawAddress = created.adresse || created.address;
+        const rawContact = created.contact || {};
+        const rawCoords = created.coordonnees || created.coordinates || {};
+        
         const normalizedAddress =
-          typeof addr === 'string'
-            ? addr
-            : addr && typeof addr === 'object'
+          typeof rawAddress === 'string'
+            ? rawAddress
+            : rawAddress && typeof rawAddress === 'object'
             ? [
-                addr.street,
-                addr.city,
-                addr.region,
-                addr.country,
-                addr.postalCode,
+                rawAddress.rue || rawAddress.street,
+                rawAddress.ville || rawAddress.city,
+                rawAddress.region,
+                rawAddress.pays || rawAddress.country,
+                rawAddress.codePostal || rawAddress.postalCode,
               ]
                 .filter(Boolean)
                 .join(', ')
@@ -960,19 +964,30 @@ export default function AdminPanel() {
 
         const newOffice: Office = {
           id: created.id || created._id || uid('office_'),
-          country: created.address?.country || created.country,
-          city: created.address?.city || created.city || addr?.city,
-          address: created.address?.street || normalizedAddress || officeForm.address,
-          lat: created.coordinates?.latitude ?? created.latitude ?? created.lat ?? officeForm.lat,
-          lng: created.coordinates?.longitude ?? created.longitude ?? created.lng ?? officeForm.lng,
-          active: created.active,
-          type: created.type,
+          name: created.nom || created.name,
+          country: rawAddress?.pays || rawAddress?.country || officeForm.country,
+          city: rawAddress?.ville || rawAddress?.city || officeForm.city,
+          address: rawAddress?.rue || rawAddress?.street || normalizedAddress || officeForm.address,
+          lat: rawCoords?.latitude ?? created.latitude ?? officeForm.lat,
+          lng: rawCoords?.longitude ?? created.longitude ?? officeForm.lng,
+          active: created.actif ?? created.active ?? true,
+          type: created.typeBureau || created.type,
+          contact: rawContact.telephone || rawContact.phone || rawContact.email || rawContact.fax
+            ? {
+                phone: rawContact.telephone || rawContact.phone,
+                email: rawContact.email,
+                fax: rawContact.fax,
+              }
+            : undefined,
         };
 
         setOffices([...offices, newOffice]);
         setOfficeForm({ active: true });
         window.dispatchEvent(new CustomEvent('imadel:offices:updated'));
         showToast('Bureau créé avec succès');
+      } else {
+        const errorMsg = (response as any).error || (response as any).message || 'Échec de l\'enregistrement du bureau.';
+        showToast(errorMsg, 'error');
       }
     } catch (error: any) {
       showToast(error.message || 'Échec de l’enregistrement du bureau.', 'error');

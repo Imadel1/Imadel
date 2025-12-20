@@ -215,12 +215,13 @@ const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
               height={823}
             />
           </picture>
-        </div>
-        <div className="news-content">
-          <h3>{news.title}</h3>
-          <span className="read-more">
-            {t('readMore')} →
-          </span>
+          <div className="news-overlay"></div>
+          <div className="news-content-overlay">
+            <h3>{news.title}</h3>
+            <span className="read-more">
+              {t('readMore')} →
+            </span>
+          </div>
         </div>
       </article>
     </Link>

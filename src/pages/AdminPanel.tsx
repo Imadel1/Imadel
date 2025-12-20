@@ -1860,6 +1860,145 @@ export default function AdminPanel() {
                 <textarea id="job-description" rows={5} value={jobForm.description||''} onChange={e=>setJobForm({...jobForm, description:e.target.value})} />
               </div>
               
+              <div className="two-col">
+                <div className="form-group">
+                  <label htmlFor="job-type">Type de contrat</label>
+                  <select 
+                    id="job-type"
+                    value={(jobForm as any).type || 'temps-plein'} 
+                    onChange={e=>setJobForm({...jobForm, type: e.target.value as Job['type']})}
+                  >
+                    <option value="temps-plein">Temps plein</option>
+                    <option value="temps-partiel">Temps partiel</option>
+                    <option value="contrat">Contrat</option>
+                    <option value="benevolat">Bénévolat</option>
+                    <option value="stage">Stage</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="job-status">Statut</label>
+                  <select 
+                    id="job-status"
+                    value={(jobForm as any).status || 'open'} 
+                    onChange={e=>setJobForm({...jobForm, status: e.target.value as Job['status']})}
+                  >
+                    <option value="open">Ouvert</option>
+                    <option value="closed">Fermé</option>
+                    <option value="filled">Pourvu</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="job-category">Catégorie</label>
+                <input 
+                  id="job-category" 
+                  placeholder="Ex: Technique, Administration, Communication, etc." 
+                  value={(jobForm as any).category || ''} 
+                  onChange={e=>setJobForm({...jobForm, category: e.target.value})} 
+                />
+              </div>
+              
+              {/* Salary Section */}
+              <div className="form-group" style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '6px', border: '1px solid #e0e0e0' }}>
+                <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.75rem', color: '#1a1a2e' }}>
+                  Salaire / Rémunération
+                </label>
+                <div className="two-col" style={{ gap: '1rem' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label htmlFor="job-salary-min">Salaire minimum</label>
+                    <input 
+                      id="job-salary-min" 
+                      type="number" 
+                      placeholder="Ex: 500000" 
+                      value={jobForm.salary?.min || ''} 
+                      onChange={e=>setJobForm({
+                        ...jobForm, 
+                        salary: { 
+                          ...(jobForm.salary || {}), 
+                          min: e.target.value ? Number(e.target.value) : undefined 
+                        }
+                      })} 
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label htmlFor="job-salary-max">Salaire maximum</label>
+                    <input 
+                      id="job-salary-max" 
+                      type="number" 
+                      placeholder="Ex: 1000000" 
+                      value={jobForm.salary?.max || ''} 
+                      onChange={e=>setJobForm({
+                        ...jobForm, 
+                        salary: { 
+                          ...(jobForm.salary || {}), 
+                          max: e.target.value ? Number(e.target.value) : undefined 
+                        }
+                      })} 
+                    />
+                  </div>
+                </div>
+                <div className="form-group" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+                  <label htmlFor="job-salary-currency">Devise</label>
+                  <select 
+                    id="job-salary-currency"
+                    value={jobForm.salary?.currency || 'XOF'} 
+                    onChange={e=>setJobForm({
+                      ...jobForm, 
+                      salary: { 
+                        ...(jobForm.salary || {}), 
+                        currency: e.target.value 
+                      }
+                    })}
+                  >
+                    <option value="XOF">XOF (Franc CFA)</option>
+                    <option value="EUR">EUR (Euro)</option>
+                    <option value="USD">USD (Dollar US)</option>
+                    <option value="MAD">MAD (Dirham marocain)</option>
+                    <option value="TND">TND (Dinar tunisien)</option>
+                    <option value="DZD">DZD (Dinar algérien)</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Requirements Section */}
+              <div className="form-group">
+                <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#1a1a2e' }}>
+                  Exigences / Qualifications
+                </label>
+                <small style={{ display: 'block', marginBottom: '0.5rem', color: '#666', fontSize: '0.85rem' }}>
+                  Ajoutez une exigence par ligne
+                </small>
+                <textarea 
+                  rows={4} 
+                  placeholder="Ex: Diplôme universitaire en développement international&#10;Minimum 3 ans d'expérience&#10;Maîtrise du français et de l'anglais&#10;Expérience en gestion de projet"
+                  value={((jobForm as any).requirements || []).join('\n')} 
+                  onChange={e=>setJobForm({
+                    ...jobForm, 
+                    requirements: e.target.value.split('\n').filter(r => r.trim())
+                  })} 
+                />
+              </div>
+              
+              {/* Responsibilities Section */}
+              <div className="form-group">
+                <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: '#1a1a2e' }}>
+                  Responsabilités / Tâches
+                </label>
+                <small style={{ display: 'block', marginBottom: '0.5rem', color: '#666', fontSize: '0.85rem' }}>
+                  Ajoutez une responsabilité par ligne
+                </small>
+                <textarea 
+                  rows={4} 
+                  placeholder="Ex: Coordonner les activités du projet&#10;Superviser l'équipe sur le terrain&#10;Préparer les rapports mensuels&#10;Participer aux réunions avec les partenaires"
+                  value={((jobForm as any).responsibilities || []).join('\n')} 
+                  onChange={e=>setJobForm({
+                    ...jobForm, 
+                    responsibilities: e.target.value.split('\n').filter(r => r.trim())
+                  })} 
+                />
+              </div>
+              
               {/* Auto-generated Apply URL Section */}
               <div style={{ padding: '1rem', background: '#fff9f5', borderRadius: '6px', border: '2px solid #FFE5D6' }}>
                   <label style={{ display: 'block', fontWeight: '600', marginBottom: '0.5rem', color: 'var(--primary, #0066CC)' }}>
@@ -2015,6 +2154,12 @@ export default function AdminPanel() {
                           images: j.images,
                           listingType: j.listingType || 'emploi',
                           deadline: j.deadline,
+                          type: j.type,
+                          status: j.status,
+                          category: j.category,
+                          salary: j.salary,
+                          requirements: j.requirements,
+                          responsibilities: j.responsibilities,
                         });
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
